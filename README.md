@@ -34,7 +34,9 @@ CentOS / RHEL
 ### Installation
 
 <code>chmod +x PatchServerInstaller_1.0.run</code>
+
 <code>sudo ./PatchServerInstaller_1.0.run</code>
+
 <code>rm -f PatchServerInstaller_1.0.run</code>
 
 
