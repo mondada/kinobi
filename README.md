@@ -33,11 +33,9 @@ CentOS / RHEL
 
 ### Installation
 
-<code>chmod +x PatchServerInstaller_1.0.run
-
-sudo ./PatchServerInstaller_1.0.run
-
-rm -f PatchServerInstaller_1.0.run</code>
+<code>chmod +x PatchServerInstaller_1.0.run</code>
+<code>sudo ./PatchServerInstaller_1.0.run</code>
+<code>rm -f PatchServerInstaller_1.0.run</code>
 
 
 ### Connecting Jamf Pro to Kinobi Server
