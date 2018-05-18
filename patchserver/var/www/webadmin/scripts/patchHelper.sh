@@ -92,7 +92,7 @@ setSchedule)
 days="${2}"
 tmpfile=$(mktemp /tmp/crontab.XXXXXX)
 crontab -l 2>/dev/null | grep -v "${0}" > ${tmpfile}
-echo "0 0 * * ${2} /var/www/html/webadmin/scripts/dbHelper.sh > /dev/null 2>&1" >> ${tmpfile}
+echo "0 0 * * ${2} /var/www/html/webadmin/scripts/patchHelper.sh > /dev/null 2>&1" >> ${tmpfile}
 crontab ${tmpfile}
 rm ${tmpfile}
 ;;

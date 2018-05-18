@@ -6,9 +6,7 @@ include "inc/functions.php";
 
 $title = "Software Title";
 
-//if (!isset($_POST['create_patch'])) {
-	include "inc/header.php";
-//}
+include "inc/header.php";
 
 include "inc/dbConnect.php";
 
@@ -249,7 +247,7 @@ if (!empty($title_id)) {
 }
 </style>
 
-<link rel="stylesheet" href="theme/checkbox.bootstrap.css"/>
+<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 
 <script type="text/javascript">
 	var existingIds = [<?php echo "\"".implode('", "', $sw_title_name_ids)."\""; ?>];
@@ -345,12 +343,12 @@ function togglePatch(element) {
 }
 </script>
 
-<link rel="stylesheet" href="theme/datepicker.bootstrap.css" />
+<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 
-<script type="text/javascript" src="scripts/moment.js"></script>
-<script type="text/javascript" src="scripts/transition.js"></script>
-<script type="text/javascript" src="scripts/collapse.js"></script>
-<script type="text/javascript" src="scripts/datepicker.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/moment.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/transition.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/collapse.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
 <script type="text/javascript">
 $(function () {
@@ -363,12 +361,12 @@ $(function () {
 
 <script type="text/javascript" src="scripts/ace/ace.js"></script>
 
-<link rel="stylesheet" href="theme/datatables.bootstrap.css" />
+<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
 
-<script type="text/javascript" src="scripts/datatables.jquery.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.bootstrap.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.buttons.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.buttons.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/buttons.bootstrap.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -413,7 +411,7 @@ $(document).ready(function() {
 </script>
 
 <?php if (!empty($title_id)) { ?>
-<span class="description"><a href="patchTitles.php">Software Titles</a> <span class="glyphicon glyphicon-chevron-right"> </span></span>
+<div class="description"><a href="patchTitles.php">Software Titles</a> <span class="glyphicon glyphicon-chevron-right"> </span></div>
 <h2 id="heading"><?php echo $sw_title['name']; ?></h2>
 <?php } ?>
 
@@ -435,265 +433,222 @@ $(document).ready(function() {
 
 				<div class="tab-pane active fade in" id="title-tab">
 
-					<div style="padding: 8px 0px;" class="description">The information in the Software Title object must match the information in the Software Title Summary object that shares <span style="font-family:monospace;">id</span>.<br>None of the following values can be null. In addition, the <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</div>
+					<div class="description" style="padding: 8px 0px;">The information in the Software Title object must match the information in the Software Title Summary object that shares <span style="font-family:monospace;">id</span>.<br>None of the following values can be null. In addition, the <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</div>
 
-					<div id="title-disabled-msg" style="padding-bottom: 8px;" class="hidden">
-						<span><small>This patch defnition is disabled.</small></span>
-						<br>
-						<button id="enable_title" type="button" class="btn btn-sm btn-default" onClick="enableTitle();" disabled>Enable</button>
+					<div id="title-disabled-msg" class="hidden" style="padding-bottom: 8px;">
+						<div class="text-muted" style="padding-bottom: 4px;">This software title is disabled.</div>
+						<button type="button" id="enable_title" class="btn btn-sm btn-default" onClick="enableTitle();" disabled>Enable</button>
 					</div>
+
 					<div id="title-enabled-msg" style="padding-bottom: 8px;">
-						<span><small>This patch defnition is enabled.</small></span>
+						<div class="text-muted">This software title is enabled.</div>
 					</div>
 
-					<div class="row">
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Name</label>
-							<span class="description">Name of the patch management software title.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validString(this, true);" onKeyUp="validString(this, true);" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $sw_title['name']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Publisher</label>
-							<span class="description">Publisher of the patch management software title.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validString(this, true);" onKeyUp="validString(this, true);" onChange="updateString(this, 'titles', 'publisher', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['publisher']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Application Name</label>
-							<span class="description">Deprecated</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, true);" onKeyUp="validOrEmptyString(this, true);" onChange="updateOrEmptyString(this, 'titles', 'app_name', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['app_name']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Bundle Identifier</label>
-							<span class="description">Deprecated</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, true);" onKeyUp="validOrEmptyString(this, true);" onChange="updateOrEmptyString(this, 'titles', 'bundle_id', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['bundle_id']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Current Version</label>
-							<span class="description">Used for reporting the latest version of the patch management software title to Jamf Pro.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validString(this, true);" onKeyUp="validString(this, true);" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['current']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">ID</label>
-							<span class="description">Uniquely identifies this software title on the external source.<br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validNameId(this, true);" onKeyUp="validNameId(this, true);" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['name_id']; ?>" />
-						</div><!-- /.col -->
-					</div><!-- /.row -->
-
-					<br>
+					<h5 id="name_label"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'name_label');" onKeyUp="validString(this, 'name_label');" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $sw_title['name']; ?>" />
+					</div>
+					<h5 id="publisher_label"><strong>Publisher</strong> <small>Publisher of the patch management software title.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'publisher_label');" onKeyUp="validString(this, 'publisher_label');" onChange="updateString(this, 'titles', 'publisher', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['publisher']; ?>" />
+					</div>
+					<h5 id="app_name_label"><strong>Application Name</strong> <small>Deprecated.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'app_name_label');" onKeyUp="validOrEmptyString(this, 'app_name_label');" onChange="updateOrEmptyString(this, 'titles', 'app_name', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['app_name']; ?>" />
+					</div>
+					<h5 id="bundle_id_label"><strong>Bundle Identifier</strong> <small>Deprecated.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'bundle_id_label');" onKeyUp="validOrEmptyString(this, 'bundle_id_label');" onChange="updateOrEmptyString(this, 'titles', 'bundle_id', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['bundle_id']; ?>" />
+					</div>
+					<h5 id="current_label"><strong>Current Version</strong> <small>Used for reporting the latest version of the patch management software title to Jamf Pro.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['current']; ?>" />
+					</div>
+					<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on the external source.<!-- <br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source. --></small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validNameId(this, 'name_id_label');" onKeyUp="validNameId(this, 'name_id_label');" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['name_id']; ?>" />
+					</div>
 
 				</div><!-- /.tab-pane -->
 
 				<div class="tab-pane fade in" id="ea-tab">
 
-					<div style="padding-top: 8px;" class="description">Extension attributes that are required by Jamf Pro to use this software title. Terms must be accepted in Jamf Pro.</div>
+					<div class="description" style="padding-top: 8px;">Extension attributes that are required by Jamf Pro to use this software title. Terms must be accepted in Jamf Pro.</div>
 
 					<table id="ext_attrs" class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Name</small></th>
+								<th>Name</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($ext_attrs as $ext_attr) { ?>
 							<tr>
-								<td>
-									<input type="hidden" name="ea_key_id[<?php echo $ext_attr['id']; ?>]" value="<?php echo $ext_attr['key_id']; ?>" />
-									<button type="button" class="btn btn-link btn-sm" data-toggle="modal" data-target="#editEa<?php echo $ext_attr['id']; ?>" data-backdrop="static" onClick="existingKeys.splice(existingKeys.indexOf('<?php echo $ext_attr['key_id']; ?>'), 1); eaNameValue = document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]').value; eaKeyValue = document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]').value; eaScriptValue = document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value;"><?php echo $ext_attr['name']; ?></button>
-								</td>
+								<td><a data-toggle="modal" href="#editEa<?php echo $ext_attr['id']; ?>" data-backdrop="static" onClick="existingKeys.splice(existingKeys.indexOf('<?php echo $ext_attr['key_id']; ?>'), 1); eaNameValue = document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]').value; eaKeyValue = document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]').value; eaScriptValue = document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value;"><?php echo $ext_attr['name']; ?></a></td>
 								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteEa<?php echo $ext_attr['id']; ?>">Delete</button></td>
 							</tr>
 							<?php } ?>
 						</tobdy>
 					</table>
 
-				</div><!-- /.tab-pane -->
+					<div class="modal fade" id="createEA" tabindex="-1" role="dialog">
+						<div class="modal-dialog modal-lg" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h3 class="modal-title" id="modalLabel">New Extension Attribute</h3>
+								</div>
+								<div class="modal-body">
 
-				<div class="modal fade" id="createEA" tabindex="-1" role="dialog">
-					<div class="modal-dialog modal-lg" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h4 class="modal-title" id="modalLabel">New Extension Attribute</h4>
-							</div>
-							<div class="modal-body">
+									<h5 id="ea_name_label[0]"><strong>Display Name</strong> <small>Used on the Jamf Pro Patch Management &gt; Extension Attributes tab.</small></h5>
+									<div class="form-group" style="max-width: 452px;">
+										<input type="text" name="ea_name[0]" id="ea_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'ea_name_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" onBlur="validString(this, 'ea_name_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" placeholder="[Required]" />
+									</div>
 
-								<div class="row">
-									<div class="col-xs-12 col-sm-12 col-lg-12">
-										<label class="control-label">Display Name</label>
-										<span class="description">Used on the Jamf Pro Patch Management &gt; Extension Attributes tab.</span>
-									</div><!-- /.col -->
-									<div class="col-xs-12 col-sm-8 col-md-6 col-lg-6">
-										<span><input type="text" name="ea_name[0]" id="ea_name[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" placeholder="[Required]" /></span>
-									</div><!-- /.col -->
+									<h5 id="ea_key_id_label[0]"><strong>Key</strong> <small>Identifier unique within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<!-- <br><strong>Note:</strong> Duplicate keys are not allowed. --></small></h5>
+									<div class="form-group" style="max-width: 452px;">
+										<input type="text" name="ea_key_id[0]" id="ea_key_id[0]" class="form-control input-sm" onKeyUp="validEaKeyid(this, 'ea_key_id_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" onBlur="validEaKeyid(this, 'ea_key_id_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" placeholder="[Required]" />
+									</div>
 
-									<div class="col-xs-12 col-sm-12 col-lg-12">
-										<label class="control-label">Key</label>
-										<span class="description">Identifier unique within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<br><strong>Note:</strong> Duplicate keys are not allowed.</span>
-									</div><!-- /.col -->
-									<div class="col-xs-12 col-sm-8 col-md-6 col-lg-6">
-										<span><input type="text" name="ea_key_id[0]" id="ea_key_id[0]" class="form-control input-sm" onKeyUp="validEaKeyid(this);" onBlur="validEaKeyid(this); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" placeholder="[Required]" /></span>
-									</div><!-- /.col -->
-								</div><!-- /.row -->
-
-								<label class="control-label">Script</label>
-								<span class="description">Standard extension attribute script which must return a <span style="font-family:monospace;">&lt;result&gt;</span>.</span>
-								<input type="hidden" name="ea_script[0]" id="ea_script[0]" value="">
-								<div id="ea_script0" class="script-editor" tabindex="-1"></div>
-								<script>
-								function setModeEditor0() {
-									var currentMode = "ace/mode/" + getScriptType(editor0.getValue());
-									if (editor0.getValue().indexOf("#!/bin/sh")==0) {
-										currentMode = "ace/mode/sh";
+									<h5><strong>Script</strong> <small>Standard extension attribute script which must return a <span style="font-family:monospace;">&lt;result&gt;</span>.</small></h5>
+									<input type="hidden" name="ea_script[0]" id="ea_script[0]" value="">
+									<div id="ea_script0" class="script-editor" tabindex="-1"></div>
+									<script>
+									function setModeEditor0() {
+										var currentMode = "ace/mode/" + getScriptType(editor0.getValue());
+										if (editor0.getValue().indexOf("#!/bin/sh")==0) {
+											currentMode = "ace/mode/sh";
+										}
+										editor0.session.setMode(currentMode);
+										editor0.setTheme("ace/theme/xcode");
+										editor0.session.setFoldStyle("markbegin");
 									}
-									editor0.session.setMode(currentMode);
-									editor0.setTheme("ace/theme/xcode");
-									editor0.session.setFoldStyle("markbegin");
-								}
-								var editor0 = ace.edit("ea_script0");
-								editor0.setShowPrintMargin(false);
-								setModeEditor0();
-								editor0.getSession().on('change', function(e) {
-									document.getElementById('ea_script[0]').value = editor0.getValue();
+									var editor0 = ace.edit("ea_script0");
+									editor0.setShowPrintMargin(false);
 									setModeEditor0();
-								});
-								$('#ea_script0').focusin(function() {
-									validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');
-								});
-								$('#ea_script0').focusout(function() {
-									validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');
-								});
-								</script>
+									editor0.getSession().on('change', function(e) {
+										document.getElementById('ea_script[0]').value = editor0.getValue();
+										setModeEditor0();
+									});
+									$('#ea_script0').focusin(function() {
+										validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');
+									});
+									$('#ea_script0').focusout(function() {
+										validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');
+									});
+									</script>
 
-							</div>
-							<div class="modal-footer">
-								<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-								<button type="submit" name="create_ea" id="create_ea" class="btn btn-primary btn-sm" disabled >Save</button>
+								</div>
+								<div class="modal-footer">
+									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
+									<button type="submit" name="create_ea" id="create_ea" class="btn btn-primary btn-sm" disabled >Save</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
 
-				<?php foreach ($ext_attrs as $ext_attr) { ?>
-				<div class="modal fade" id="editEa<?php echo $ext_attr['id']; ?>" tabindex="-1" role="dialog">
-					<div class="modal-dialog modal-lg" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h4 class="modal-title" id="modalLabel">Edit Extension Attribute</h4>
-							</div>
-							<div class="modal-body">
+					<?php foreach ($ext_attrs as $ext_attr) { ?>
+					<div class="modal fade" id="editEa<?php echo $ext_attr['id']; ?>" tabindex="-1" role="dialog">
+						<div class="modal-dialog modal-lg" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h3 class="modal-title" id="modalLabel">Edit Extension Attribute</h3>
+								</div>
+								<div class="modal-body">
 
-								<div class="row">
-									<div class="col-xs-12 col-sm-12 col-lg-12">
-										<label class="control-label">Display Name</label>
-										<span class="description">Used on the Jamf Pro Patch Management &gt; Extension Attributes tab.</span>
-									</div><!-- /.col -->
-									<div class="col-xs-12 col-sm-8 col-md-6 col-lg-6">
-										<span><input type="text" name="ea_name[<?php echo $ext_attr['id']; ?>]" id="ea_name[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onOnFocus="validString(this);" onKeyUp="validString(this);" onBlur="validString(this); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo $ext_attr['name']; ?>" /></span>
-									</div><!-- /.col -->
+									<h5 id="ea_name_label[<?php echo $ext_attr['id']; ?>]"><strong>Display Name</strong> <small>Used on the Jamf Pro Patch Management &gt; Extension Attributes tab.</small></h5>
+									<div class="form-group" style="max-width: 452px;">
+										<input type="text" name="ea_name[<?php echo $ext_attr['id']; ?>]" id="ea_name[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onKeyUp="validString(this, 'ea_name_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" onBlur="validString(this, 'ea_name_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo $ext_attr['name']; ?>" />
+									</div>
 
-									<div class="col-xs-12 col-sm-12 col-lg-12">
-										<label class="control-label">Key</label>
-										<span class="description">Identifier unique within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<br><strong>Note:</strong> Duplicate keys are not allowed.</span>
-									</div><!-- /.col -->
-									<div class="col-xs-12 col-sm-8 col-md-6 col-lg-6">
-										<span><input type="text" name="ea_key_id[<?php echo $ext_attr['id']; ?>]" id="ea_key_id[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onOnFocus="validEaKeyid(this);" onKeyUp="validEaKeyid(this);" onBlur="validEaKeyid(this); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo $ext_attr['key_id']; ?>" /></span>
-									</div><!-- /.col -->
-								</div><!-- /.row -->
+									<h5 id="ea_key_id_label[<?php echo $ext_attr['id']; ?>]"><strong>Key</strong> <small>Identifier unique within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<!-- <br><strong>Note:</strong> Duplicate keys are not allowed. --></small></h5>
+									<div class="form-group" style="max-width: 452px;">
+										<input type="text" name="ea_key_id[<?php echo $ext_attr['id']; ?>]" id="ea_key_id[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onKeyUp="validEaKeyid(this, 'ea_key_id_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" onBlur="validEaKeyid(this, 'ea_key_id_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo $ext_attr['key_id']; ?>" />
+									</div>
 
-								<label class="control-label">Script</label>
-								<span class="description">Standard extension attribute script which must return a <span style="font-family:monospace;">&lt;result&gt;</span>.</span>
-								<input type="hidden" name="ea_script[<?php echo $ext_attr['id']; ?>]" id="ea_script[<?php echo $ext_attr['id']; ?>]" value="<?php echo htmlentities($ext_attr['script']); ?>">
-								<div id="ea_script<?php echo $ext_attr['id']; ?>" class="script-editor" tabindex="-1"><?php echo htmlentities($ext_attr['script']); ?></div>
-								<script>
-								function setModeEditor<?php echo $ext_attr['id']; ?>() {
-									var currentMode = "ace/mode/" + getScriptType(editor<?php echo $ext_attr['id']; ?>.getValue());
-									if (editor<?php echo $ext_attr['id']; ?>.getValue().indexOf("#!/bin/sh")==0) {
-										currentMode = "ace/mode/sh";
+									<h5><strong>Script</strong> <small>Standard extension attribute script which must return a <span style="font-family:monospace;">&lt;result&gt;</span>.</small></h5>
+									<input type="hidden" name="ea_script[<?php echo $ext_attr['id']; ?>]" id="ea_script[<?php echo $ext_attr['id']; ?>]" value="<?php echo htmlentities($ext_attr['script']); ?>">
+									<div id="ea_script<?php echo $ext_attr['id']; ?>" class="script-editor" tabindex="-1"><?php echo htmlentities($ext_attr['script']); ?></div>
+									<script>
+									function setModeEditor<?php echo $ext_attr['id']; ?>() {
+										var currentMode = "ace/mode/" + getScriptType(editor<?php echo $ext_attr['id']; ?>.getValue());
+										if (editor<?php echo $ext_attr['id']; ?>.getValue().indexOf("#!/bin/sh")==0) {
+											currentMode = "ace/mode/sh";
+										}
+										editor<?php echo $ext_attr['id']; ?>.session.setMode(currentMode);
+										editor<?php echo $ext_attr['id']; ?>.setTheme("ace/theme/xcode");
+										editor<?php echo $ext_attr['id']; ?>.session.setFoldStyle("markbegin");
 									}
-									editor<?php echo $ext_attr['id']; ?>.session.setMode(currentMode);
-									editor<?php echo $ext_attr['id']; ?>.setTheme("ace/theme/xcode");
-									editor<?php echo $ext_attr['id']; ?>.session.setFoldStyle("markbegin");
-								}
-								var editor<?php echo $ext_attr['id']; ?> = ace.edit("ea_script<?php echo $ext_attr['id']; ?>");
-								editor<?php echo $ext_attr['id']; ?>.setShowPrintMargin(false);
-								setModeEditor<?php echo $ext_attr['id']; ?>();
-								editor<?php echo $ext_attr['id']; ?>.getSession().on('change', function(e) {
-									document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value = editor<?php echo $ext_attr['id']; ?>.getValue();
+									var editor<?php echo $ext_attr['id']; ?> = ace.edit("ea_script<?php echo $ext_attr['id']; ?>");
+									editor<?php echo $ext_attr['id']; ?>.setShowPrintMargin(false);
 									setModeEditor<?php echo $ext_attr['id']; ?>();
-								});
-								$('#ea_script<?php echo $ext_attr['id']; ?>').focusin(function() {
-									validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');
-								});
-								$('#ea_script<?php echo $ext_attr['id']; ?>').focusout(function() {
-									validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');
-								});
-								</script>
+									editor<?php echo $ext_attr['id']; ?>.getSession().on('change', function(e) {
+										document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value = editor<?php echo $ext_attr['id']; ?>.getValue();
+										setModeEditor<?php echo $ext_attr['id']; ?>();
+									});
+									$('#ea_script<?php echo $ext_attr['id']; ?>').focusin(function() {
+										validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');
+									});
+									$('#ea_script<?php echo $ext_attr['id']; ?>').focusout(function() {
+										validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');
+									});
+									</script>
 
-							</div>
-							<div class="modal-footer">
-								<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" onClick="existingKeys.push('<?php echo $ext_attr['key_id']; ?>'); document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]').value = eaNameValue; document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]').value = eaKeyValue; hideError(document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]')); hideError(document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]'));">Cancel</button>
-								<button type="submit" name="save_ea[<?php echo $ext_attr['id']; ?>]" id="save_ea[<?php echo $ext_attr['id']; ?>]" class="btn btn-primary btn-sm" value="<?php echo $ext_attr['id']; ?>" disabled >Save</button>
+								</div>
+								<div class="modal-footer">
+									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" onClick="existingKeys.push('<?php echo $ext_attr['key_id']; ?>'); document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]').value = eaNameValue; document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]').value = eaKeyValue; hideError(document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]')); hideError(document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]'));">Cancel</button>
+									<button type="submit" name="save_ea[<?php echo $ext_attr['id']; ?>]" id="save_ea[<?php echo $ext_attr['id']; ?>]" class="btn btn-primary btn-sm" value="<?php echo $ext_attr['id']; ?>" disabled >Save</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
 
-				<div class="modal fade" id="deleteEa<?php echo $ext_attr['id']; ?>" tabindex="-1" role="dialog">
-					<div class="modal-dialog" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h4 class="modal-title" id="modalLabel">Delete '<?php echo $ext_attr['name']; ?>'?</h4>
-							</div>
-							<div class="modal-body">
-								<span class="description">This action is permanent and cannot be undone.</span>
-							</div>
-							<div class="modal-footer">
-								<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
-								<button type="submit" name="delete_ea" id="delete_ea" class="btn btn-danger btn-sm pull-right" value="<?php echo $ext_attr['id']; ?>">Delete</button>
+					<div class="modal fade" id="deleteEa<?php echo $ext_attr['id']; ?>" tabindex="-1" role="dialog">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h3 class="modal-title" id="modalLabel">Delete '<?php echo $ext_attr['name']; ?>'?</h3>
+								</div>
+								<div class="modal-body">
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+									<button type="submit" name="delete_ea" id="delete_ea" class="btn btn-danger btn-sm pull-right" value="<?php echo $ext_attr['id']; ?>">Delete</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<?php } ?>
+					<?php } ?>
+
+				</div><!-- /.tab-pane -->
 
 				<div class="tab-pane fade in" id="rqmts-tab">
 
-					<div style="padding: 8px 0px;" class="description">Criteria used to determine which computers in your environment have this software title installed.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</div>
+					<div class="description" style="padding: 8px 0px;">Criteria used to determine which computers in your environment have this software title installed.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</div>
 
 					<div id="rqmts-alert-msg" style="padding-bottom: 8px;" class="hidden">
-						<span class="text-danger">
-							<span class="glyphicon glyphicon-exclamation-sign"></span>
-							<small>At least one requirement is required for the definition to be valid.</small>
-						</span>
+						<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one requirement is required for the definition to be valid.</div>
 					</div>
 
 					<table class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Order</small></th>
-								<th><small>Criteria</small></th>
-								<th><small>Operator</small></th>
-								<th><small>Value</small></th>
-								<th><small>and/or</small></th>
+								<th>Order</th>
+								<th>Criteria</th>
+								<th>Operator</th>
+								<th>Value</th>
+								<th>and/or</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($requirements as $requirement) { ?>
 							<tr>
-								<td><input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" /></td>
+									</div>
 								<td>
 									<select class="form-control input-sm" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);">
 										<?php foreach ($ext_attrs as $ext_attr) { ?>
@@ -718,7 +673,11 @@ $(document).ready(function() {
 										<option value="less than or equal"<?php echo ($requirement['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($requirement['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
 									</select>
 								</td>
-								<td><input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo $requirement['value']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo $requirement['value']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);">
 										<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
@@ -738,13 +697,12 @@ $(document).ready(function() {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Requirement</h4>
+									<h3 class="modal-title" id="modalLabel">New Requirement</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Criteria</label>
-									<span class="description">Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</span>
-									<span>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<div class="form-group">
 										<input type="hidden" name="rqmt_order[0]" id="rqmt_order[0]" value="<?php echo sizeof($requirements); ?>" />
 										<select id="rqmt_name[0]" name="rqmt_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'rqmt_type[0]', 'rqmt_operator[0]'); validCriteria('create_rqmt', 'rqmt_order[0]', 'rqmt_name[0]', 'rqmt_operator[0]', 'rqmt_type[0]');" >
 											<option value="" disabled selected>Select...</option>
@@ -758,7 +716,7 @@ $(document).ready(function() {
 										</select>
 										<input type="hidden" name="rqmt_type[0]" id="rqmt_type[0]" value="recon" />
 										<input type="hidden" name="rqmt_operator[0]" id="rqmt_operator[0]" value="is" />
-									</span>
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -774,10 +732,10 @@ $(document).ready(function() {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete Requirement?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete Requirement?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -795,22 +753,19 @@ $(document).ready(function() {
 					<div style="padding: 8px 0px;" class="description">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</div>
 
 					<div id="patches-alert-msg" style="padding-bottom: 8px;" class="hidden">
-						<span class="text-danger">
-							<span class="glyphicon glyphicon-exclamation-sign"></span>
-							<small>At least one patch must be enabled for the definition to be valid.</small>
-						</span>
+						<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one patch must be enabled for the definition to be valid.</div>
 					</div>
 
 					<table id="patches" class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Enable</small></th>
-								<th><small>Order</small></th>
-								<th><small>Version</small></th>
-								<th><small><nobr>Release Date</nobr></small></th>
-								<th><small><nobr>Minimum OS</nobr></small></th>
-								<th><small><nobr>Stand Alone</nobr></small></th>
-								<th><small>Reboot</th>
+								<th>Enable</th>
+								<th>Order</th>
+								<th>Version</th>
+								<th><nobr>Release Date</nobr></th>
+								<th><nobr>Minimum OS</nobr></th>
+								<th><nobr>Stand Alone</nobr></th>
+								<th>Reboot</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -823,15 +778,12 @@ $(document).ready(function() {
 										<label/>
 									</div>
 								</td>
-								<td>
-									<input type="hidden" name="patch_order[<?php echo $patch['id']; ?>]" value="<?php echo $patch['sort_order']; ?>"/>
-									<small><?php echo $patch['sort_order']; ?></small>
-								</td>
-								<td><small><a href="managePatch.php?id=<?php echo $patch['id']; ?>"><?php echo $patch['version']; ?></a></small></td>
-								<td><small><nobr><?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?></nobr></small></td>
-								<td><small><?php echo $patch['min_os']; ?></small></td>
-								<td><small><?php echo ($patch['standalone'] == "1" ? "Yes" : "No") ?></small></td>
-								<td><small><?php echo ($patch['reboot'] == "1" ? "Yes" : "No") ?></small></td>
+								<td><input type="hidden" name="patch_order[<?php echo $patch['id']; ?>]" value="<?php echo $patch['sort_order']; ?>"/><?php echo $patch['sort_order']; ?></td>
+								<td nowrap><a href="managePatch.php?id=<?php echo $patch['id']; ?>"><?php echo $patch['version']; ?></a></td>
+								<td nowrap><?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?></td>
+								<td nowrap><?php echo $patch['min_os']; ?></td>
+								<td><?php echo ($patch['standalone'] == "1" ? "Yes" : "No") ?></td>
+								<td><?php echo ($patch['reboot'] == "1" ? "Yes" : "No") ?></td>
 								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deletePatch<?php echo $patch['id']; ?>">Delete</button></td>
 							</tr>
 							<?php } ?>
@@ -842,39 +794,42 @@ $(document).ready(function() {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Patch</h4>
+									<h3 class="modal-title" id="modalLabel">New Patch</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Sort Order</label>
-									<span><input type="text" name="patch_order[0]" id="patch_order[0]" class="form-control input-sm" onKeyUp="validInteger(this);" onBlur="validInteger(this); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="0" /></span>
-
-									<label class="control-label">Version</label>
-									<span class="description">Version associated with this patch.</span>
-									<span><input type="text" name="patch_version[0]" id="patch_version[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="" /></span>
-
-									<label class="control-label">Release Date</label>
-									<span class="description">Date that this patch version was released.</span>
-									<div class="input-group date" id="patch_datepicker">
-										<input type="text" name="patch_released[0]" id="patch_released[0]" class="form-control input-sm" onBlur="validDate(this); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
-										<span class="input-group-addon input-sm">
-											<span class="glyphicon glyphicon-calendar"></span>
-										</span>
+									<h5 id="patch_order_label[0]"><strong>Sort Order</strong></h5>
+									<div class="form-group">
+										<input type="text" name="patch_order[0]" id="patch_order[0]" class="form-control input-sm" onKeyUp="validInteger(this, 'patch_order_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validInteger(this, 'patch_order_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="0" />
 									</div>
 
-									<label class="control-label">Standalone</label>
-									<span class="description"><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</span>
+									<h5 id="patch_version_label[0]"><strong>Version</strong> <small>Version associated with this patch.</small></h5>
+									<div class="form-group">
+										<input type="text" name="patch_version[0]" id="patch_version[0]" class="form-control input-sm" onKeyUp="validString(this, 'patch_version_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validString(this, 'patch_version_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="" />
+									</div>
+
+									<h5 id="patch_released_label[0]"><strong>Release Date</strong> <small>Date that this patch version was released.</small></h5>
+									<div class="form-group">
+										<div class="input-group date" id="patch_datepicker">
+											<span class="input-group-addon input-sm">
+												<span class="glyphicon glyphicon-calendar"></span>
+											</span>
+											<input type="text" name="patch_released[0]" id="patch_released[0]" class="form-control input-sm" onFocus="validDate(this, 'patch_released_label[0]');" onBlur="validDate(this, 'patch_released_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
+										</div>
+									</div>
+
+									<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 									<select id="patch_standalone[0]" name="patch_standalone[0]" class="form-control input-sm">
 										<option value="1">Yes</option>
 										<option value="0">No</option>
 									</select>
 
-									<label class="control-label">Minimum Operating System</label>
-									<span class="description">Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes. See the capabilities array for patch policy implementation.</span>
-									<span><input type="text" name="patch_min_os[0]" id="patch_min_os[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" /></span>
+									<h5 id="patch_min_os_label[0]"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes. See the capabilities array for patch policy implementation.</small></h5>
+									<div class="form-group">
+										<input type="text" name="patch_min_os[0]" id="patch_min_os[0]" class="form-control input-sm" onKeyUp="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
+									</div>
 
-									<label class="control-label">Reboot</label>
-									<span class="description"><span style="font-family:monospace;">true</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">false</span> specifies that the computer will not be restarted.</span>
+									<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">true</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">false</span> specifies that the computer will not be restarted.</small></h5>
 									<select id="patch_reboot[0]" name="patch_reboot[0]" class="form-control input-sm">
 										<option value="0">No</option>
 										<option value="1">Yes</option>
@@ -894,10 +849,10 @@ $(document).ready(function() {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete '<?php echo $patch['version']; ?>'?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete Patch Version '<?php echo $patch['version']; ?>'?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -931,7 +886,7 @@ $(document).ready(function() {
 		<hr>
 		<br>
 
-		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='dbSettings.php'">
+		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='patchDB.php'">
 
 	</div><!-- /.col -->
 </div><!-- /.row -->

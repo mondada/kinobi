@@ -2,72 +2,55 @@ function enableButton(buttonId, enable) {
 	document.getElementById(buttonId).disabled = !enable;
 }
 
-function showError(element, icon = false) {
+function showError(element, labelId = false) {
 	element.parentElement.classList.add("has-error");
-	if (icon) {
-		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-remove form-control-feedback";
-		span.style.right = "15px";
-		element.parentElement.appendChild(span);
+	if (labelId) {
+		document.getElementById(labelId).classList.add("text-danger");
 	}
 }
 
-function hideError(element, icon = false) {
+function hideError(element, labelId = false) {
 	element.parentElement.classList.remove("has-error");
-	if (icon) {
-		var span = element.parentElement.getElementsByTagName("span");
-		for (var i = 0; i < span.length; i++) {
-			element.parentElement.removeChild(span[i]);
-		}
+	if (labelId) {
+		document.getElementById(labelId).classList.remove("text-danger");
 	}
 }
 
 function showSuccess(element, icon = false) {
-	element.parentElement.classList.add("has-success");
 	if (icon) {
 		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-ok form-control-feedback";
-		span.style.right = "15px";
+		span.className = "glyphicon glyphicon-ok form-control-feedback text-success";
 		element.parentElement.appendChild(span);
-	}
-}
-
-function hideSuccess(element, icon = false) {
-	element.parentElement.classList.remove("has-success");
-	if (icon) {
-		var span = element.parentElement.getElementsByTagName("span");
-		for (var i = 0; i < span.length; i++) {
-			element.parentElement.removeChild(span[i]);
-		}
-	}
-}
-
-function showWarning(element, icon = false) {
-	element.parentElement.classList.add("has-warning");
-	if (icon) {
-		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-warning-sign form-control-feedback";
-		span.style.right = "15px";
-		element.parentElement.appendChild(span);
-	}
-}
-
-function hideWarning(element, icon = false) {
-	element.parentElement.classList.remove("has-warning");
-	if (icon) {
-		var span = element.parentElement.getElementsByTagName("span");
-		for (var i = 0; i < span.length; i++) {
-			element.parentElement.removeChild(span[i]);
-		}
-	}
-}
-
-function validString(element, icon = false) {
-	hideSuccess(element, icon);
-	if (/^.{1,255}$/.test(element.value)) {
-		hideError(element, icon);
 	} else {
-		showError(element, icon);
+		element.parentElement.classList.add("has-success");
+	}
+}
+
+function hideSuccess(element) {
+	element.parentElement.classList.remove("has-success");
+	var span = element.parentElement.getElementsByTagName("span");
+	console.log(span);
+	for (var i = 0; i < span.length; i++) {
+		if (span[i].classList.contains("form-control-feedback")) {
+			element.parentElement.removeChild(span[i]);
+		}
+	}
+}
+
+function showWarning(element) {
+	element.parentElement.classList.add("has-warning");
+}
+
+function hideWarning(element) {
+	element.parentElement.classList.remove("has-warning");
+}
+
+function validString(element, labelId = false) {
+	hideSuccess(element);
+	if (/^.{1,255}$/.test(element.value)) {
+		hideError(element, labelId);
+	} else {
+		showError(element, labelId);
 	}
 }
 
@@ -78,12 +61,12 @@ function updateString(element, table, field, row_id, icon = false) {
 	}
 }
 
-function validOrEmptyString(element, icon = false) {
-	hideSuccess(element, icon);
+function validOrEmptyString(element, labelId = false) {
+	hideSuccess(element);
 	if (/^.{0,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
@@ -94,12 +77,12 @@ function updateOrEmptyString(element, table, field, row_id, icon = false) {
 	}
 }
 
-function validInteger(element, icon = false) {
-	hideSuccess(element, icon);
+function validInteger(element, labelId = false) {
+	hideSuccess(element);
 	if (element.value != "" && element.value == parseInt(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
@@ -110,19 +93,19 @@ function updateInteger(element, table, field, row_id, icon = false) {
 	}
 }
 
-function validDate(element) {
+function validDate(element, labelId = false) {
 	hideSuccess(element);
 	if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(element.value)) {
-		hideError(element);
+		hideError(element, labelId);
 	} else {
-		showError(element);
+		showError(element, labelId);
 	}
 }
 
-function updateDate(element, table, field, row_id) {
+function updateDate(element, table, field, row_id, icon = false) {
 	if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(element.value)) {
 		ajaxPost("patchCtl.php?patch_id="+row_id, "patch_released="+element.value);
-		showSuccess(element);
+		showSuccess(element, icon);
 	}
 }
 
@@ -130,12 +113,12 @@ function updateTimestamp(row_id) {
 	ajaxPost("patchCtl.php?title_id="+row_id, "title_modified=true");
 }
  
-function validNameId(element, icon = false) {
-	hideSuccess(element, icon);
+function validNameId(element, labelId = false) {
+	hideSuccess(element);
 	if (existingIds.indexOf(element.value) == -1 && /^([A-Za-z0-9.-]){1,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
@@ -146,12 +129,12 @@ function updateNameId(element, table, field, row_id, icon = false) {
 	}
 }
 
-function validEaKeyid(element, icon = false) {
-	hideSuccess(element, icon);
+function validEaKeyid(element, labelId = false) {
+	hideSuccess(element);
 	if (existingKeys.indexOf(element.value) == -1 && /^.{1,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 

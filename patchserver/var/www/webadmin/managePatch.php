@@ -323,12 +323,12 @@ function enablePatch() {
 }
 </script>
 
-<link rel="stylesheet" href="theme/datepicker.bootstrap.css" />
+<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 
-<script type="text/javascript" src="scripts/moment.js"></script>
-<script type="text/javascript" src="scripts/transition.js"></script>
-<script type="text/javascript" src="scripts/collapse.js"></script>
-<script type="text/javascript" src="scripts/datepicker.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/moment.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/transition.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/collapse.js"></script>
+<script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
 <script type="text/javascript">
 $(function () {
@@ -339,10 +339,10 @@ $(function () {
 });
 </script>
 
-<link rel="stylesheet" href="theme/datatables.bootstrap.css" />
+<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
 
 <?php if (!empty($patch_id)) { ?>
-<span class="description"><a href="patchTitles.php">Software Titles</a> <span class="glyphicon glyphicon-chevron-right"></span> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right"></span></span>
+<div class="description"><a href="patchTitles.php">Software Titles</a> <span class="glyphicon glyphicon-chevron-right"></span> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right"></span></div>
 <h2 id="heading"><?php echo $patch['version']; ?></h2>
 <?php } ?>
 
@@ -365,84 +365,60 @@ $(function () {
 
 				<div class="tab-pane active fade in" id="patch-tab">
 
-					<span style="padding: 8px 0px;" class="description">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</span>
+					<div class="description" style="padding: 8px 0px;">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</div>
 
-					<div id="patch-disabled-msg" style="padding-bottom: 8px;" class="hidden">
-						<span><small>This patch is disabled.</small></span>
-						<br>
+					<div id="patch-disabled-msg" class="hidden" style="padding-bottom: 8px;">
+						<div class="text-muted" style="padding-bottom: 4px;">This patch is disabled.</div>
 						<button id="enable_patch" type="button" class="btn btn-sm btn-default" onClick="enablePatch();" disabled>Enable</button>
 					</div>
 					<div id="patch-enabled-msg" style="padding-bottom: 8px;">
-						<span><small>This patch is enabled.</small></span>
+						<div class="text-muted">This patch is enabled.</div>
 					</div>
 
-					<div class="row">
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Sort Order</label>
-							<span class="description"></span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validInteger(this, true);" onKeyUp="validInteger(this, true);" onChange="validInteger(this, true); updateInteger(this, 'patches', 'sort_order', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['sort_order']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Version</label>
-							<span class="description">Version associated with this patch.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validString(this, true);" onKeyUp="validString(this, true);" onChange="validString(this, true); updateString(this, 'patches', 'version', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $patch['version']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Release Date</label>
-							<span class="description">Date that this patch version was released.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<div class="input-group date" id="released">
-								<input type="text" class="form-control input-sm" onFocus="validDate(this);" onBlur="validDate(this); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" />
-								<span class="input-group-addon input-sm">
-									<span class="glyphicon glyphicon-calendar"></span>
-								</span>
-							</div>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Standalone</label>
-							<span class="description"><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<select class="form-control input-sm" onChange="validInteger(this, true); updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
-								<option value="1" <?php echo ($patch['standalone'] == "1" ? " selected" : "") ?> >Yes</option>
-								<option value="0" <?php echo ($patch['standalone'] == "0" ? " selected" : "") ?> >No</option>
-							</select>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Minimum Operating System</label>
-							<span class="description">Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes. See the capabilities array for patch policy implementation.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<input type="text" class="form-control input-sm" onFocus="validString(this, true);" onKeyUp="validString(this, true);" onChange="validString(this, true); updateString(this, 'patches', 'min_os', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['min_os']; ?>" />
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-12 col-lg-12">
-							<label class="control-label">Reboot</label>
-							<span class="description"><span style="font-family:monospace;">true</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">false</span> specifies that the computer will not be restarted.</span>
-						</div><!-- /.col -->
-						<div class="col-xs-12 col-sm-8 col-md-5 col-lg-4">
-							<select class="form-control input-sm" onChange="validInteger(this, true); updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+					<h5 id="sort_order_label"><strong>Sort Order</strong></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validInteger(this, 'sort_order_label');" onKeyUp="validInteger(this, 'sort_order_label');" onChange="updateInteger(this, 'patches', 'sort_order', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['sort_order']; ?>" />
+					</div>
+					<h5 id="version_label"><strong>Version</strong> <small>Version associated with this patch.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'version_label');" onKeyUp="validString(this, 'version_label');" onChange="updateString(this, 'patches', 'version', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $patch['version']; ?>" />
+					</div>
+					<h5 id="released_label"><strong>Release Date</strong> <small>Date that this patch version was released.</small></h5>
+					<div class="form-group">
+						<div class="input-group has-feedback date" id="released" style="max-width: 449px;">
+							<span class="input-group-addon input-sm">
+								<span class="glyphicon glyphicon-calendar"></span>
+							</span>
+							<input type="text" class="form-control input-sm" onFocus="validDate(this, 'released_label');" onBlur="validDate(this, 'released_label'); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" />
+						</div>
+					</div>
+					<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
+					<div class="form-group" style="max-width: 449px;">
+						<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+							<option value="1" <?php echo ($patch['standalone'] == "1" ? " selected" : "") ?> >Yes</option>
+							<option value="0" <?php echo ($patch['standalone'] == "0" ? " selected" : "") ?> >No</option>
+						</select>
+					</div>
+					<h5 id="min_os_label"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes. See the capabilities array for patch policy implementation.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 449px;">
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'min_os_label');" onKeyUp="validString(this, 'min_os_label');" onChange="updateString(this, 'patches', 'min_os', <?php echo $patch_id; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['min_os']; ?>" />
+					</div>
+					<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">true</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">false</span> specifies that the computer will not be restarted.</small></h5>
+					<div class="form-group" style="max-width: 449px;">
+							<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
 								<option value="0" <?php echo ($patch['reboot'] == "0" ? " selected" : "") ?> >No</option>
 								<option value="1" <?php echo ($patch['reboot'] == "1" ? " selected" : "") ?> >Yes</option>
 							</select>
-						</div><!-- /.col -->
-					</div><!-- /.row -->
+					</div>
 
 				</div><!-- /.tab-pane -->
 
 				<div class="tab-pane fade in" id="components-tab">
 
-					<span style="padding-top: 8px;" class="description">Defines the elements that comprise this patch version.<br><strong>Note:</strong> Only one element is supported by Jamf Pro at this time.</span>
+					<div class="description" style="padding-top: 8px;">Defines the elements that comprise this patch version.<br><strong>Note:</strong> Only one element is supported by Jamf Pro at this time.</div>
 
 					<div id="components-alert-msg" style="padding-top: 8px;" class="hidden">
-						<span class="text-danger">
-							<span class="glyphicon glyphicon-exclamation-sign"></span>
-							<small>At least one component is required for the patch to be valid.</small>
-						</span>
+						<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one component is required for the patch to be valid.</div>
 					</div>
 
 					<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
@@ -459,46 +435,54 @@ $(function () {
 						<?php foreach ($components as $component) { ?>
 						<thead>
 							<tr>
-								<th colspan="3"><small>Name</small></th>
-								<th colspan="3"><small>Version</small></th>
+								<th colspan="3">Name</th>
+								<th colspan="3">Version</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-								<td colspan="3"><input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['name']; ?>" /></td>
-								<td colspan="3"><input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['version']; ?>" /></td>
+								<td colspan="3">
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['name']; ?>" />
+									</div>
+								</td>
+								<td colspan="3">
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['version']; ?>" />
+									</div>
+								</td>
 								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteComp<?php echo $component['id']; ?>">Delete</button></td>
 							</tr>
 						</tbody>
 						<thead>
 							<tr>
 								<td colspan="7">
-									<label class="control-label">Criteria</label>
-									<div class="description">Criteria used to determine which computers in your environment have this patch version installed.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</div>
+									<h5><strong>Criteria</strong> <small>Criteria used to determine which computers in your environment have this patch version installed.<!-- <br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered. --></small></h5>
 									<?php if (sizeof($component['criteria']) == 0) { ?>
 									<div style="padding-top: 8px;">
-										<span class="text-danger">
-											<span class="glyphicon glyphicon-exclamation-sign"></span>
-											<small>At least one criteria is required for the component to be valid.</small>
-										</span>
+										<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span>At least one criteria is required for the component to be valid.</div>
 									</div>
 									<?php } ?>
 								</td>
 							</tr>
 							<tr>
-								<th><small>Order</small></th>
-								<th><small>Criteria</small></th>
-								<th colspan="2"><small>Operator</small></th>
-								<th><small>Value</small></th>
-								<th><small>and/or</small></th>
+								<th>Order</th>
+								<th>Criteria</th>
+								<th colspan="2">Operator</th>
+								<th>Value</th>
+								<th>and/or</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($component['criteria'] as $criteria) { ?>
 							<tr>
-								<td><input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
 										<option value=""<?php echo ($criteria['name'] == "" ? " selected" : "") ?> disabled ></option>
@@ -524,7 +508,11 @@ $(function () {
 										<option value="less than or equal"<?php echo ($criteria['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($criteria['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
 									</select>
 								</td>
-								<td><input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $criteria['value']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $criteria['value']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
 										<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
@@ -546,12 +534,8 @@ $(function () {
 						<?php if (sizeof($components) == 0) { ?>
 						<thead>
 							<tr>
-								<th colspan="3">
-									<small>Name</small>
-								</th>
-								<th colspan="3">
-									<small>Version</small>
-								</th>
+								<th colspan="3">Name</th>
+								<th colspan="3">Version</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -567,17 +551,19 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Component</h4>
+									<h3 class="modal-title" id="modalLabel">New Component</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Name</label>
-									<span class="description">Name of the patch management software title.</span>
-									<span><input type="text" name="comp_name[0]" id="comp_name[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="<?php echo (sizeof($components) == 0 ? $patch['name'] : "") ?>"/></span>
+									<h5 id="comp_name_label[0]"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
+									<div class="form-group">
+										<input type="text" name="comp_name[0]" id="comp_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'comp_name_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" onBlur="validString(this, 'comp_name_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="<?php echo (sizeof($components) == 0 ? $patch['name'] : "") ?>"/>
+									</div>
 
-									<label class="control-label">Version</label>
-									<span class="description">Version associated with this patch.</span>
-									<span><input type="text" name="comp_version[0]" id="comp_version[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="<?php echo (sizeof($components) == 0 ? $patch['version'] : "") ?>"/></span>
+									<h5 id="comp_version_label[0]"><strong>Version</strong> <small>Version associated with this patch.</small></h5>
+									<div class="form-group">
+										<input type="text" name="comp_version[0]" id="comp_version[0]" class="form-control input-sm" onKeyUp="validString(this, 'comp_version_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" onBlur="validString(this, 'comp_version_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="<?php echo (sizeof($components) == 0 ? $patch['version'] : "") ?>"/>
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -593,10 +579,10 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete Component?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete Component?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -610,13 +596,12 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Criteria</h4>
+									<h3 class="modal-title" id="modalLabel">New Criteria</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Criteria</label>
-									<span class="description">Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</span>
-									<span>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<div class="form-group">
 										<input type="hidden" name="new_criteria_order[<?php echo $component['id']; ?>]" id="new_criteria_order[<?php echo $component['id']; ?>]" value="<?php echo sizeof($component['criteria']); ?>" />
 										<select id="new_criteria_name[<?php echo $component['id']; ?>]" name="new_criteria_name[<?php echo $component['id']; ?>]" class="form-control input-sm" onChange="selectCriteria(this, 'new_criteria_type[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]'); validCriteria('create_criteria[<?php echo $component['id']; ?>]', 'new_criteria_order[<?php echo $component['id']; ?>]', 'new_criteria_name[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]', 'new_criteria_type[<?php echo $component['id']; ?>]');" >
 											<option value="" disabled selected>Select...</option>
@@ -630,7 +615,7 @@ $(function () {
 										</select>
 										<input type="hidden" name="new_criteria_type[<?php echo $component['id']; ?>]" id="new_criteria_type[<?php echo $component['id']; ?>]" value="recon" />
 										<input type="hidden" name="new_criteria_operator[<?php echo $component['id']; ?>]" id="new_criteria_operator[<?php echo $component['id']; ?>]" value="is" />
-									</span>
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -640,15 +625,16 @@ $(function () {
 							</div>
 						</div>
 					</div>
+					
 					<?php foreach ($component['criteria'] as $criteria) { ?>
 					<div class="modal fade" id="deleteCriteria<?php echo $criteria['id']; ?>" tabindex="-1" role="dialog">
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete Criteria?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete Criteria?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -664,23 +650,27 @@ $(function () {
 
 				<div class="tab-pane fade in" id="dependencies-tab">
 
-					<span style="padding: 8px 0px;" class="description">Not currently used by Jamf Pro.<br><strong>Note:</strong> Cannot be a null value.</span>
+					<div class="description" style="padding: 8px 0px;">Not currently used by Jamf Pro.<br><strong>Note:</strong> Cannot be a null value.</div>
 
 					<table class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Order</small></th>
-								<th><small>Criteria</small></th>
-								<th><small>Operator</small></th>
-								<th><small>Value</small></th>
-								<th><small>and/or</small></th>
+								<th>Order</th>
+								<th>Criteria</th>
+								<th>Operator</th>
+								<th>Value</th>
+								<th>and/or</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($dependencies as $dependency) { ?>
 							<tr>
-								<td><input type="text" size="3" name="dep_order[<?php echo $dependency['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'dependencies', 'sort_order', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $dependency['sort_order']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" size="3" name="dep_order[<?php echo $dependency['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'dependencies', 'sort_order', <?php echo $dependency['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $dependency['sort_order']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateCriteria(this, 'dep_operator[<?php echo $dependency['id']; ?>]', 'dep_type[<?php echo $dependency['id']; ?>]', 'dependencies', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
 										<?php foreach ($ext_attrs as $ext_attr) { ?>
@@ -705,7 +695,11 @@ $(function () {
 										<option value="less than or equal"<?php echo ($dependency['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($dependency['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
 									</select>
 								</td>
-								<td><input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'dependencies', 'value', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $dependency['value']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'dependencies', 'value', <?php echo $dependency['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $dependency['value']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
 										<option value="1"<?php echo ($dependency['is_and'] == "1" ? " selected" : "") ?>>and</option>
@@ -725,13 +719,12 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Dependency</h4>
+									<h3 class="modal-title" id="modalLabel">New Dependency</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Criteria</label>
-									<span class="description">Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</span>
-									<span>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<div class="form-group">
 										<input type="hidden" name="dep_order[0]" id="dep_order[0]" value="<?php echo sizeof($dependencies); ?>" />
 										<select id="dep_name[0]" name="dep_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'dep_type[0]', 'dep_operator[0]'); validCriteria('create_dep', 'dep_order[0]', 'dep_name[0]', 'dep_operator[0]', 'dep_type[0]');" >
 											<option value="" disabled selected>Select...</option>
@@ -745,7 +738,7 @@ $(function () {
 										</select>
 										<input type="hidden" name="dep_type[0]" id="dep_type[0]" value="recon" />
 										<input type="hidden" name="dep_operator[0]" id="dep_operator[0]" value="is" />
-									</span>
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -761,10 +754,10 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete Dependency?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete Dependency?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -779,30 +772,31 @@ $(function () {
 
 				<div class="tab-pane fade in" id="capabilities-tab">
 
-					<span style="padding: 8px 0px;" class="description">Criteria used to determine which computers in your environment have the ability to install and run this patch.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</span>
+					<div class="description" style="padding: 8px 0px;">Criteria used to determine which computers in your environment have the ability to install and run this patch.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</div>
 
 					<div id="capabilities-alert-msg" style="padding-bottom: 8px;" class="hidden">
-						<span class="text-danger">
-							<span class="glyphicon glyphicon-exclamation-sign"></span>
-							<small>At least one capability is required for the patch to be valid.</small>
-						</span>
+						<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one capability is required for the definition to be valid.</div>
 					</div>
 
 					<table class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Order</small></th>
-								<th><small>Criteria</small></th>
-								<th><small>Operator</small></th>
-								<th><small>Value</small></th>
-								<th><small>and/or</small></th>
+								<th>Order</th>
+								<th>Criteria</th>
+								<th>Operator</th>
+								<th>Value</th>
+								<th>and/or</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($capabilities as $capability) { ?>
 							<tr>
-								<td><input type="text" size="3" name="cap_order[<?php echo $capability['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'capabilities', 'sort_order', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $capability['sort_order']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" size="3" name="cap_order[<?php echo $capability['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'capabilities', 'sort_order', <?php echo $capability['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $capability['sort_order']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateCriteria(this, 'cap_operator[<?php echo $capability['id']; ?>]', 'cap_type[<?php echo $capability['id']; ?>]', 'capabilities', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
 										<?php foreach ($ext_attrs as $ext_attr) { ?>
@@ -827,7 +821,11 @@ $(function () {
 										<option value="less than or equal"<?php echo ($capability['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($capability['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
 									</select>
 								</td>
-								<td><input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'capabilities', 'value', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $capability['value']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'capabilities', 'value', <?php echo $capability['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $capability['value']; ?>" />
+									</div>
+								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
 										<option value="1"<?php echo ($capability['is_and'] == "1" ? " selected" : "") ?>>and</option>
@@ -847,13 +845,12 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Capability</h4>
+									<h3 class="modal-title" id="modalLabel">New Capability</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Criteria</label>
-									<span class="description">Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</span>
-									<span>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<div class="form-group">
 										<input type="hidden" name="cap_order[0]" id="cap_order[0]" value="<?php echo sizeof($capabilities); ?>" />
 										<select id="cap_name[0]" name="cap_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'cap_type[0]', 'cap_operator[0]'); validCriteria('create_cap', 'cap_order[0]', 'cap_name[0]', 'cap_operator[0]', 'cap_type[0]');" >
 											<option value="" disabled selected>Select...</option>
@@ -867,7 +864,7 @@ $(function () {
 										</select>
 										<input type="hidden" name="cap_type[0]" id="cap_type[0]" value="recon" />
 										<input type="hidden" name="cap_operator[0]" id="cap_operator[0]" value="is" />
-									</span>
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -883,10 +880,10 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete Capability?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete Capability?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -901,7 +898,7 @@ $(function () {
 
 				<div class="tab-pane fade in" id="killapps-tab">
 
-					<span style="padding-top: 8px;" class="description">Specifies processes that will be stopped before a patch policy runs.</span>
+					<div class="description" style="padding: 8px 0px;">Specifies processes that will be stopped before a patch policy runs.</div>
 
 					<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
 						<div class="row">
@@ -916,15 +913,23 @@ $(function () {
 					<table id="kill_apps" class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Application Name</small></th>
-								<th><small>Bundle Identifier</small></th>
+								<th><nobr>Application Name</nobr></th>
+								<th><nobr>Bundle Identifier</nobr></th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($kill_apps as $kill_app) { ?><tr>
-								<td><input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'app_name', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['app_name']; ?>" /></td>
-								<td><input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'bundle_id', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['bundle_id']; ?>" /></td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'app_name', <?php echo $kill_app['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['app_name']; ?>" />
+									</div>
+								</td>
+								<td>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'bundle_id', <?php echo $kill_app['id']; ?>, true); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['bundle_id']; ?>" />
+									</div>
+								</td>
 								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteKillApp<?php echo $kill_app['id']; ?>">Delete</button></td>
 							</tr><?php } ?>
 							<?php if (sizeof($kill_apps) == 0) { ?><tr>
@@ -938,17 +943,19 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">New Application</h4>
+									<h3 class="modal-title" id="modalLabel">New Application</h3>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Application Name</label>
-									<span class="description">Name of the application that will be stopped before a patch policy runs.</span>
-									<span><input type="text" name="kill_app_name[0]" id="kill_app_name[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" /></span>
+									<h5 id="kill_app_name_label[0]"><strong>Application Name</strong> <small>Name of the application that will be stopped before a patch policy runs.</small></h5>
+									<div class="form-group">
+										<input type="text" name="kill_app_name[0]" id="kill_app_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'kill_app_name_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" onBlur="validString(this, 'kill_app_name_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" />
+									</div>
 
-									<label class="control-label">Bundle Identifier</label>
-									<span class="description">Bundle identifier of the applications that will be stopped before a patch policy runs.</span>
-									<span><input type="text" name="kill_bundle_id[0]" id="kill_bundle_id[0]" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" /></span>
+									<h5 id="kill_bundle_id_label[0]"><strong>Bundle Identifier</strong> <small>Bundle identifier of the applications that will be stopped before a patch policy runs.</small></h5>
+									<div class="form-group">
+										<input type="text" name="kill_bundle_id[0]" id="kill_bundle_id[0]" class="form-control input-sm" onKeyUp="validString(this, 'kill_bundle_id_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" onBlur="validString(this, 'kill_bundle_id_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" />
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -964,10 +971,10 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h4 class="modal-title" id="modalLabel">Delete <?php echo $kill_app['app_name']; ?>?</h4>
+									<h3 class="modal-title" id="modalLabel">Delete <?php echo $kill_app['app_name']; ?>?</h3>
 								</div>
 								<div class="modal-body">
-									<span class="description">This action is permanent and cannot be undone.</span>
+									<div class="text-muted">This action is permanent and cannot be undone.</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -1001,7 +1008,7 @@ $(function () {
 		<hr>
 		<br>
 
-		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='dbSettings.php'">
+		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='patchDB.php'">
 
 	</div><!-- /.col -->
 </div><!-- /.row -->

@@ -56,10 +56,10 @@ if ! grep -q "patchTitles.php" /var/www/html/webadmin/inc/header.php; then
                 <li class="<?php if ($pageURI == "patchTitles.php") { echo "active"; } ?>"><a href="patchTitles.php"><span class="glyphicon glyphicon-refresh marg-right"></span>Patch Definitions</a></li>' /var/www/html/webadmin/inc/header.php
 fi
 # Insert database control in settings.php
-if ! grep -q "dbSettings.php" /var/www/html/webadmin/settings.php; then
+if ! grep -q "patchDB.php" /var/www/html/webadmin/settings.php; then
 	sed -i 's:<strong>Shares</strong>:<strong>Services</strong>:g' /var/www/html/webadmin/settings.php
 	sed -i '/<a href="AFP.php">/i\
-				<a href="dbSettings.php">\
+				<a href="patchDB.php">\
 					<p><img src="images/settings/DataBaseStatus.png" alt="Database"></p>\
 					<p>Database</p>\
 				</a>\
@@ -79,8 +79,8 @@ if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
 		$title_count = $pdo->query("SELECT COUNT(id) FROM titles")->fetchColumn();\
 	}\
 \
-	function dbExec($cmd) {\
-		return shell_exec("sudo /bin/sh scripts/dbHelper.sh ".escapeshellcmd($cmd)." 2>&1");\
+	function patchExec($cmd) {\
+		return shell_exec("sudo /bin/sh scripts/patchHelper.sh ".escapeshellcmd($cmd)." 2>&1");\
 	}\
 	?>\
 \
@@ -101,7 +101,7 @@ if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
 			<div class="col-xs-6 col-md-2">\
 				<div class="bs-callout bs-callout-default">\
 					<h4>SSL Enabled</h4>\
-					<span><?php echo (trim(dbExec("getSSLstatus")) == "true" ? "Yes" : "No") ?></span>\
+					<span><?php echo (trim(patchExec("getSSLstatus")) == "true" ? "Yes" : "No") ?></span>\
 				</div>\
 			</div>\
 			<!-- /Column -->\
@@ -124,18 +124,18 @@ if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
 fi
 
 # Prevent writes to the webadmin's database helper script
-chown root:root /var/www/html/webadmin/scripts/dbHelper.sh >> $logFile
-chmod a-wr /var/www/html/webadmin/scripts/dbHelper.sh >> $logFile
-chmod u+rx /var/www/html/webadmin/scripts/dbHelper.sh >> $logFile
+chown root:root /var/www/html/webadmin/scripts/patchHelper.sh >> $logFile
+chmod a-wr /var/www/html/webadmin/scripts/patchHelper.sh >> $logFile
+chmod u+rx /var/www/html/webadmin/scripts/patchHelper.sh >> $logFile
 
 # Allow the webadmin from webadmin to invoke the database helper script
-sed -i '/scripts\/dbHelper.sh/d' /etc/sudoers
+sed -i '/scripts\/patchHelper.sh/d' /etc/sudoers
 sed -i 's/^\(Defaults *requiretty\)/#\1/' /etc/sudoers
 if [[ $(grep "^#includedir /etc/sudoers.d" /etc/sudoers) == "" ]] ; then
 	echo "#includedir /etc/sudoers.d" >> /etc/sudoers
 fi
-if ! grep -q 'scripts/dbHelper.sh' /etc/sudoers.d/webadmin; then
-	echo "$www_user ALL=(ALL) NOPASSWD: /bin/sh scripts/dbHelper.sh *" >> /etc/sudoers.d/webadmin
+if ! grep -q 'scripts/patchHelper.sh' /etc/sudoers.d/webadmin; then
+	echo "$www_user ALL=(ALL) NOPASSWD: /bin/sh scripts/patchHelper.sh *" >> /etc/sudoers.d/webadmin
 	chmod 0440 /etc/sudoers.d/webadmin
 fi
 

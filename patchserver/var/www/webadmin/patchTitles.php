@@ -6,9 +6,7 @@ include "inc/functions.php";
 
 $title = "Software Titles";
 
-//if (!isset($_POST['create_title'])) {
-	include "inc/header.php";
-//}
+include "inc/header.php";
 
 include "inc/dbConnect.php";
 
@@ -28,21 +26,22 @@ if (isset($pdo)) {
 		$stmt = $pdo->prepare('INSERT INTO titles (name, publisher, app_name, bundle_id, modified, current, name_id) VALUES (?, ?, ?, ?, ?, ?, ?)');
 		$stmt->execute([$name, $publisher, $app_name, $bundle_id, $modified, $current, $name_id]);
 		if ($stmt->errorCode() == '00000') {
-			//header("Location: manageTitle.php?new=true&id=".$pdo->lastInsertId());
-			echo "<div class=\"alert alert-success\"><strong>SUCCESS:</strong> Created Software Title '<a href=\"manageTitle.php?id=".$pdo->lastInsertId()."\">".$name."'</a></div>";
+			$status_msg = "<div class=\"text-success\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-ok-sign\"></span> Created Software Title '<a href=\"manageTitle.php?id=".$pdo->lastInsertId()."\">".$name."</a>'</div>";
 		} else {
-			//include "inc/header.php";
-			echo "<div class=\"alert alert-danger\"><strong>ERROR:</strong> ".$stmt->errorInfo()[2]."</div>";
+			$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> ".$stmt->errorInfo()[2]."</div>";
 		}
 	}
 
 	// Delete Software Title
 	if (isset($_POST['delete_title'])) {
 		$title_id = $_POST['delete_title'];
+		$title_name = $_POST['delete_name'][$title_id];
 		$stmt = $pdo->prepare('DELETE FROM titles WHERE id = ?');
 		$stmt->execute([$title_id]);
-		if ($stmt->errorCode() != '00000') {
-			echo "<div class=\"alert alert-danger\"><strong>ERROR:</strong> ".$stmt->errorInfo()[2]."</div>";
+		if ($stmt->errorCode() == '00000') {
+			$status_msg = "<div class=\"text-success\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-ok-sign\"></span> Deleted Software Title '".$title_name."'</div>";
+		} else {
+			$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> ".$stmt->errorInfo()[2]."</div>";
 		}
 	}
 
@@ -63,8 +62,10 @@ if (isset($pdo)) {
 			$sw_title['enabled'] == "0";
 			$disable = $pdo->prepare('UPDATE titles SET enabled = 0 WHERE id = ?');
 			$disable->execute([$sw_title['id']]);
-			if ($disable->errorCode() != '00000') {
-				echo "<div class=\"alert alert-danger\"><strong>ERROR:</strong> ".$disable->errorInfo()[2]."</div>";
+			if ($disable->errorCode() == '00000') {
+				$status_msg = $status_msg."<div class=\"text-warning\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> Software Title '".$sw_title['name']."' has been disabled.</div>";
+			} else {
+				$status_msg = $status_msg."<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> ".$stmt->errorInfo()[2]."</div>";
 			}
 		}
 		array_push($sw_titles, $sw_title);
@@ -80,7 +81,7 @@ if (isset($pdo)) {
 
 <?php if (isset($pdo)) { ?>
 
-<link rel="stylesheet" href="theme/checkbox.bootstrap.css"/>
+<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 
 <script type="text/javascript">
 	var existingIds = [<?php echo "\"".implode('", "', array_map(function($el){ return $el['name_id']; }, $sw_titles))."\""; ?>];
@@ -88,12 +89,12 @@ if (isset($pdo)) {
 
 <script type="text/javascript" src="scripts/patchValidation.js"></script>
 
-<link rel="stylesheet" href="theme/datatables.bootstrap.css" />
+<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
 
-<script type="text/javascript" src="scripts/datatables.jquery.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.bootstrap.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.buttons.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.buttons.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/buttons.bootstrap.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -114,14 +115,13 @@ $(document).ready(function() {
 			null,
 			null,
 			null,
-			// null,
 			{ "orderable": false }
 		]
 	});
 } );
 </script>
 
-<span class="description">&nbsp;</span>
+<div class="description">&nbsp;</div>
 
 <h2>Software Titles</h2>
 
@@ -131,16 +131,16 @@ $(document).ready(function() {
 		<form action="patchTitles.php" method="post" name="title" id="title">
 
 			<hr>
-			<br>
+			<?php echo (isset($status_msg) ? $status_msg : "<br>"); ?>
 
 			<table id="sw_titles" class="table table-striped">
 				<thead>
 					<tr>
-						<th><small>Enable</small></th>
-						<th><small>Name</small></th>
-						<th><small>Publisher</small></th>
-						<th><small><nobr>Last Modified</nobr></small></th>
-						<th><small><nobr>Current Version</nobr></small></th>
+						<th>Enable</th>
+						<th>Name</th>
+						<th>Publisher</th>
+						<th><nobr>Last Modified</nobr></th>
+						<th><nobr>Current Version</nobr></th>
 						<th></th>
 					</tr>
 				</thead>
@@ -153,14 +153,10 @@ $(document).ready(function() {
 								<label/>
 							</div>
 						</td>
-						<td>
-							<input type="hidden" name="delete_name[<?php echo $sw_title['id']; ?>]" value="<?php echo $sw_title['name']; ?>" />
-							<small><a href="manageTitle.php?id=<?php echo $sw_title['id']; ?>"><?php echo $sw_title['name']; ?></a></small>
-						</td>
-						<td><small><?php echo $sw_title['publisher']; ?></small></td>
-						<!-- <td><small><nobr><?php echo gmdate("M j, Y \a\\t g:i A", $sw_title['modified']); ?></nobr></small></td> -->
-						<td><small><nobr><?php echo gmdate("Y-m-d\TH:i:s\Z", $sw_title['modified']); ?></nobr></small></td>
-						<td><small><?php echo $sw_title['current']; ?></small></td>
+						<td nowrap><a href="manageTitle.php?id=<?php echo $sw_title['id']; ?>"><?php echo $sw_title['name']; ?></a></td>
+						<td nowrap><?php echo $sw_title['publisher']; ?></td>
+						<td nowrap><?php echo gmdate("Y-m-d\TH:i:s\Z", $sw_title['modified']); ?><!-- <?php echo gmdate("M j, Y \a\\t g:i A", $sw_title['modified']); ?> --></td>
+						<td nowrap><?php echo $sw_title['current']; ?></td>
 						<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#confirm_delete<?php echo $sw_title['id']; ?>">Delete</button></td>
 					</tr>
 					<?php } ?>
@@ -171,33 +167,39 @@ $(document).ready(function() {
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h4 class="modal-title" id="modalLabel">New Software Title</h4>
+							<h3 class="modal-title">New Software Title</h3>
 						</div>
 						<div class="modal-body">
 
-							<label class="control-label">Name</label>
-							<span class="description">Name of the patch management software title.</span>
-							<span><input type="text" name="name" id="name" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" /></span>
+							<h5 id="name_label"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
+							<div class="form-group">
+								<input type="text" name="name" id="name" class="form-control input-sm" onKeyUp="validString(this, 'name_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validString(this, 'name_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" />
+							</div>
 
-							<label class="control-label">Publisher</label>
-							<span class="description">Publisher of the patch management software title.</span>
-							<span><input type="text" name="publisher" id="publisher" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" /></span>
+							<h5 id="publisher_label"><strong>Publisher</strong> <small>Publisher of the patch management software title.</small></h5>
+							<div class="form-group">
+								<input type="text" name="publisher" id="publisher" class="form-control input-sm" onKeyUp="validString(this, 'publisher_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validString(this, 'publisher_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" />
+							</div>
 
-							<label class="control-label">Application Name</label>
-							<span class="description">Deprecated</span>
-							<span><input type="text" name="app_name" id="app_name" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onBlur="validOrEmptyString(this); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Optional]" /></span>
+							<h5 id="app_name_label"><strong>Application Name</strong> <small>Deprecated.</small></h5>
+							<div class="form-group">
+								<input type="text" name="app_name" id="app_name" class="form-control input-sm" onKeyUp="validOrEmptyString(this, 'app_name_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validOrEmptyString(this, 'app_name_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Optional]" />
+							</div>
 
-							<label class="control-label">Bundle Identifier</label>
-							<span class="description">Deprecated</span>
-							<span><input type="text" name="bundle_id" id="bundle_id" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onBlur="validOrEmptyString(this); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Optional]" /></span>
+							<h5 id="bundle_id_label"><strong>Bundle Identifier</strong> <small>Deprecated.</small></h5>
+							<div class="form-group">
+								<input type="text" name="bundle_id" id="bundle_id" class="form-control input-sm" onKeyUp="validOrEmptyString(this, 'bundle_id_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validOrEmptyString(this, 'bundle_id_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Optional]" />
+							</div>
 
-							<label class="control-label">Current Version</label>
-							<span class="description">Used for reporting the latest version of the patch management software title to Jamf Pro.</span>
-							<span><input type="text" name="current" id="current" class="form-control input-sm" onKeyUp="validString(this);" onBlur="validString(this); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" /></span>
+							<h5 id="current_label"><strong>Current Version</strong> <small>Used for reporting the latest version of the patch management software title to Jamf Pro.</small></h5>
+							<div class="form-group">
+								<input type="text" name="current" id="current" class="form-control input-sm" onKeyUp="validString(this, 'current_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validString(this, 'current_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" />
+							</div>
 
-							<label class="control-label">ID</label>
-							<span class="description">Uniquely identifies this software title on the external source.<br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source.</span>
-							<span><input type="text" name="name_id" id="name_id" class="form-control input-sm" onKeyUp="validNameId(this);" onBlur="validNameId(this); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" /></span>
+							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on the external source.<!-- <br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source. --></small></h5>
+							<div class="form-group">
+								<input type="text" name="name_id" id="name_id" class="form-control input-sm" onKeyUp="validNameId(this, 'name_id_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validNameId(this, 'name_id_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" />
+							</div>
 
 						</div>
 						<div class="modal-footer">
@@ -213,10 +215,11 @@ $(document).ready(function() {
 				<div class="modal-dialog" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h4 class="modal-title" id="modalLabel">Delete '<?php echo $sw_title['name']; ?>'?</h4>
+							<h3 class="modal-title" id="modalLabel">Delete '<?php echo $sw_title['name']; ?>'?</h3>
 						</div>
 						<div class="modal-body">
-							<span class="description">This action is permanent and cannot be undone.</span>
+							<div class="text-muted">This action is permanent and cannot be undone.</div>
+							<input type="hidden" name="delete_name[<?php echo $sw_title['id']; ?>]" value="<?php echo $sw_title['name']; ?>" />
 						</div>
 						<div class="modal-footer">
 							<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -240,7 +243,7 @@ $(document).ready(function() {
 		<hr>
 		<br>
 
-		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='dbSettings.php'">
+		<button type="button" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='patchDB.php'">
 
 	</div><!-- /.col -->
 </div><!-- /.row -->

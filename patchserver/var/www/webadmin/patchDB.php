@@ -8,11 +8,9 @@ $title = "Database";
 
 include "inc/header.php";
 
-function dbExec($cmd) {
-	return shell_exec("sudo /bin/sh scripts/dbHelper.sh ".escapeshellcmd($cmd)." 2>&1");
+function patchExec($cmd) {
+	return shell_exec("sudo /bin/sh scripts/patchHelper.sh ".escapeshellcmd($cmd)." 2>&1");
 }
-
-$status_msg = "<p class=\"text-muted\"><small>Nothing to report.</small></p>";
 
 // Get Retention
 $retention = $conf->getSetting("retention");
@@ -23,39 +21,39 @@ if ($retention == "") {
 
 // Backup
 if (isset($_POST["backup"])) {
-	if (trim(dbExec("backupDB")) == "true") {
-		$status_msg = "<p><span class=\"glyphicon glyphicon-ok-sign text-success\"></span><small> Backup completed successfully.</small></p>";
+	if (trim(patchExec("backupDB")) == "true") {
+		$status_msg = "<div class=\"text-success\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-ok-sign\"></span> Backup completed successfully.</div>";
 	} else {
-		$status_msg = "<p class=\"text-danger\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span><small> Backup failed.</small></p>";
+		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> Backup failed.</div>";
 	}
 }
 
 // Upload
 if (isset($_POST["upload"]) && isset($_FILES["upload_file"]["name"])) {
 	if ($_FILES["upload_file"]["error"] > 0) {
-		$status_msg = "<p class=\"text-danger\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span><small> ".$_FILES["upload_file"]["error"].".</small></p>";
+		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> ".$_FILES["upload_file"]["error"].".</div>";
 	} elseif ($_FILES["upload_file"]["type"] != "application/x-gzip") {
-		$status_msg = "<p class=\"text-danger\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span><small> Invalid file type".$_FILES["upload_file"]["type"].".</small></p>";
+		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> Invalid file type".$_FILES["upload_file"]["type"].".</div>";
 	} else {
 		// To Do: Add string replace to remove spaces in filename
 		$filename = basename($_FILES["upload_file"]["name"]);
 		move_uploaded_file($_FILES["upload_file"]["tmp_name"], '/tmp/'.$filename);
-		dbExec("uploadDB ".$filename);
-		$status_msg = "<p><span class=\"glyphicon glyphicon-ok-sign text-success\"></span><small> File uploaded successfully.</small></p>";
+		patchExec("uploadDB ".$filename);
+		$status_msg = "<div class=\"text-success\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-ok-sign\"></span> File uploaded successfully.</div>";
 	}
 }
 
 // Restore
 if (isset($_POST["restore"])) {
-	if (trim(dbExec("restoreDB ".$_POST["restore"])) == "true") {
-		$status_msg = "<p><span class=\"glyphicon glyphicon-ok-sign text-success\"></span><small> Restored '".basename($_POST["restore"])."'.</small></p>";
+	if (trim(patchExec("restoreDB ".$_POST["restore"])) == "true") {
+		$status_msg = "<div class=\"text-success\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-ok-sign\"></span> Restored '".basename($_POST["restore"])."'.</div>";
 	} else {
-		$status_msg = "<p class=\"text-danger\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span><small> Restore failed.</small></p>";
+		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> Restore failed.</div>";
 	}
 }
 
 // List Backups
-$backup_list = trim(dbExec("listBackups"));
+$backup_list = trim(patchExec("listBackups"));
 if ($backup_list != "") {
 	$backups = explode("\n", $backup_list);
 } else {
@@ -63,7 +61,7 @@ if ($backup_list != "") {
 }
 
 // Get Schedule
-$schedule_str = trim(dbExec("getSchedule"));
+$schedule_str = trim(patchExec("getSchedule"));
 if ($schedule_str != "") {
 	$scheduled = explode(",", $schedule_str);
 } else {
@@ -76,7 +74,7 @@ if ($schedule_str != "") {
 
 ?>
 
-<link rel="stylesheet" href="theme/checkbox.bootstrap.css"/>
+<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 
 <script type="text/javascript" src="scripts/patchValidation.js"></script>
 
@@ -91,7 +89,7 @@ function updateSchedule(element) {
 		scheduled.push(element.value);
 	}
 	scheduled.sort();
-	ajaxPost('dbCtl.php', 'schedule='+scheduled.join());
+	ajaxPost('patchCtl.php', 'schedule='+scheduled.join());
 	if (scheduled.length == 0) {
 		showScheduleError();
 	} else {
@@ -99,18 +97,18 @@ function updateSchedule(element) {
 	}
 }
 
-function validRetention(element, icon = false) {
-	hideSuccess(element, icon);
+function validRetention(element, labelId = false) {
+	hideSuccess(element);
 	if (element.value == parseInt(element.value) && element.value > 0  && element.value < 31) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
 function updateRetention(element, icon = false) {
 	if (element.value == parseInt(element.value) && element.value > 0  && element.value < 31) {
-		ajaxPost("dbCtl.php", "retention="+element.value);
+		ajaxPost("patchCtl.php", "retention="+element.value);
 		showSuccess(element, icon);
 	}
 }
@@ -144,12 +142,12 @@ $(document).ready(function(){
 });
 </script>
 
-<link rel="stylesheet" href="theme/datatables.bootstrap.css" />
+<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
 
-<script type="text/javascript" src="scripts/datatables.jquery.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.bootstrap.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.buttons.min.js"></script>
-<script type="text/javascript" src="scripts/datatables.buttons.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="scripts/dataTables/buttons.bootstrap.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -174,13 +172,13 @@ $(document).ready(function() {
 } );
 </script>
 
-<span class="description"><a href="settings.php">Settings</a> <span class="glyphicon glyphicon-chevron-right"></span></span>
+<div class="description"><a href="settings.php">Settings</a> <span class="glyphicon glyphicon-chevron-right"></span></div>
 <h2>Database</h2>
 
 <div class="row">
-	<div class="col-sm-12 col-md-8"> 
+	<div class="col-sm-12 col-md-9"> 
 
-		<form action="dbSettings.php" method="post" name="Database" id="Database" enctype="multipart/form-data">
+		<form action="patchDB.php" method="post" name="Database" id="Database" enctype="multipart/form-data">
 
 			<ul class="nav nav-tabs nav-justified" id="top-tabs">
 				<li class="active"><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab">Backup / Restore</a></li>
@@ -191,30 +189,23 @@ $(document).ready(function() {
 
 				<div class="tab-pane active fade in" id="backup-tab">
 
+					<?php echo (isset($status_msg) ? $status_msg : ""); ?>
 
-					<label class="control-label">Status</label>
-					<?php echo $status_msg; ?>
-
-					<hr>
-
-					<label class="control-label">Backup</label>
-					<span class="description">Click the backup button to create a gzipped backup file of the SQLite database.</span>
+					<h5><strong>Backup</strong></h5>
+					<div class="description" style="padding-bottom: 4px;">Click the backup button to create a gzipped backup file of the SQLite database.</div>
 					<button type="submit" name="backup" id="backup" class="btn btn-primary btn-sm" value="backup">Backup</button>
 
 					<br>
 					<br>
-					<hr>
 
-					<label class="control-label">Available Backups</label>
-					<span class="description">Backup archives are saved in <span style="font-family:monospace;">/var/appliance/backup</span> on this server.<br>Click the backup filename to download a backup archive.</span>
-
-					<br>
+					<h5><strong>Available Backups</strong></h5>
+					<div class="description" style="padding-bottom: 8px;">Backup archives are saved in <span style="font-family:monospace;">/var/appliance/backup</span> on this server.<br>Click the backup filename to download a backup archive.</div>
 
 					<table id="backups" class="table table-striped">
 						<thead>
 							<tr>
-								<th><small>Filename</small></th>
-								<th><small>Date</small></th>
+								<th>Filename</th>
+								<th>Date</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -222,8 +213,8 @@ $(document).ready(function() {
 							<?php $i = 0; 
 							foreach ($backups as $backup) { ?>
 							<tr>
-								<td nowrap><small><a href="dbCtl.php?download=<?php echo basename($backup); ?>"><?php echo basename($backup); ?></a></small></td>
-								<td nowrap><small><?php echo gmdate("Y-m-d\TH:i:s\Z", stat($backup)["mtime"]); ?></small></td>
+								<td nowrap><a href="patchCtl.php?download=<?php echo basename($backup); ?>"><?php echo basename($backup); ?></a></td>
+								<td nowrap><?php echo gmdate("Y-m-d\TH:i:s\Z", stat($backup)["mtime"]); ?></td>
 								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#restore_<?php echo $i; ?>">Restore</button></td>
 							</tr>
 							<?php $i++;
@@ -240,7 +231,7 @@ $(document).ready(function() {
 									<h4 class="modal-title" id="modalLabel">Restore Database</h4>
 								</div>
 								<div class="modal-body">
-									<span class="description">Are you sure you want to restore the database:<br> '<?php echo basename($backup); ?>' ?</span>
+									<div class="text-muted">Are you sure you want to restore the database:<br> '<?php echo basename($backup); ?>' ?</div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
@@ -256,16 +247,12 @@ $(document).ready(function() {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
 									<h4 class="modal-title" id="modalLabel">Upload Backup</h4>
 								</div>
 								<div class="modal-body">
 
-									<label class="control-label">Archive</label>
-									<span class="description">Upload a backup archive(gz) file to add to your list of available backups.</span>
-									<span><input type="file" name="upload_file" id="upload_file" class="form-control input-sm" onChange="document.getElementById('upload').disabled = this.value == '';" ></span>
+									<h5>Archive <small>Upload a backup archive(gz) file to add to your list of available backups.</small></h5>
+									<input type="file" name="upload_file" id="upload_file" class="form-control input-sm" onChange="document.getElementById('upload').disabled = this.value == '';" >
 
 								</div>
 								<div class="modal-footer">
@@ -279,8 +266,9 @@ $(document).ready(function() {
 
 				<div class="tab-pane fade in" id="schedule-tab">
 
-					<label class="control-label">Schedule</label>
-					<span class="description">Select the days of the week you would like your backup to run.<br><strong>Note:</strong> Backups will occur at 12:00 AM on the specified days.</span>
+					<h5><strong>Schedule</strong></h5>
+					<div class="description" style="padding-bottom: 8px;">Select the days of the week you would like your backup to run.<br><strong>Note:</strong> Backups will occur at 12:00 AM on the specified days.</div>
+
 					<div class="checkbox checkbox-primary checkbox-inline">
 						<input name="schedule[0]" id="schedule[0]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="0" <?php echo (in_array(0, $scheduled) ? "checked" : ""); ?>>
 						<label for="sun"> Sun </label>
@@ -313,13 +301,10 @@ $(document).ready(function() {
 					<br>
 					<br>
 
-					<label class="control-label">Retention</label>
-					<span class="description">Enter the number of backup archives that you would like to remain on the server.</span>
-					<div class="row">
-						<div class="col-xs-3">
-							<input type="text" name="retention" id="retention" class="form-control input-sm" onFocus="validRetention(this, true);" onKeyUp="validRetention(this, true);" onChange="validRetention(this, true); updateRetention(this, true);" placeholder="[1 - 30]" value="<?php echo $retention; ?>" />
-						</div><!-- /.col -->
-					</div><!-- /.row -->
+					<h5 id="retention_label"><strong>Retention</strong> <small>Enter the number of backup archives that you would like to remain on the server.</small></h5>
+					<div class="form-group has-feedback" style="max-width: 100px;">
+						<input type="text" class="form-control input-sm" onFocus="validRetention(this, 'retention_label');" onKeyUp="validRetention(this, 'retention_label');" onChange="updateRetention(this, true);" placeholder="[1 - 30]" value="<?php echo $retention; ?>" />
+					</div>
 
 				</div><!-- /.tab-pane -->
 
