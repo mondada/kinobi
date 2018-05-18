@@ -44,6 +44,6 @@ CentOS / RHEL
 
 To connect Jamf Pro to an external patch source, navigate to Settings > Computer Management > Patch Management
 
-Add <code>/v1.php</code> as the hostname in Jamf Pro
+Add `<HOSTNAME or IP ADDRESS>/v1.php` as the hostname in Jamf Pro
 
 If enabling SSL ensure the Jamf Pro Server will trust the NetSUS SSL certificate.
