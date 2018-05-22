@@ -443,27 +443,27 @@ $(document).ready(function() {
 
 					<h5 id="name_label"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
-						<input type="text" class="form-control input-sm" onFocus="validString(this, 'name_label');" onKeyUp="validString(this, 'name_label');" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $sw_title['name']; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'name_label');" onKeyUp="validString(this, 'name_label');" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $sw_title['name']; ?>" />
 					</div>
 					<h5 id="publisher_label"><strong>Publisher</strong> <small>Publisher of the patch management software title.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
-						<input type="text" class="form-control input-sm" onFocus="validString(this, 'publisher_label');" onKeyUp="validString(this, 'publisher_label');" onChange="updateString(this, 'titles', 'publisher', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['publisher']; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'publisher_label');" onKeyUp="validString(this, 'publisher_label');" onChange="updateString(this, 'titles', 'publisher', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['publisher']; ?>" />
 					</div>
 					<h5 id="app_name_label"><strong>Application Name</strong> <small>Deprecated.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
-						<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'app_name_label');" onKeyUp="validOrEmptyString(this, 'app_name_label');" onChange="updateOrEmptyString(this, 'titles', 'app_name', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['app_name']; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'app_name_label');" onKeyUp="validOrEmptyString(this, 'app_name_label');" onChange="updateOrEmptyString(this, 'titles', 'app_name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['app_name']; ?>" />
 					</div>
 					<h5 id="bundle_id_label"><strong>Bundle Identifier</strong> <small>Deprecated.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
-						<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'bundle_id_label');" onKeyUp="validOrEmptyString(this, 'bundle_id_label');" onChange="updateOrEmptyString(this, 'titles', 'bundle_id', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['bundle_id']; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'bundle_id_label');" onKeyUp="validOrEmptyString(this, 'bundle_id_label');" onChange="updateOrEmptyString(this, 'titles', 'bundle_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['bundle_id']; ?>" />
 					</div>
 					<h5 id="current_label"><strong>Current Version</strong> <small>Used for reporting the latest version of the patch management software title to Jamf Pro.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
-						<input type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['current']; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['current']; ?>" />
 					</div>
 					<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on the external source.<!-- <br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source. --></small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
-						<input type="text" class="form-control input-sm" onFocus="validNameId(this, 'name_id_label');" onKeyUp="validNameId(this, 'name_id_label');" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['name_id']; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validNameId(this, 'name_id_label');" onKeyUp="validNameId(this, 'name_id_label');" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['name_id']; ?>" />
 					</div>
 
 				</div><!-- /.tab-pane -->
@@ -644,79 +644,85 @@ $(document).ready(function() {
 							<tr>
 								<td>
 									<div class="has-feedback">
-										<input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" /></td>
+										<input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" /></td>
 									</div>
 								<td>
-									<select class="form-control input-sm" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);">
-										<?php foreach ($ext_attrs as $ext_attr) { ?>
-										<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($requirement['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
-										<?php } ?>
-										<option value="Application Bundle ID"<?php echo ($requirement['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
-										<option value="Application Title"<?php echo ($requirement['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
-										<option value="Application Version"<?php echo ($requirement['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
-										<option value="Architecture Type"<?php echo ($requirement['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
-										<option value="Boot Drive Available MB"<?php echo ($requirement['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
-										<option value="Drive Capacity MB"<?php echo ($requirement['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
-										<option value="Make"<?php echo ($requirement['name'] == "Make" ? " selected" : "") ?> >Make</option>
-										<option value="Model"<?php echo ($requirement['name'] == "Model" ? " selected" : "") ?> >Model</option>
-										<option value="Model Identifier"<?php echo ($requirement['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
-										<option value="Number of Processors"<?php echo ($requirement['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
-										<option value="Operating System"<?php echo ($requirement['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
-										<option value="Operating System Build"<?php echo ($requirement['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
-										<option value="Operating System Name"<?php echo ($requirement['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
-										<option value="Operating System Version"<?php echo ($requirement['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
-										<option value="Optical Drive"<?php echo ($requirement['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
-										<option value="Platform"<?php echo ($requirement['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
-										<option value="Processor Speed MHz"<?php echo ($requirement['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
-										<option value="Processor Type"<?php echo ($requirement['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
-										<option value="SMC Version"<?php echo ($requirement['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
-										<option value="Total Number of Cores"<?php echo ($requirement['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
-										<option value="Total RAM MB"<?php echo ($requirement['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
-									</select>
+									<div class="has-feedback">
+										<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);">
+											<?php foreach ($ext_attrs as $ext_attr) { ?>
+											<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($requirement['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
+											<?php } ?>
+											<option value="Application Bundle ID"<?php echo ($requirement['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
+											<option value="Application Title"<?php echo ($requirement['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
+											<option value="Application Version"<?php echo ($requirement['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
+											<option value="Architecture Type"<?php echo ($requirement['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
+											<option value="Boot Drive Available MB"<?php echo ($requirement['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
+											<option value="Drive Capacity MB"<?php echo ($requirement['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
+											<option value="Make"<?php echo ($requirement['name'] == "Make" ? " selected" : "") ?> >Make</option>
+											<option value="Model"<?php echo ($requirement['name'] == "Model" ? " selected" : "") ?> >Model</option>
+											<option value="Model Identifier"<?php echo ($requirement['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
+											<option value="Number of Processors"<?php echo ($requirement['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
+											<option value="Operating System"<?php echo ($requirement['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
+											<option value="Operating System Build"<?php echo ($requirement['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
+											<option value="Operating System Name"<?php echo ($requirement['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
+											<option value="Operating System Version"<?php echo ($requirement['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
+											<option value="Optical Drive"<?php echo ($requirement['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
+											<option value="Platform"<?php echo ($requirement['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+											<option value="Processor Speed MHz"<?php echo ($requirement['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
+											<option value="Processor Type"<?php echo ($requirement['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
+											<option value="SMC Version"<?php echo ($requirement['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
+											<option value="Total Number of Cores"<?php echo ($requirement['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
+											<option value="Total RAM MB"<?php echo ($requirement['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
+										</select>
+									</div>
 									<input type="hidden" id="rqmt_type[<?php echo $requirement['id']; ?>]" value="<?php echo $requirement['type']; ?>"/>
 								</td>
 								<td>
-									<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 144px;" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" >
-										<option value="is"<?php echo ($requirement['operator'] == "is" ? " selected" : "") ?> >is</option>
-										<option value="is not"<?php echo ($requirement['operator'] == "is not" ? " selected" : "") ?> >is not</option>
-										<?php
-										switch($requirement['name']) {
-										case "Application Title": ?>
-										<option value="has"<?php echo ($requirement['operator'] == "has" ? " selected" : "") ?> >has</option>
-										<option value="does not have"<?php echo ($requirement['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
-										<?php break;
-										case "Boot Drive Available MB":
-										case "Drive Capacity MB":
-										case "Number of Processors":
-										case "Processor Speed MHz":
-										case "Total Number of Cores":
-										case "Total RAM MB": ?>
-										<option value="more than"<?php echo ($requirement['operator'] == "more than" ? " selected" : "") ?> >more than</option>
-										<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?> >less than</option>
-										<?php break;
-										case "Operating System Version": ?>
-										<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
-										<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-										<option value="greater than"<?php echo ($requirement['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
-										<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?> >less than</option>
-										<option value="greater than or equal"<?php echo ($requirement['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
-										<option value="less than or equal"<?php echo ($requirement['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
-										<?php default: ?>
-										<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
-										<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-										<?php } ?>
-									</select>
-								</td>
-								<td>
 									<div class="has-feedback">
-										<input type="text" class="form-control input-sm" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo $requirement['value']; ?>" />
+										<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" >
+											<option value="is"<?php echo ($requirement['operator'] == "is" ? " selected" : "") ?> >is</option>
+											<option value="is not"<?php echo ($requirement['operator'] == "is not" ? " selected" : "") ?> >is not</option>
+											<?php
+											switch($requirement['name']) {
+											case "Application Title": ?>
+											<option value="has"<?php echo ($requirement['operator'] == "has" ? " selected" : "") ?> >has</option>
+											<option value="does not have"<?php echo ($requirement['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
+											<?php break;
+											case "Boot Drive Available MB":
+											case "Drive Capacity MB":
+											case "Number of Processors":
+											case "Processor Speed MHz":
+											case "Total Number of Cores":
+											case "Total RAM MB": ?>
+											<option value="more than"<?php echo ($requirement['operator'] == "more than" ? " selected" : "") ?> >more than</option>
+											<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+											<?php break;
+											case "Operating System Version": ?>
+											<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
+											<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+											<option value="greater than"<?php echo ($requirement['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
+											<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+											<option value="greater than or equal"<?php echo ($requirement['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
+											<option value="less than or equal"<?php echo ($requirement['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
+											<?php default: ?>
+											<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
+											<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+											<?php } ?>
+										</select>
 									</div>
 								</td>
 								<td>
-									<select class="form-control input-sm" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);">
-										<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
-										<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
-									</select>
+									<div class="has-feedback">
+										<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo $requirement['value']; ?>" />
+									</div>
+								</td>
+								<td>
+									<div class="has-feedback">
+										<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);">
+											<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
+											<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
+										</select>
+									</div>
 								</td>
 								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteRqmt<?php echo $requirement['id']; ?>">Delete</button></td>
 							</tr>

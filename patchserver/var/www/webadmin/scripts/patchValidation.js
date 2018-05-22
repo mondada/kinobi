@@ -16,18 +16,16 @@ function hideError(element, labelId = false) {
 	}
 }
 
-function showSuccess(element, icon = false) {
-	if (icon) {
-		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-ok form-control-feedback text-success";
-		element.parentElement.appendChild(span);
-	} else {
-		element.parentElement.classList.add("has-success");
+function showSuccess(element, offset = false) {
+	var span = document.createElement("span");
+	span.className = "glyphicon glyphicon-ok form-control-feedback text-success";
+	if (offset) {
+		span.style.right = offset + "px";
 	}
+	element.parentElement.appendChild(span);
 }
 
 function hideSuccess(element) {
-	element.parentElement.classList.remove("has-success");
 	var span = element.parentElement.getElementsByTagName("span");
 	for (var i = 0; i < span.length; i++) {
 		if (span[i].classList.contains("form-control-feedback")) {
@@ -36,12 +34,22 @@ function hideSuccess(element) {
 	}
 }
 
-function showWarning(element) {
-	element.parentElement.classList.add("has-warning");
+function showWarning(element, offset = false) {
+	var span = document.createElement("span");
+	span.className = "glyphicon glyphicon-exclamation-sign form-control-feedback text-muted";
+	if (offset) {
+		span.style.right = offset + "px";
+	}
+	element.parentElement.appendChild(span);
 }
 
 function hideWarning(element) {
-	element.parentElement.classList.remove("has-warning");
+	var span = element.parentElement.getElementsByTagName("span");
+	for (var i = 0; i < span.length; i++) {
+		if (span[i].classList.contains("form-control-feedback")) {
+			element.parentElement.removeChild(span[i]);
+		}
+	}
 }
 
 function validString(element, labelId = false) {
@@ -53,10 +61,11 @@ function validString(element, labelId = false) {
 	}
 }
 
-function updateString(element, table, field, row_id, icon = false) {
+function updateString(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (/^.{1,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
@@ -69,10 +78,11 @@ function validOrEmptyString(element, labelId = false) {
 	}
 }
 
-function updateOrEmptyString(element, table, field, row_id, icon = false) {
+function updateOrEmptyString(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (/^.{0,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
@@ -85,10 +95,11 @@ function validInteger(element, labelId = false) {
 	}
 }
 
-function updateInteger(element, table, field, row_id, icon = false) {
+function updateInteger(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (element.value != "" && element.value == parseInt(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
@@ -101,10 +112,11 @@ function validDate(element, labelId = false) {
 	}
 }
 
-function updateDate(element, table, field, row_id, icon = false) {
+function updateDate(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(element.value)) {
 		ajaxPost("patchCtl.php?patch_id="+row_id, "patch_released="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
@@ -121,10 +133,11 @@ function validNameId(element, labelId = false) {
 	}
 }
 
-function updateNameId(element, table, field, row_id, icon = false) {
+function updateNameId(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (existingIds.indexOf(element.value) == -1 && /^([A-Za-z0-9.-]){1,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
@@ -137,10 +150,11 @@ function validEaKeyid(element, labelId = false) {
 	}
 }
 
-function updateCriteria(element, operatorId, typeId, table, row_id) {
+function updateCriteria(element, operatorId, typeId, table, row_id, offset = false) {
 	// Save Criteria
+	hideWarning(element);
 	ajaxPost("patchCtl.php?table="+table+"&field=name&id="+row_id, "value="+element.value);
-	showSuccess(element);
+	showSuccess(element, offset);
 	// Update Operator
 	switch (element.value) {
 		case "Application Title":
@@ -172,8 +186,9 @@ function updateCriteria(element, operatorId, typeId, table, row_id) {
 	if (options.indexOf(current) >= 0) {
 		operator.value = current;
 	} else {
+		hideSuccess(operator);
 		ajaxPost("patchCtl.php?table="+table+"&field=operator&id="+row_id, "value="+operator.value);
-		showWarning(operator);
+		showWarning(operator, offset);
 	}
 	// Update Type
 	var type = document.getElementById(typeId);

@@ -106,10 +106,10 @@ function validRetention(element, labelId = false) {
 	}
 }
 
-function updateRetention(element, icon = false) {
+function updateRetention(element, offset = false) {
 	if (element.value == parseInt(element.value) && element.value > 0  && element.value < 31) {
 		ajaxPost("patchCtl.php", "retention="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
@@ -303,7 +303,7 @@ $(document).ready(function() {
 
 					<h5 id="retention_label"><strong>Retention</strong> <small>Enter the number of backup archives that you would like to remain on the server.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 100px;">
-						<input type="text" class="form-control input-sm" onFocus="validRetention(this, 'retention_label');" onKeyUp="validRetention(this, 'retention_label');" onChange="updateRetention(this, true);" placeholder="[1 - 30]" value="<?php echo $retention; ?>" />
+						<input type="text" class="form-control input-sm" onFocus="validRetention(this, 'retention_label');" onKeyUp="validRetention(this, 'retention_label');" onChange="updateRetention(this);" placeholder="[1 - 30]" value="<?php echo $retention; ?>" />
 					</div>
 
 				</div><!-- /.tab-pane -->
