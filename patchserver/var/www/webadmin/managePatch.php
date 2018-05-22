@@ -482,27 +482,63 @@ $(function () {
 								</td>
 								<td>
 									<select class="form-control input-sm" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);">
-										<option value=""<?php echo ($criteria['name'] == "" ? " selected" : "") ?> disabled ></option>
 										<?php foreach ($ext_attrs as $ext_attr) { ?>
 										<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($criteria['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 										<?php } ?>
 										<option value="Application Bundle ID"<?php echo ($criteria['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
+										<option value="Application Title"<?php echo ($criteria['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
 										<option value="Application Version"<?php echo ($criteria['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
-										<option value="Platform"<?php echo ($criteria['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Architecture Type"<?php echo ($criteria['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
+										<option value="Boot Drive Available MB"<?php echo ($criteria['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
+										<option value="Drive Capacity MB"<?php echo ($criteria['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
+										<option value="Make"<?php echo ($criteria['name'] == "Make" ? " selected" : "") ?> >Make</option>
+										<option value="Model"<?php echo ($criteria['name'] == "Model" ? " selected" : "") ?> >Model</option>
+										<option value="Model Identifier"<?php echo ($criteria['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
+										<option value="Number of Processors"<?php echo ($criteria['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
+										<option value="Operating System"<?php echo ($criteria['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
+										<option value="Operating System Build"<?php echo ($criteria['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
+										<option value="Operating System Name"<?php echo ($criteria['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
 										<option value="Operating System Version"<?php echo ($criteria['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
+										<option value="Optical Drive"<?php echo ($criteria['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
+										<option value="Platform"<?php echo ($criteria['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Processor Speed MHz"<?php echo ($criteria['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
+										<option value="Processor Type"<?php echo ($criteria['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
+										<option value="SMC Version"<?php echo ($criteria['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
+										<option value="Total Number of Cores"<?php echo ($criteria['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
+										<option value="Total RAM MB"<?php echo ($criteria['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
 									</select>
 									<input type="hidden" id="criteria_type[<?php echo $criteria['id']; ?>]" value="<?php echo $criteria['type']; ?>"/>
 								</td>
 								<td colspan="2">
-									<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+									<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 144px;" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
 										<option value="is"<?php echo ($criteria['operator'] == "is" ? " selected" : "") ?> >is</option>
 										<option value="is not"<?php echo ($criteria['operator'] == "is not" ? " selected" : "") ?> >is not</option>
+										<?php
+										switch($criteria['name']) {
+										case "Application Title": ?>
+										<option value="has"<?php echo ($criteria['operator'] == "has" ? " selected" : "") ?> >has</option>
+										<option value="does not have"<?php echo ($criteria['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
+										<?php break;
+										case "Boot Drive Available MB":
+										case "Drive Capacity MB":
+										case "Number of Processors":
+										case "Processor Speed MHz":
+										case "Total Number of Cores":
+										case "Total RAM MB": ?>
+										<option value="more than"<?php echo ($criteria['operator'] == "more than" ? " selected" : "") ?> >more than</option>
+										<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<?php break;
+										case "Operating System Version": ?>
 										<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
 										<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-										<option value="greater than"<?php echo ($criteria['operator'] == "greater than" ? " selected" : "") ?><?php echo ($criteria['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than</option>
-										<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?><?php echo ($criteria['name'] != "Operating System Version" ? " disabled" : "") ?> >less than</option>
-										<option value="greater than or equal"<?php echo ($criteria['operator'] == "greater than or equal" ? " selected" : "") ?><?php echo ($criteria['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than or equal</option>
-										<option value="less than or equal"<?php echo ($criteria['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($criteria['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
+										<option value="greater than"<?php echo ($criteria['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
+										<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<option value="greater than or equal"<?php echo ($criteria['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
+										<option value="less than or equal"<?php echo ($criteria['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
+										<?php default: ?>
+										<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
+										<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+										<?php } ?>
 									</select>
 								</td>
 								<td>
@@ -606,9 +642,26 @@ $(function () {
 											<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 											<?php } ?>
 											<option value="Application Bundle ID">Application Bundle ID</option>
+											<option value="Application Title">Application Title</option>
 											<option value="Application Version">Application Version</option>
-											<option value="Platform">Platform</option>
+											<option value="Architecture Type">Architecture Type</option>
+											<option value="Boot Drive Available MB">Boot Drive Available MB</option>
+											<option value="Drive Capacity MB">Drive Capacity MB</option>
+											<option value="Make">Make</option>
+											<option value="Model">Model</option>
+											<option value="Model Identifier">Model Identifier</option>
+											<option value="Number of Processors">Number of Processors</option>
+											<option value="Operating System">Operating System</option>
+											<option value="Operating System Build">Operating System Build</option>
+											<option value="Operating System Name">Operating System Name</option>
 											<option value="Operating System Version">Operating System Version</option>
+											<option value="Optical Drive">Optical Drive</option>
+											<option value="Platform">Platform</option>
+											<option value="Processor Speed MHz">Processor Speed MHz</option>
+											<option value="Processor Type">Processor Type</option>
+											<option value="SMC Version">SMC Version</option>
+											<option value="Total Number of Cores">Total Number of Cores</option>
+											<option value="Total RAM MB">Total RAM MB</option>
 										</select>
 										<input type="hidden" name="new_criteria_type[<?php echo $component['id']; ?>]" id="new_criteria_type[<?php echo $component['id']; ?>]" value="recon" />
 										<input type="hidden" name="new_criteria_operator[<?php echo $component['id']; ?>]" id="new_criteria_operator[<?php echo $component['id']; ?>]" value="is" />
@@ -674,22 +727,59 @@ $(function () {
 										<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($dependency['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 										<?php } ?>
 										<option value="Application Bundle ID"<?php echo ($dependency['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
+										<option value="Application Title"<?php echo ($dependency['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
 										<option value="Application Version"<?php echo ($dependency['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
-										<option value="Platform"<?php echo ($dependency['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Architecture Type"<?php echo ($dependency['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
+										<option value="Boot Drive Available MB"<?php echo ($dependency['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
+										<option value="Drive Capacity MB"<?php echo ($dependency['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
+										<option value="Make"<?php echo ($dependency['name'] == "Make" ? " selected" : "") ?> >Make</option>
+										<option value="Model"<?php echo ($dependency['name'] == "Model" ? " selected" : "") ?> >Model</option>
+										<option value="Model Identifier"<?php echo ($dependency['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
+										<option value="Number of Processors"<?php echo ($dependency['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
+										<option value="Operating System"<?php echo ($dependency['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
+										<option value="Operating System Build"<?php echo ($dependency['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
+										<option value="Operating System Name"<?php echo ($dependency['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
 										<option value="Operating System Version"<?php echo ($dependency['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
+										<option value="Optical Drive"<?php echo ($dependency['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
+										<option value="Platform"<?php echo ($dependency['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Processor Speed MHz"<?php echo ($dependency['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
+										<option value="Processor Type"<?php echo ($dependency['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
+										<option value="SMC Version"<?php echo ($dependency['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
+										<option value="Total Number of Cores"<?php echo ($dependency['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
+										<option value="Total RAM MB"<?php echo ($dependency['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
 									</select>
 									<input type="hidden" id="dep_type[<?php echo $dependency['id']; ?>]" value="<?php echo $dependency['type']; ?>"/>
 								</td>
 								<td>
-									<select id="dep_operator[<?php echo $dependency['id']; ?>]" class="form-control input-sm" onFocus="hideWarning(this);" onChange="updateString(this, 'dependencies', 'operator', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+									<select id="dep_operator[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 144px;" onFocus="hideWarning(this);" onChange="updateString(this, 'dependencies', 'operator', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
 										<option value="is"<?php echo ($dependency['operator'] == "is" ? " selected" : "") ?> >is</option>
 										<option value="is not"<?php echo ($dependency['operator'] == "is not" ? " selected" : "") ?> >is not</option>
+										<?php
+										switch($dependency['name']) {
+										case "Application Title": ?>
+										<option value="has"<?php echo ($dependency['operator'] == "has" ? " selected" : "") ?> >has</option>
+										<option value="does not have"<?php echo ($dependency['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
+										<?php break;
+										case "Boot Drive Available MB":
+										case "Drive Capacity MB":
+										case "Number of Processors":
+										case "Processor Speed MHz":
+										case "Total Number of Cores":
+										case "Total RAM MB": ?>
+										<option value="more than"<?php echo ($dependency['operator'] == "more than" ? " selected" : "") ?> >more than</option>
+										<option value="less than"<?php echo ($dependency['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<?php break;
+										case "Operating System Version": ?>
 										<option value="like"<?php echo ($dependency['operator'] == "like" ? " selected" : "") ?> >like</option>
 										<option value="not like"<?php echo ($dependency['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-										<option value="greater than"<?php echo ($dependency['operator'] == "greater than" ? " selected" : "") ?><?php echo ($dependency['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than</option>
-										<option value="less than"<?php echo ($dependency['operator'] == "less than" ? " selected" : "") ?><?php echo ($dependency['name'] != "Operating System Version" ? " disabled" : "") ?> >less than</option>
-										<option value="greater than or equal"<?php echo ($dependency['operator'] == "greater than or equal" ? " selected" : "") ?><?php echo ($dependency['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than or equal</option>
-										<option value="less than or equal"<?php echo ($dependency['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($dependency['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
+										<option value="greater than"<?php echo ($dependency['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
+										<option value="less than"<?php echo ($dependency['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<option value="greater than or equal"<?php echo ($dependency['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
+										<option value="less than or equal"<?php echo ($dependency['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
+										<?php default: ?>
+										<option value="like"<?php echo ($dependency['operator'] == "like" ? " selected" : "") ?> >like</option>
+										<option value="not like"<?php echo ($dependency['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+										<?php } ?>
 									</select>
 								</td>
 								<td>
@@ -729,9 +819,26 @@ $(function () {
 											<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 											<?php } ?>
 											<option value="Application Bundle ID">Application Bundle ID</option>
+											<option value="Application Title">Application Title</option>
 											<option value="Application Version">Application Version</option>
-											<option value="Platform">Platform</option>
+											<option value="Architecture Type">Architecture Type</option>
+											<option value="Boot Drive Available MB">Boot Drive Available MB</option>
+											<option value="Drive Capacity MB">Drive Capacity MB</option>
+											<option value="Make">Make</option>
+											<option value="Model">Model</option>
+											<option value="Model Identifier">Model Identifier</option>
+											<option value="Number of Processors">Number of Processors</option>
+											<option value="Operating System">Operating System</option>
+											<option value="Operating System Build">Operating System Build</option>
+											<option value="Operating System Name">Operating System Name</option>
 											<option value="Operating System Version">Operating System Version</option>
+											<option value="Optical Drive">Optical Drive</option>
+											<option value="Platform">Platform</option>
+											<option value="Processor Speed MHz">Processor Speed MHz</option>
+											<option value="Processor Type">Processor Type</option>
+											<option value="SMC Version">SMC Version</option>
+											<option value="Total Number of Cores">Total Number of Cores</option>
+											<option value="Total RAM MB">Total RAM MB</option>
 										</select>
 										<input type="hidden" name="dep_type[0]" id="dep_type[0]" value="recon" />
 										<input type="hidden" name="dep_operator[0]" id="dep_operator[0]" value="is" />
@@ -800,22 +907,59 @@ $(function () {
 										<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($capability['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 										<?php } ?>
 										<option value="Application Bundle ID"<?php echo ($capability['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
+										<option value="Application Title"<?php echo ($capability['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
 										<option value="Application Version"<?php echo ($capability['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
-										<option value="Platform"<?php echo ($capability['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Architecture Type"<?php echo ($capability['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
+										<option value="Boot Drive Available MB"<?php echo ($capability['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
+										<option value="Drive Capacity MB"<?php echo ($capability['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
+										<option value="Make"<?php echo ($capability['name'] == "Make" ? " selected" : "") ?> >Make</option>
+										<option value="Model"<?php echo ($capability['name'] == "Model" ? " selected" : "") ?> >Model</option>
+										<option value="Model Identifier"<?php echo ($capability['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
+										<option value="Number of Processors"<?php echo ($capability['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
+										<option value="Operating System"<?php echo ($capability['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
+										<option value="Operating System Build"<?php echo ($capability['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
+										<option value="Operating System Name"<?php echo ($capability['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
 										<option value="Operating System Version"<?php echo ($capability['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
+										<option value="Optical Drive"<?php echo ($capability['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
+										<option value="Platform"<?php echo ($capability['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Processor Speed MHz"<?php echo ($capability['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
+										<option value="Processor Type"<?php echo ($capability['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
+										<option value="SMC Version"<?php echo ($capability['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
+										<option value="Total Number of Cores"<?php echo ($capability['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
+										<option value="Total RAM MB"<?php echo ($capability['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
 									</select>
 									<input type="hidden" id="cap_type[<?php echo $capability['id']; ?>]" value="<?php echo $capability['type']; ?>"/>
 								</td>
 								<td>
-									<select id="cap_operator[<?php echo $capability['id']; ?>]" class="form-control input-sm" onFocus="hideWarning(this);" onChange="updateString(this, 'capabilities', 'operator', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+									<select id="cap_operator[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 144px;" onFocus="hideWarning(this);" onChange="updateString(this, 'capabilities', 'operator', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
 										<option value="is"<?php echo ($capability['operator'] == "is" ? " selected" : "") ?> >is</option>
 										<option value="is not"<?php echo ($capability['operator'] == "is not" ? " selected" : "") ?> >is not</option>
+										<?php
+										switch($capability['name']) {
+										case "Application Title": ?>
+										<option value="has"<?php echo ($capability['operator'] == "has" ? " selected" : "") ?> >has</option>
+										<option value="does not have"<?php echo ($capability['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
+										<?php break;
+										case "Boot Drive Available MB":
+										case "Drive Capacity MB":
+										case "Number of Processors":
+										case "Processor Speed MHz":
+										case "Total Number of Cores":
+										case "Total RAM MB": ?>
+										<option value="more than"<?php echo ($capability['operator'] == "more than" ? " selected" : "") ?> >more than</option>
+										<option value="less than"<?php echo ($capability['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<?php break;
+										case "Operating System Version": ?>
 										<option value="like"<?php echo ($capability['operator'] == "like" ? " selected" : "") ?> >like</option>
 										<option value="not like"<?php echo ($capability['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-										<option value="greater than"<?php echo ($capability['operator'] == "greater than" ? " selected" : "") ?><?php echo ($capability['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than</option>
-										<option value="less than"<?php echo ($capability['operator'] == "less than" ? " selected" : "") ?><?php echo ($capability['name'] != "Operating System Version" ? " disabled" : "") ?> >less than</option>
-										<option value="greater than or equal"<?php echo ($capability['operator'] == "greater than or equal" ? " selected" : "") ?><?php echo ($capability['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than or equal</option>
-										<option value="less than or equal"<?php echo ($capability['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($capability['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
+										<option value="greater than"<?php echo ($capability['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
+										<option value="less than"<?php echo ($capability['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<option value="greater than or equal"<?php echo ($capability['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
+										<option value="less than or equal"<?php echo ($capability['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
+										<?php default: ?>
+										<option value="like"<?php echo ($capability['operator'] == "like" ? " selected" : "") ?> >like</option>
+										<option value="not like"<?php echo ($capability['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+										<?php } ?>
 									</select>
 								</td>
 								<td>
@@ -855,9 +999,26 @@ $(function () {
 											<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 											<?php } ?>
 											<option value="Application Bundle ID">Application Bundle ID</option>
+											<option value="Application Title">Application Title</option>
 											<option value="Application Version">Application Version</option>
-											<option value="Platform">Platform</option>
+											<option value="Architecture Type">Architecture Type</option>
+											<option value="Boot Drive Available MB">Boot Drive Available MB</option>
+											<option value="Drive Capacity MB">Drive Capacity MB</option>
+											<option value="Make">Make</option>
+											<option value="Model">Model</option>
+											<option value="Model Identifier">Model Identifier</option>
+											<option value="Number of Processors">Number of Processors</option>
+											<option value="Operating System">Operating System</option>
+											<option value="Operating System Build">Operating System Build</option>
+											<option value="Operating System Name">Operating System Name</option>
 											<option value="Operating System Version">Operating System Version</option>
+											<option value="Optical Drive">Optical Drive</option>
+											<option value="Platform">Platform</option>
+											<option value="Processor Speed MHz">Processor Speed MHz</option>
+											<option value="Processor Type">Processor Type</option>
+											<option value="SMC Version">SMC Version</option>
+											<option value="Total Number of Cores">Total Number of Cores</option>
+											<option value="Total RAM MB">Total RAM MB</option>
 										</select>
 										<input type="hidden" name="cap_type[0]" id="cap_type[0]" value="recon" />
 										<input type="hidden" name="cap_operator[0]" id="cap_operator[0]" value="is" />

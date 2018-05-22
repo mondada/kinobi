@@ -652,22 +652,59 @@ $(document).ready(function() {
 										<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($requirement['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 										<?php } ?>
 										<option value="Application Bundle ID"<?php echo ($requirement['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
+										<option value="Application Title"<?php echo ($requirement['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
 										<option value="Application Version"<?php echo ($requirement['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
-										<option value="Platform"<?php echo ($requirement['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Architecture Type"<?php echo ($requirement['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
+										<option value="Boot Drive Available MB"<?php echo ($requirement['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
+										<option value="Drive Capacity MB"<?php echo ($requirement['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
+										<option value="Make"<?php echo ($requirement['name'] == "Make" ? " selected" : "") ?> >Make</option>
+										<option value="Model"<?php echo ($requirement['name'] == "Model" ? " selected" : "") ?> >Model</option>
+										<option value="Model Identifier"<?php echo ($requirement['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
+										<option value="Number of Processors"<?php echo ($requirement['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
+										<option value="Operating System"<?php echo ($requirement['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
+										<option value="Operating System Build"<?php echo ($requirement['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
+										<option value="Operating System Name"<?php echo ($requirement['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
 										<option value="Operating System Version"<?php echo ($requirement['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
+										<option value="Optical Drive"<?php echo ($requirement['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
+										<option value="Platform"<?php echo ($requirement['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+										<option value="Processor Speed MHz"<?php echo ($requirement['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
+										<option value="Processor Type"<?php echo ($requirement['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
+										<option value="SMC Version"<?php echo ($requirement['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
+										<option value="Total Number of Cores"<?php echo ($requirement['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
+										<option value="Total RAM MB"<?php echo ($requirement['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
 									</select>
 									<input type="hidden" id="rqmt_type[<?php echo $requirement['id']; ?>]" value="<?php echo $requirement['type']; ?>"/>
 								</td>
 								<td>
-									<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" >
+									<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 144px;" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" >
 										<option value="is"<?php echo ($requirement['operator'] == "is" ? " selected" : "") ?> >is</option>
 										<option value="is not"<?php echo ($requirement['operator'] == "is not" ? " selected" : "") ?> >is not</option>
+										<?php
+										switch($requirement['name']) {
+										case "Application Title": ?>
+										<option value="has"<?php echo ($requirement['operator'] == "has" ? " selected" : "") ?> >has</option>
+										<option value="does not have"<?php echo ($requirement['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
+										<?php break;
+										case "Boot Drive Available MB":
+										case "Drive Capacity MB":
+										case "Number of Processors":
+										case "Processor Speed MHz":
+										case "Total Number of Cores":
+										case "Total RAM MB": ?>
+										<option value="more than"<?php echo ($requirement['operator'] == "more than" ? " selected" : "") ?> >more than</option>
+										<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<?php break;
+										case "Operating System Version": ?>
 										<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
 										<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-										<option value="greater than"<?php echo ($requirement['operator'] == "greater than" ? " selected" : "") ?><?php echo ($requirement['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than</option>
-										<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?><?php echo ($requirement['name'] != "Operating System Version" ? " disabled" : "") ?> >less than</option>
-										<option value="greater than or equal"<?php echo ($requirement['operator'] == "greater than or equal" ? " selected" : "") ?><?php echo ($requirement['name'] != "Operating System Version" ? " disabled" : "") ?> >greater than or equal</option>
-										<option value="less than or equal"<?php echo ($requirement['operator'] == "less than or equal" ? " selected" : "") ?><?php echo ($requirement['name'] != "Operating System Version" ? " disabled" : "") ?> >less than or equal</option>
+										<option value="greater than"<?php echo ($requirement['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
+										<option value="less than"<?php echo ($requirement['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+										<option value="greater than or equal"<?php echo ($requirement['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
+										<option value="less than or equal"<?php echo ($requirement['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
+										<?php default: ?>
+										<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
+										<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+										<?php } ?>
 									</select>
 								</td>
 								<td>
@@ -707,9 +744,26 @@ $(document).ready(function() {
 											<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 											<?php } ?>
 											<option value="Application Bundle ID">Application Bundle ID</option>
+											<option value="Application Title">Application Title</option>
 											<option value="Application Version">Application Version</option>
-											<option value="Platform">Platform</option>
+											<option value="Architecture Type">Architecture Type</option>
+											<option value="Boot Drive Available MB">Boot Drive Available MB</option>
+											<option value="Drive Capacity MB">Drive Capacity MB</option>
+											<option value="Make">Make</option>
+											<option value="Model">Model</option>
+											<option value="Model Identifier">Model Identifier</option>
+											<option value="Number of Processors">Number of Processors</option>
+											<option value="Operating System">Operating System</option>
+											<option value="Operating System Build">Operating System Build</option>
+											<option value="Operating System Name">Operating System Name</option>
 											<option value="Operating System Version">Operating System Version</option>
+											<option value="Optical Drive">Optical Drive</option>
+											<option value="Platform">Platform</option>
+											<option value="Processor Speed MHz">Processor Speed MHz</option>
+											<option value="Processor Type">Processor Type</option>
+											<option value="SMC Version">SMC Version</option>
+											<option value="Total Number of Cores">Total Number of Cores</option>
+											<option value="Total RAM MB">Total RAM MB</option>
 										</select>
 										<input type="hidden" name="rqmt_type[0]" id="rqmt_type[0]" value="recon" />
 										<input type="hidden" name="rqmt_operator[0]" id="rqmt_operator[0]" value="is" />

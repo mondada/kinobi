@@ -29,7 +29,6 @@ function showSuccess(element, icon = false) {
 function hideSuccess(element) {
 	element.parentElement.classList.remove("has-success");
 	var span = element.parentElement.getElementsByTagName("span");
-	console.log(span);
 	for (var i = 0; i < span.length; i++) {
 		if (span[i].classList.contains("form-control-feedback")) {
 			element.parentElement.removeChild(span[i]);
@@ -139,25 +138,44 @@ function validEaKeyid(element, labelId = false) {
 }
 
 function updateCriteria(element, operatorId, typeId, table, row_id) {
+	// Save Criteria
 	ajaxPost("patchCtl.php?table="+table+"&field=name&id="+row_id, "value="+element.value);
 	showSuccess(element);
+	// Update Operator
+	switch (element.value) {
+		case "Application Title":
+			var options = ["is", "is not", "has", "does not have"];
+			break;
+		case "Operating System Version":
+			var options = ["is", "is not", "like", "not like", "greater than", "less than", "greater than or equal", "less than or equal"];
+			break;
+		case "Boot Drive Available MB":
+		case "Drive Capacity MB":
+		case "Number of Processors":
+		case "Processor Speed MHz":
+		case "Total Number of Cores":
+		case "Total RAM MB":
+			var options = ["is", "is not", "more than", "less than"];
+			break;
+		default:
+			var options = ["is", "is not", "like", "not like"];
+	}
 	var operator = document.getElementById(operatorId);
-	var state = (element.value != "Operating System Version");
-	if (state == true && operator.value == "greater than"
-		|| state == true && operator.value == "less than"
-		|| state == true && operator.value == "greater than or equal"
-		|| state == true && operator.value == "less than or equal") {
-		operator.value = "is";
+	var current = operator.value;
+	while (operator.options.length) {
+		operator.remove(0);
+	}
+	for (i = 0; i < options.length; i++) {
+		var option = new Option(options[i], options[i]);
+		operator.options.add(option);
+	}
+	if (options.indexOf(current) >= 0) {
+		operator.value = current;
+	} else {
 		ajaxPost("patchCtl.php?table="+table+"&field=operator&id="+row_id, "value="+operator.value);
 		showWarning(operator);
 	}
-	var options = operator.getElementsByTagName("option");
-	for (var i = 0; i < options.length; i++) {
-		if (options[i].value == "greater than") { options[i].disabled = state; };
-		if (options[i].value == "less than") { options[i].disabled = state; };
-		if (options[i].value == "greater than or equal") { options[i].disabled = state; };
-		if (options[i].value == "less than or equal") { options[i].disabled = state; };
-	}
+	// Update Type
 	var type = document.getElementById(typeId);
 	if (extAttrKeys.indexOf(element.value) >= 0) {
 		if (type.value != "extensionAttribute") {
