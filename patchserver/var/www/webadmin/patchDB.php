@@ -33,7 +33,7 @@ if (isset($_POST["upload"]) && isset($_FILES["upload_file"]["name"])) {
 	if ($_FILES["upload_file"]["error"] > 0) {
 		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> ".$_FILES["upload_file"]["error"].".</div>";
 	} elseif ($_FILES["upload_file"]["type"] != "application/x-gzip") {
-		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> Invalid file type".$_FILES["upload_file"]["type"].".</div>";
+		$status_msg = "<div class=\"text-danger\" style=\"padding: 12px 0px;\"><span class=\"glyphicon glyphicon-exclamation-sign\"></span> Invalid file type '".$_FILES["upload_file"]["type"]."'.</div>";
 	} else {
 		// To Do: Add string replace to remove spaces in filename
 		$filename = basename($_FILES["upload_file"]["name"]);
