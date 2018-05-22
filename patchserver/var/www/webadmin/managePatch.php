@@ -182,9 +182,6 @@ if (!empty($patch_id)) {
 	$patch['enabled'] = ($patch['enabled'] == "1") ? "1" : "0";
 	$patch['error'] = array();
 
-	// Patch Select
-	$patches_select = $pdo->query('SELECT id, version FROM patches WHERE title_id = "'.$patch['title_id'].'" ORDER BY sort_order')->fetchAll(PDO::FETCH_ASSOC);
-
 	// Kill Applications
 	$kill_apps = $pdo->query('SELECT id, bundle_id, app_name FROM kill_apps WHERE patch_id = "'.$patch_id.'"')->fetchAll(PDO::FETCH_ASSOC);
 

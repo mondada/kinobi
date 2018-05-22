@@ -146,9 +146,6 @@ if (!empty($title_id)) {
 	$sw_title = $pdo->query('SELECT name, publisher, app_name, bundle_id, modified, current, name_id, enabled FROM titles WHERE id = "'.$title_id.'"')->fetch(PDO::FETCH_ASSOC);
 	$sw_title['error'] = array();
 
-	// Software Title Select
-	$sw_titles_select = $pdo->query('SELECT id, name FROM titles ORDER BY name')->fetchAll(PDO::FETCH_ASSOC);
-
 	// Software Title Name IDs
 	$sw_title_name_ids = $pdo->query('SELECT name_id FROM titles WHERE id <> "'.$title_id.'" ORDER BY name_id')->fetchAll(PDO::FETCH_COLUMN);
 
