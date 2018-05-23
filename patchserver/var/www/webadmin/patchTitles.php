@@ -93,8 +93,8 @@ if (isset($pdo)) {
 
 <script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
-<script type="text/javascript" src="scripts/dataTables/dataTables.buttons.min.js"></script>
-<script type="text/javascript" src="scripts/dataTables/buttons.bootstrap.min.js"></script>
+<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {

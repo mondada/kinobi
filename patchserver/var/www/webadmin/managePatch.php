@@ -322,9 +322,9 @@ function enablePatch() {
 
 <link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 
-<script type="text/javascript" src="scripts/datetimepicker/moment.js"></script>
-<script type="text/javascript" src="scripts/datetimepicker/transition.js"></script>
-<script type="text/javascript" src="scripts/datetimepicker/collapse.js"></script>
+<script type="text/javascript" src="scripts/moment/moment.js"></script>
+<script type="text/javascript" src="scripts/bootstrap/transition.js"></script>
+<script type="text/javascript" src="scripts/bootstrap/collapse.js"></script>
 <script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
 <script type="text/javascript">
