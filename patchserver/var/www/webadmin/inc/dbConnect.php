@@ -14,7 +14,8 @@ try {
 		"modified" integer NOT NULL DEFAULT(-1),
 		"current" text NOT NULL,
 		"name_id" text NOT NULL,
-		"enabled" integer NOT NULL DEFAULT(0)
+		"enabled" integer NOT NULL DEFAULT(0),
+		"source_id" integer NOT NULL DEFAULT(0)
 	)';
 	$pdo->exec($sql);
 
