@@ -37,15 +37,28 @@ if (!empty($title_id)) {
 
 	// Save Extension Attribute
 	if (isset($_POST['save_ea'])) {
-		$ea_id = $_POST['save_ea'][$ea_id];
+		$ea_id = implode($_POST['save_ea']);
 		$ea_key_id = $_POST['ea_key_id'][$ea_id];
 		$ea_script = $_POST['ea_script'][$ea_id];
 		$ea_name = $_POST['ea_name'][$ea_id];
+		$stmt = $pdo->prepare('SELECT key_id FROM ext_attrs WHERE id = ?');
+		$stmt->execute([$ea_id]);
+		$old_key_id = $stmt->fetchColumn();
+		$pdo->beginTransaction();
+		$stmt = $pdo->prepare('UPDATE requirements SET name = ? WHERE name = ?');
+		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt = $pdo->prepare('UPDATE capabilities SET name = ? WHERE name = ?');
+		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt = $pdo->prepare('UPDATE dependencies SET name = ? WHERE name = ?');
+		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt = $pdo->prepare('UPDATE criteria SET name = ? WHERE name = ?');
+		$stmt->execute([$ea_key_id, $old_key_id]);
 		$stmt = $pdo->prepare('UPDATE ext_attrs SET key_id = ?, script = ?, name = ? WHERE id = ?');
 		$stmt->execute([$ea_key_id, $ea_script, $ea_name, $ea_id]);
 		if ($stmt->errorCode() != '00000') {
 			echo "<div class=\"alert alert-danger\"><strong>ERROR:</strong> ".$stmt->errorInfo()[2]."</div>";
 		}
+		$pdo->commit();
 	}
 
 	// Delete Extension Attribute
