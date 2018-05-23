@@ -881,10 +881,10 @@ $(document).ready(function() {
 									<h5 id="patch_released_label[0]"><strong>Release Date</strong> <small>Date that this patch version was released.</small></h5>
 									<div class="form-group">
 										<div class="input-group date" id="patch_datepicker">
-											<span class="input-group-addon input-sm">
+											<span class="input-group-addon input-sm" style="color: #555; background-color: #eee; border: 1px solid #ccc; border-right: 0;">
 												<span class="glyphicon glyphicon-calendar"></span>
 											</span>
-											<input type="text" name="patch_released[0]" id="patch_released[0]" class="form-control input-sm" onFocus="validDate(this, 'patch_released_label[0]');" onBlur="validDate(this, 'patch_released_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
+											<input type="text" name="patch_released[0]" id="patch_released[0]" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'patch_released_label[0]');" onKeyUp="validDate(this, 'patch_released_label[0]');" onBlur="validDate(this, 'patch_released_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
 										</div>
 									</div>
 

@@ -383,10 +383,10 @@ $(function () {
 					<h5 id="released_label"><strong>Release Date</strong> <small>Date that this patch version was released.</small></h5>
 					<div class="form-group">
 						<div class="input-group has-feedback date" id="released" style="max-width: 449px;">
-							<span class="input-group-addon input-sm">
+							<span class="input-group-addon input-sm" style="color: #555; background-color: #eee; border: 1px solid #ccc; border-right: 0;">
 								<span class="glyphicon glyphicon-calendar"></span>
 							</span>
-							<input type="text" class="form-control input-sm" onFocus="validDate(this, 'released_label');" onBlur="validDate(this, 'released_label'); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" />
+							<input type="text" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'released_label');" onKeyUp="validDate(this, 'released_label');" onBlur="validDate(this, 'released_label'); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" />
 						</div>
 					</div>
 					<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
