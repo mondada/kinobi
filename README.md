@@ -1,49 +1,19 @@
-### About
+![Kinobi logo](https://github.com/mondada/kinobi/blob/development/docs/images/kinobi.png)
 
-Kinobi is an External Patch Definition server for Jamf Pro.
-It provides a simple interface for creating and editing Patch Definitions, as well as the appropriate endpoints for Jamf Pro to connect to.
+# Kinobi
 
+Kinobi is an external patch server (or *patch source*) for Jamf Pro. It provides a simple interface for creating and editing patch definitions, as well as the appropriate endpoints for Jamf Pro to connect to.
 
-#### Requirements
+![Kinobi screenshot](https://github.com/mondada/kinobi/blob/development/docs/images/kinobi_screenshot.png)
 
-NetSUS 4.1.0 or later
+## Documentation
 
+For full documentation and installation guide, please see the [Kinobi wiki](https://github.com/mondada/kinobi/wiki).
 
-Latest OVA
+## Requirements
+Kinobi is designed to run on [NetSUS 4.1.0 or later](https://github.com/jamf/NetSUS). Accordingly, Kinobi shares the [same system requirements](https://github.com/jamf/NetSUS#requirements) as NetSUS.
 
-https://www.dropbox.com/s/selvovkm0mwrqli/NetSUSLP_4.2.3.ova
+## Getting Help
+Discussion regarding Kinobi can be found on the `#kinobi-dev` channel on the [MacAdmins](https://macadmins.herokuapp.com) Slack group.
 
-
-Latest Installer
-
-https://www.dropbox.com/s/e7drtcjc3b47525/NetSUSLPInstaller_4.2.3.run
-
-
-### Downloading
-
-Ubuntu
-
-<code>wget https://www.dropbox.com/s/oqe13l73fqkme9g/PatchServerInstaller_1.0.run</code>
-
-
-CentOS / RHEL
-
-<code>curl -L -O https://www.dropbox.com/s/oqe13l73fqkme9g/PatchServerInstaller_1.0.run</code>
-
-
-### Installation
-
-<code>chmod +x PatchServerInstaller_1.0.run</code>
-
-<code>sudo ./PatchServerInstaller_1.0.run</code>
-
-<code>rm -f PatchServerInstaller_1.0.run</code>
-
-
-### Connecting Jamf Pro to Kinobi Server
-
-To connect Jamf Pro to an external patch source, navigate to Settings > Computer Management > Patch Management
-
-Add <code>/v1.php</code> as the hostname in Jamf Pro
-
-If enabling SSL ensure the Jamf Pro Server will trust the NetSUS SSL certificate.
+Issues can be filed [directly on GitHub](https://github.com/mondada/kinobi/issues), but **please ensure the issue has not already been reported** before doing so.

@@ -2,127 +2,121 @@ function enableButton(buttonId, enable) {
 	document.getElementById(buttonId).disabled = !enable;
 }
 
-function showError(element, icon = false) {
+function showError(element, labelId = false) {
 	element.parentElement.classList.add("has-error");
-	if (icon) {
-		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-remove form-control-feedback";
-		span.style.right = "15px";
-		element.parentElement.appendChild(span);
+	if (labelId) {
+		document.getElementById(labelId).classList.add("text-danger");
 	}
 }
 
-function hideError(element, icon = false) {
+function hideError(element, labelId = false) {
 	element.parentElement.classList.remove("has-error");
-	if (icon) {
-		var span = element.parentElement.getElementsByTagName("span");
-		for (var i = 0; i < span.length; i++) {
+	if (labelId) {
+		document.getElementById(labelId).classList.remove("text-danger");
+	}
+}
+
+function showSuccess(element, offset = false) {
+	var span = document.createElement("span");
+	span.className = "glyphicon glyphicon-ok form-control-feedback text-success";
+	if (offset) {
+		span.style.right = offset + "px";
+	}
+	element.parentElement.appendChild(span);
+}
+
+function hideSuccess(element) {
+	var span = element.parentElement.getElementsByTagName("span");
+	for (var i = 0; i < span.length; i++) {
+		if (span[i].classList.contains("form-control-feedback")) {
 			element.parentElement.removeChild(span[i]);
 		}
 	}
 }
 
-function showSuccess(element, icon = false) {
-	element.parentElement.classList.add("has-success");
-	if (icon) {
-		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-ok form-control-feedback";
-		span.style.right = "15px";
-		element.parentElement.appendChild(span);
+function showWarning(element, offset = false) {
+	var span = document.createElement("span");
+	span.className = "glyphicon glyphicon-exclamation-sign form-control-feedback text-muted";
+	if (offset) {
+		span.style.right = offset + "px";
 	}
+	element.parentElement.appendChild(span);
 }
 
-function hideSuccess(element, icon = false) {
-	element.parentElement.classList.remove("has-success");
-	if (icon) {
-		var span = element.parentElement.getElementsByTagName("span");
-		for (var i = 0; i < span.length; i++) {
+function hideWarning(element) {
+	var span = element.parentElement.getElementsByTagName("span");
+	for (var i = 0; i < span.length; i++) {
+		if (span[i].classList.contains("form-control-feedback")) {
 			element.parentElement.removeChild(span[i]);
 		}
 	}
 }
 
-function showWarning(element, icon = false) {
-	element.parentElement.classList.add("has-warning");
-	if (icon) {
-		var span = document.createElement("span");
-		span.className = "glyphicon glyphicon-warning-sign form-control-feedback";
-		span.style.right = "15px";
-		element.parentElement.appendChild(span);
-	}
-}
-
-function hideWarning(element, icon = false) {
-	element.parentElement.classList.remove("has-warning");
-	if (icon) {
-		var span = element.parentElement.getElementsByTagName("span");
-		for (var i = 0; i < span.length; i++) {
-			element.parentElement.removeChild(span[i]);
-		}
-	}
-}
-
-function validString(element, icon = false) {
-	hideSuccess(element, icon);
+function validString(element, labelId = false) {
+	hideSuccess(element);
 	if (/^.{1,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
-function updateString(element, table, field, row_id, icon = false) {
+function updateString(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (/^.{1,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
-function validOrEmptyString(element, icon = false) {
-	hideSuccess(element, icon);
+function validOrEmptyString(element, labelId = false) {
+	hideSuccess(element);
 	if (/^.{0,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
-function updateOrEmptyString(element, table, field, row_id, icon = false) {
+function updateOrEmptyString(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (/^.{0,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
-function validInteger(element, icon = false) {
-	hideSuccess(element, icon);
+function validInteger(element, labelId = false) {
+	hideSuccess(element);
 	if (element.value != "" && element.value == parseInt(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
-function updateInteger(element, table, field, row_id, icon = false) {
+function updateInteger(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (element.value != "" && element.value == parseInt(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
-function validDate(element) {
+function validDate(element, labelId = false) {
 	hideSuccess(element);
 	if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(element.value)) {
-		hideError(element);
+		hideError(element, labelId);
 	} else {
-		showError(element);
+		showError(element, labelId);
 	}
 }
 
-function updateDate(element, table, field, row_id) {
+function updateDate(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(element.value)) {
 		ajaxPost("patchCtl.php?patch_id="+row_id, "patch_released="+element.value);
-		showSuccess(element);
+		showSuccess(element, offset);
 	}
 }
 
@@ -130,51 +124,73 @@ function updateTimestamp(row_id) {
 	ajaxPost("patchCtl.php?title_id="+row_id, "title_modified=true");
 }
  
-function validNameId(element, icon = false) {
-	hideSuccess(element, icon);
+function validNameId(element, labelId = false) {
+	hideSuccess(element);
 	if (existingIds.indexOf(element.value) == -1 && /^([A-Za-z0-9.-]){1,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
-function updateNameId(element, table, field, row_id, icon = false) {
+function updateNameId(element, table, field, row_id, offset = false) {
+	hideWarning(element);
 	if (existingIds.indexOf(element.value) == -1 && /^([A-Za-z0-9.-]){1,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
-		showSuccess(element, icon);
+		showSuccess(element, offset);
 	}
 }
 
-function validEaKeyid(element, icon = false) {
-	hideSuccess(element, icon);
+function validEaKeyid(element, labelId = false) {
+	hideSuccess(element);
 	if (existingKeys.indexOf(element.value) == -1 && /^.{1,255}$/.test(element.value)) {
-		hideError(element, icon);
+		hideError(element, labelId);
 	} else {
-		showError(element, icon);
+		showError(element, labelId);
 	}
 }
 
-function updateCriteria(element, operatorId, typeId, table, row_id) {
+function updateCriteria(element, operatorId, typeId, table, row_id, offset = false) {
+	// Save Criteria
+	hideWarning(element);
 	ajaxPost("patchCtl.php?table="+table+"&field=name&id="+row_id, "value="+element.value);
-	showSuccess(element);
+	showSuccess(element, offset);
+	// Update Operator
+	switch (element.value) {
+		case "Application Title":
+			var options = ["is", "is not", "has", "does not have"];
+			break;
+		case "Operating System Version":
+			var options = ["is", "is not", "like", "not like", "greater than", "less than", "greater than or equal", "less than or equal"];
+			break;
+		case "Boot Drive Available MB":
+		case "Drive Capacity MB":
+		case "Number of Processors":
+		case "Processor Speed MHz":
+		case "Total Number of Cores":
+		case "Total RAM MB":
+			var options = ["is", "is not", "more than", "less than"];
+			break;
+		default:
+			var options = ["is", "is not", "like", "not like"];
+	}
 	var operator = document.getElementById(operatorId);
-	var state = (element.value != "Operating System Version");
-	if (state == true && operator.value == "greater than"
-		|| state == true && operator.value == "less than"
-		|| state == true && operator.value == "greater than or equal"
-		|| state == true && operator.value == "less than or equal") {
-		operator.value = "is";
+	var current = operator.value;
+	while (operator.options.length) {
+		operator.remove(0);
+	}
+	for (i = 0; i < options.length; i++) {
+		var option = new Option(options[i], options[i]);
+		operator.options.add(option);
+	}
+	if (options.indexOf(current) >= 0) {
+		operator.value = current;
+	} else {
+		hideSuccess(operator);
 		ajaxPost("patchCtl.php?table="+table+"&field=operator&id="+row_id, "value="+operator.value);
-		showWarning(operator);
+		showWarning(operator, offset);
 	}
-	var options = operator.getElementsByTagName("option");
-	for (var i = 0; i < options.length; i++) {
-		if (options[i].value == "greater than") { options[i].disabled = state; };
-		if (options[i].value == "less than") { options[i].disabled = state; };
-		if (options[i].value == "greater than or equal") { options[i].disabled = state; };
-		if (options[i].value == "less than or equal") { options[i].disabled = state; };
-	}
+	// Update Type
 	var type = document.getElementById(typeId);
 	if (extAttrKeys.indexOf(element.value) >= 0) {
 		if (type.value != "extensionAttribute") {
