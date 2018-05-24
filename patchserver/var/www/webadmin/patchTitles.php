@@ -196,7 +196,7 @@ $(document).ready(function() {
 								<input type="text" name="current" id="current" class="form-control input-sm" onKeyUp="validString(this, 'current_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validString(this, 'current_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" />
 							</div>
 
-							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on the external source.<!-- <br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source. --></small></h5>
+							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on this external source.<br><strong>Note:</strong> The <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</small></h5>
 							<div class="form-group">
 								<input type="text" name="name_id" id="name_id" class="form-control input-sm" onKeyUp="validNameId(this, 'name_id_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" onBlur="validNameId(this, 'name_id_label'); validTitle('create_title', 'name', 'publisher', 'app_name', 'bundle_id', 'current', 'name_id');" placeholder="[Required]" />
 							</div>

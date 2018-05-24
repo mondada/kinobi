@@ -362,7 +362,7 @@ $(function () {
 
 				<div class="tab-pane active fade in" id="patch-tab">
 
-					<div class="description" style="padding: 8px 0px;">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</div>
+					<div class="description" style="padding: 8px 0px;">Software title version information; one patch is one software title version.</div>
 
 					<div id="patch-disabled-msg" class="hidden" style="padding-bottom: 8px;">
 						<div class="text-muted" style="padding-bottom: 4px;">This patch is disabled.</div>
@@ -389,18 +389,18 @@ $(function () {
 							<input type="text" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'released_label');" onKeyUp="validDate(this, 'released_label');" onBlur="validDate(this, 'released_label'); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" />
 						</div>
 					</div>
-					<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
+					<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">Yes</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">No</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
 						<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
 							<option value="1" <?php echo ($patch['standalone'] == "1" ? " selected" : "") ?> >Yes</option>
 							<option value="0" <?php echo ($patch['standalone'] == "0" ? " selected" : "") ?> >No</option>
 						</select>
 					</div>
-					<h5 id="min_os_label"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes. See the capabilities array for patch policy implementation.</small></h5>
+					<h5 id="min_os_label"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
 						<input type="text" class="form-control input-sm" onFocus="validString(this, 'min_os_label');" onKeyUp="validString(this, 'min_os_label');" onChange="updateString(this, 'patches', 'min_os', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['min_os']; ?>" />
 					</div>
-					<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">true</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">false</span> specifies that the computer will not be restarted.</small></h5>
+					<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">Yes</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">No</span> specifies that the computer will not be restarted.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
 							<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
 								<option value="0" <?php echo ($patch['reboot'] == "0" ? " selected" : "") ?> >No</option>
@@ -455,10 +455,10 @@ $(function () {
 						<thead>
 							<tr>
 								<td colspan="7">
-									<h5><strong>Criteria</strong> <small>Criteria used to determine which computers in your environment have this patch version installed.<!-- <br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered. --></small></h5>
+									<h5><strong>Criteria</strong> <small>Criteria used to determine which computers in your environment have this patch version installed.<br>The following values are the same as a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria must be ordered in the same way that smart group criteria is ordered.</small></h5>
 									<?php if (sizeof($component['criteria']) == 0) { ?>
 									<div style="padding-top: 8px;">
-										<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span>At least one criteria is required for the component to be valid.</div>
+										<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one criteria is required for the component to be valid.</div>
 									</div>
 									<?php } ?>
 								</td>
@@ -639,7 +639,7 @@ $(function () {
 								</div>
 								<div class="modal-body">
 
-									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 									<div class="form-group">
 										<input type="hidden" name="new_criteria_order[<?php echo $component['id']; ?>]" id="new_criteria_order[<?php echo $component['id']; ?>]" value="<?php echo sizeof($component['criteria']); ?>" />
 										<select id="new_criteria_name[<?php echo $component['id']; ?>]" name="new_criteria_name[<?php echo $component['id']; ?>]" class="form-control input-sm" onChange="selectCriteria(this, 'new_criteria_type[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]'); validCriteria('create_criteria[<?php echo $component['id']; ?>]', 'new_criteria_order[<?php echo $component['id']; ?>]', 'new_criteria_name[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]', 'new_criteria_type[<?php echo $component['id']; ?>]');" >
@@ -706,7 +706,7 @@ $(function () {
 
 				<div class="tab-pane fade in" id="dependencies-tab">
 
-					<div class="description" style="padding: 8px 0px;">Not currently used by Jamf Pro.<br><strong>Note:</strong> Cannot be a null value.</div>
+					<div class="description" style="padding: 8px 0px;">Not currently used by Jamf Pro.</div>
 
 					<table class="table table-striped">
 						<thead>
@@ -822,7 +822,7 @@ $(function () {
 								</div>
 								<div class="modal-body">
 
-									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 									<div class="form-group">
 										<input type="hidden" name="dep_order[0]" id="dep_order[0]" value="<?php echo sizeof($dependencies); ?>" />
 										<select id="dep_name[0]" name="dep_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'dep_type[0]', 'dep_operator[0]'); validCriteria('create_dep', 'dep_order[0]', 'dep_name[0]', 'dep_operator[0]', 'dep_type[0]');" >
@@ -888,7 +888,7 @@ $(function () {
 
 				<div class="tab-pane fade in" id="capabilities-tab">
 
-					<div class="description" style="padding: 8px 0px;">Criteria used to determine which computers in your environment have the ability to install and run this patch.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</div>
+					<div class="description" style="padding: 8px 0px;">Criteria used to determine which computers in your environment have the ability to install and run this patch.<br>The following values are the same as a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria must be ordered in the same way that smart group criteria is ordered.</div>
 
 					<div id="capabilities-alert-msg" style="padding-bottom: 8px;" class="hidden">
 						<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one capability is required for the definition to be valid.</div>
@@ -1008,7 +1008,7 @@ $(function () {
 								</div>
 								<div class="modal-body">
 
-									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 									<div class="form-group">
 										<input type="hidden" name="cap_order[0]" id="cap_order[0]" value="<?php echo sizeof($capabilities); ?>" />
 										<select id="cap_name[0]" name="cap_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'cap_type[0]', 'cap_operator[0]'); validCriteria('create_cap', 'cap_order[0]', 'cap_name[0]', 'cap_operator[0]', 'cap_type[0]');" >
@@ -1119,7 +1119,7 @@ $(function () {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h3 class="modal-title" id="modalLabel">New Application</h3>
+									<h3 class="modal-title" id="modalLabel">Kill Application</h3>
 								</div>
 								<div class="modal-body">
 

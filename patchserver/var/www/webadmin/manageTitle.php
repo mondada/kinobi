@@ -443,7 +443,7 @@ $(document).ready(function() {
 
 				<div class="tab-pane active fade in" id="title-tab">
 
-					<div class="description" style="padding: 8px 0px;">The information in the Software Title object must match the information in the Software Title Summary object that shares <span style="font-family:monospace;">id</span>.<br>None of the following values can be null. In addition, the <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</div>
+					<div class="description" style="padding: 8px 0px;">The information in the Software Title also provides the information for the Software Title Summary object.</div>
 
 					<div id="title-disabled-msg" class="hidden" style="padding-bottom: 8px;">
 						<div class="text-muted" style="padding-bottom: 4px;">This software title is disabled.</div>
@@ -474,7 +474,7 @@ $(document).ready(function() {
 					<div class="form-group has-feedback" style="max-width: 449px;">
 						<input type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['current']; ?>" />
 					</div>
-					<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on the external source.<!-- <br><strong>Note:</strong> An <span style="font-family:monospace;">id</span> cannot be duplicated on an individual external source. --></small></h5>
+					<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on this external source.<br><strong>Note:</strong> The <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 449px;">
 						<input type="text" class="form-control input-sm" onFocus="validNameId(this, 'name_id_label');" onKeyUp="validNameId(this, 'name_id_label');" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['name_id']; ?>" />
 					</div>
@@ -515,12 +515,12 @@ $(document).ready(function() {
 										<input type="text" name="ea_name[0]" id="ea_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'ea_name_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" onBlur="validString(this, 'ea_name_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" placeholder="[Required]" />
 									</div>
 
-									<h5 id="ea_key_id_label[0]"><strong>Key</strong> <small>Identifier unique within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<!-- <br><strong>Note:</strong> Duplicate keys are not allowed. --></small></h5>
+									<h5 id="ea_key_id_label[0]"><strong>Key</strong> <small>Unique identifier within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<!-- <br><strong>Note:</strong> Duplicate keys are not allowed. --></small></h5>
 									<div class="form-group" style="max-width: 452px;">
 										<input type="text" name="ea_key_id[0]" id="ea_key_id[0]" class="form-control input-sm" onKeyUp="validEaKeyid(this, 'ea_key_id_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" onBlur="validEaKeyid(this, 'ea_key_id_label[0]'); validEa('create_ea', 'ea_name[0]', 'ea_key_id[0]');" placeholder="[Required]" />
 									</div>
 
-									<h5><strong>Script</strong> <small>Standard extension attribute script which must return a <span style="font-family:monospace;">&lt;result&gt;</span>.</small></h5>
+									<h5><strong>Script</strong> <small>Standard extension attribute script which must return an XML <span style="font-family:monospace;">&lt;result&gt;</span>.</small></h5>
 									<input type="hidden" name="ea_script[0]" id="ea_script[0]" value="">
 									<div id="ea_script0" class="script-editor" tabindex="-1"></div>
 									<script>
@@ -635,7 +635,7 @@ $(document).ready(function() {
 
 				<div class="tab-pane fade in" id="rqmts-tab">
 
-					<div class="description" style="padding: 8px 0px;">Criteria used to determine which computers in your environment have this software title installed.<br>The following values correspond with a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria objects in an array must be ordered in the same way that smart group criteria is ordered.</div>
+					<div class="description" style="padding: 8px 0px;">Criteria used to determine which computers in your environment have this software title installed.<br>The following values are the same as a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria must be ordered in the same way that smart group criteria is ordered.</div>
 
 					<div id="rqmts-alert-msg" style="padding-bottom: 8px;" class="hidden">
 						<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one requirement is required for the definition to be valid.</div>
@@ -754,7 +754,7 @@ $(document).ready(function() {
 								</div>
 								<div class="modal-body">
 
-									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.<br>When type is <span style="font-family:monospace;">extensionAttribute</span>, the name value is the key defined in the extensionAttribute object.</small></h5>
+									<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 									<div class="form-group">
 										<input type="hidden" name="rqmt_order[0]" id="rqmt_order[0]" value="<?php echo sizeof($requirements); ?>" />
 										<select id="rqmt_name[0]" name="rqmt_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'rqmt_type[0]', 'rqmt_operator[0]'); validCriteria('create_rqmt', 'rqmt_order[0]', 'rqmt_name[0]', 'rqmt_operator[0]', 'rqmt_type[0]');" >
@@ -888,18 +888,18 @@ $(document).ready(function() {
 										</div>
 									</div>
 
-									<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">true</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">false</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
+									<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">Yes</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">No</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 									<select id="patch_standalone[0]" name="patch_standalone[0]" class="form-control input-sm">
 										<option value="1">Yes</option>
 										<option value="0">No</option>
 									</select>
 
-									<h5 id="patch_min_os_label[0]"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes. See the capabilities array for patch policy implementation.</small></h5>
+									<h5 id="patch_min_os_label[0]"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 									<div class="form-group">
 										<input type="text" name="patch_min_os[0]" id="patch_min_os[0]" class="form-control input-sm" onKeyUp="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
 									</div>
 
-									<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">true</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">false</span> specifies that the computer will not be restarted.</small></h5>
+									<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">Yes</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">No</span> specifies that the computer will not be restarted.</small></h5>
 									<select id="patch_reboot[0]" name="patch_reboot[0]" class="form-control input-sm">
 										<option value="0">No</option>
 										<option value="1">Yes</option>

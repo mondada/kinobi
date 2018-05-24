@@ -192,7 +192,7 @@ $(document).ready(function() {
 					<?php echo (isset($status_msg) ? $status_msg : ""); ?>
 
 					<h5><strong>Backup</strong></h5>
-					<div class="description" style="padding-bottom: 4px;">Click the backup button to create a gzipped backup file of the SQLite database.</div>
+					<div class="description" style="padding-bottom: 4px;">Perform a manual backup of the database.</div>
 					<button type="submit" name="backup" id="backup" class="btn btn-primary btn-sm" value="backup">Backup</button>
 
 					<br>
@@ -251,11 +251,12 @@ $(document).ready(function() {
 								</div>
 								<div class="modal-body">
 
-									<h5>Archive <small>Upload a backup archive(gz) file to add to your list of available backups.</small></h5>
+									<h5>Archive <small>Upload a backup archive file (gzipped SQLite database) to add to the list of available backups.</small></h5>
 									<input type="file" name="upload_file" id="upload_file" class="form-control input-sm" onChange="document.getElementById('upload').disabled = this.value == '';" >
 
 								</div>
 								<div class="modal-footer">
+									<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
 									<button type="submit" name="upload" id="upload" class="btn btn-primary btn-sm" disabled >Upload</button>
 								</div>
 							</div>
@@ -267,7 +268,7 @@ $(document).ready(function() {
 				<div class="tab-pane fade in" id="schedule-tab">
 
 					<h5><strong>Schedule</strong></h5>
-					<div class="description" style="padding-bottom: 8px;">Select the days of the week you would like your backup to run.<br><strong>Note:</strong> Backups will occur at 12:00 AM on the specified days.</div>
+					<div class="description" style="padding-bottom: 8px;">Days of the week for an automatic backup to run.<br><strong>Note:</strong> Backups will occur at 12:00 AM (this server's local time) on the specified days.</div>
 
 					<div class="checkbox checkbox-primary checkbox-inline">
 						<input name="schedule[0]" id="schedule[0]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="0" <?php echo (in_array(0, $scheduled) ? "checked" : ""); ?>>
@@ -301,7 +302,7 @@ $(document).ready(function() {
 					<br>
 					<br>
 
-					<h5 id="retention_label"><strong>Retention</strong> <small>Enter the number of backup archives that you would like to remain on the server.</small></h5>
+					<h5 id="retention_label"><strong>Retention</strong> <small>Number of backup archives to be retained on the server.</small></h5>
 					<div class="form-group has-feedback" style="max-width: 100px;">
 						<input type="text" class="form-control input-sm" onFocus="validRetention(this, 'retention_label');" onKeyUp="validRetention(this, 'retention_label');" onChange="updateRetention(this);" placeholder="[1 - 30]" value="<?php echo $retention; ?>" />
 					</div>
