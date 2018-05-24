@@ -118,7 +118,7 @@ if (sizeof($request) > 0) {
 } 
 
 if (is_array($response)) {
-	header("Content-Type: application/json; charset=UTF-8");
+	header("Content-Type: application/json");
 	print_r(json_encode($response));
 } else {
 	header($_SERVER['SERVER_PROTOCOL']." 404 Not Found");
