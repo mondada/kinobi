@@ -956,7 +956,7 @@ $(document).ready(function() {
 		<hr>
 		<br>
 
-		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='patchDB.php'">
+		<input type="button" id="settings-button" name="action" class="btn btn-sm btn-default" value="Settings" onclick="document.location.href='patchSettings.php'">
 
 	</div><!-- /.col -->
 </div><!-- /.row -->

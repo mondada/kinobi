@@ -56,12 +56,12 @@ if ! grep -q "patchTitles.php" /var/www/html/webadmin/inc/header.php; then
                 <li class="<?php if ($pageURI == "patchTitles.php") { echo "active"; } ?>"><a href="patchTitles.php"><span class="glyphicon glyphicon-refresh marg-right"></span>Patch Definitions</a></li>' /var/www/html/webadmin/inc/header.php
 fi
 # Insert database control in settings.php
-if ! grep -q "patchDB.php" /var/www/html/webadmin/settings.php; then
+if ! grep -q "patchSettings.php" /var/www/html/webadmin/settings.php; then
 	sed -i 's:<strong>Shares</strong>:<strong>Services</strong>:g' /var/www/html/webadmin/settings.php
 	sed -i '/<a href="AFP.php">/i\
-				<a href="patchDB.php">\
-					<p><img src="images/settings/DataBaseStatus.png" alt="Database"></p>\
-					<p>Database</p>\
+				<a href="patchSettings.php">\
+					<p><img src="images/settings/PatchManagement.png" alt="Patch"></p>\
+					<p>Patch</p>\
 				</a>\
 			</div>\
 			<!-- /Column -->\

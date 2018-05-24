@@ -4,7 +4,7 @@ include "inc/config.php";
 include "inc/auth.php";
 include "inc/functions.php";
 
-$title = "Database";
+$title = "Patch";
 
 include "inc/header.php";
 
@@ -173,12 +173,12 @@ $(document).ready(function() {
 </script>
 
 <div class="description"><a href="settings.php">Settings</a> <span class="glyphicon glyphicon-chevron-right"></span></div>
-<h2>Database</h2>
+<h2>Patch</h2>
 
 <div class="row">
 	<div class="col-sm-12 col-md-9"> 
 
-		<form action="patchDB.php" method="post" name="Database" id="Database" enctype="multipart/form-data">
+		<form action="patchSettings.php" method="post" name="Database" id="Database" enctype="multipart/form-data">
 
 			<ul class="nav nav-tabs nav-justified" id="top-tabs">
 				<li class="active"><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab">Backup / Restore</a></li>
