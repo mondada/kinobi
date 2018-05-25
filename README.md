@@ -1,10 +1,14 @@
-![Kinobi logo](https://github.com/mondada/kinobi/blob/development/docs/images/kinobi.png)
+![Kinobi logo](https://github.com/mondada/kinobi/blob/master/docs/images/kinobi.png)
 
 # Kinobi
 
 Kinobi is an external patch server (or *patch source*) for Jamf Pro. It provides a simple interface for creating and editing patch definitions, as well as the appropriate endpoints for Jamf Pro to connect to.
 
-![Kinobi screenshot](https://github.com/mondada/kinobi/blob/development/docs/images/kinobi_screenshot.png)
+![Kinobi screenshot](https://github.com/mondada/kinobi/blob/master/docs/images/kinobi_screenshot.png)
+
+## Downloading
+
+The latest release of Kinobi is available as a **.run** package via the [Releases](https://github.com/mondada/kinobi/releases) page.
 
 ## Documentation
 
