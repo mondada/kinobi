@@ -843,10 +843,14 @@ $(document).ready(function() {
 							<?php foreach ($patches as $patch) { ?>
 							<tr>
 								<td>
+									<?php if (sizeof($patch['error']) == 0) { ?>
 									<div class="checkbox checkbox-primary">
-										<input type="checkbox" class="styled" name="enable_patch" id="enable_patch" value="<?php echo $patch['id']; ?>" onChange="togglePatch(this); updateTimestamp(<?php echo $title_id; ?>);" <?php echo (sizeof($patch['error']) > 0) ? "disabled " : ""; ?><?php echo ($patch['enabled'] == "1" && sizeof($patch['error']) == 0) ? "checked " : ""; ?>/>
+										<input type="checkbox" class="styled" name="enable_patch" id="enable_patch" value="<?php echo $patch['id']; ?>" onChange="togglePatch(this); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($patch['enabled'] == "1") ? "checked" : ""; ?>/>
 										<label/>
 									</div>
+									<?php } else { ?>
+									<div style="padding-left: 16px; padding-top: 2px;"><a href="managePatch.php?id=<?php echo $patch['id']; ?>"><span class="glyphicon glyphicon-exclamation-sign text-danger" style="font-size: 17px;"></span></a></div>
+									<?php } ?>
 								</td>
 								<td><input type="hidden" name="patch_order[<?php echo $patch['id']; ?>]" value="<?php echo $patch['sort_order']; ?>"/><?php echo $patch['sort_order']; ?></td>
 								<td nowrap><a href="managePatch.php?id=<?php echo $patch['id']; ?>"><?php echo $patch['version']; ?></a></td>
