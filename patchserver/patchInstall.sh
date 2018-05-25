@@ -26,7 +26,7 @@ if [[ $(which apt-get 2>&-) != "" ]]; then
 	log "Updating package lists..."
 	apt-get -q update >> $logFile
 	apt_install php5-sqlite
-	apt_install php-sqlite
+	apt_install php-sqlite3
 	apt_install libxml-xpath-perl
 	www_user=www-data
 	www_service=apache2
