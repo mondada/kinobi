@@ -148,10 +148,14 @@ $(document).ready(function() {
 					<?php foreach ($sw_titles as $sw_title) { ?>
 					<tr>
 						<td>
+							<?php if (sizeof($sw_title['error']) == 0) { ?>
 							<div class="checkbox checkbox-primary">
-								<input type="checkbox" class="styled" name="enable_title" id="enable_title" value="<?php echo $sw_title['id']; ?>" onChange="javascript:ajaxPost('patchCtl.php?title_id='+this.value, 'title_enabled='+this.checked);" <?php echo (sizeof($sw_title['error']) > 0) ? "disabled " : ""; ?><?php echo ($sw_title['enabled'] == "1" && sizeof($sw_title['error']) == 0) ? "checked " : ""; ?>/>
+								<input type="checkbox" class="styled" name="enable_title" id="enable_title" value="<?php echo $sw_title['id']; ?>" onChange="javascript:ajaxPost('patchCtl.php?title_id='+this.value, 'title_enabled='+this.checked);" <?php echo ($sw_title['enabled'] == "1") ? "checked " : ""; ?>/>
 								<label/>
 							</div>
+							<?php } else { ?>
+							<div style="padding-left: 16px; padding-top: 2px;"><a href="manageTitle.php?id=<?php echo $sw_title['id']; ?>"><span class="glyphicon glyphicon-exclamation-sign text-danger" style="font-size: 17px;"></span></a></div>
+							<?php } ?>
 						</td>
 						<td nowrap><a href="manageTitle.php?id=<?php echo $sw_title['id']; ?>"><?php echo $sw_title['name']; ?></a></td>
 						<td nowrap><?php echo $sw_title['publisher']; ?></td>
