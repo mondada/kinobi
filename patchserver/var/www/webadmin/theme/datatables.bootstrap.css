@@ -28,9 +28,9 @@ div.dataTables_wrapper div.dataTables_length select {
   width: 75px;
   display: inline-block;
 }
-div.dataTables_wrapper div.dataTables_button {
+/* div.dataTables_wrapper div.dataTables_filter {
   text-align: right;
-}
+} */
 div.dataTables_wrapper div.dataTables_filter label {
   font-weight: normal;
   white-space: nowrap;
@@ -42,7 +42,6 @@ div.dataTables_wrapper div.dataTables_filter input {
   width: auto;
 }
 div.dataTables_wrapper div.dataTables_info {
-  text-align: center;
   padding-top: 8px;
   white-space: nowrap;
 }
@@ -143,7 +142,6 @@ div.dataTables_scrollFoot > .dataTables_scrollFootInner > table {
 }
 
 @media screen and (max-width: 767px) {
-  div.dataTables_wrapper div.dataTables_button,
   div.dataTables_wrapper div.dataTables_length,
   div.dataTables_wrapper div.dataTables_filter,
   div.dataTables_wrapper div.dataTables_info,

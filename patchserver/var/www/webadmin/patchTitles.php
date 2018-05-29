@@ -90,6 +90,7 @@ if (isset($pdo)) {
 <script type="text/javascript" src="scripts/patchValidation.js"></script>
 
 <link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+<link rel="stylesheet" href="theme/buttons.bootstrap.css" />
 
 <script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
@@ -99,14 +100,16 @@ if (isset($pdo)) {
 <script type="text/javascript">
 $(document).ready(function() {
 	$('#sw_titles').DataTable( {
-		buttons: [ {
-			text: '<span class="glyphicon glyphicon-plus"></span> New',
+		buttons: [
+			{
+				text: '<span class="glyphicon glyphicon-plus"></span> New',
+				className: 'btn-primary btn-sm',
 				action: function ( e, dt, node, config ) {
                     $("#createTitle").modal();
 				}
 			}
 		],
-		"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
+		"dom": "<'row'<'col-sm-4'f><'col-sm-4 text-center'i><'col-sm-4 text-right'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 		"order": [ 1, 'asc' ],
 		"lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
 		"columns": [

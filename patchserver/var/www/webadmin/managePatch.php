@@ -337,6 +337,7 @@ $(function () {
 </script>
 
 <link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+<link rel="stylesheet" href="theme/buttons.bootstrap.css" />
 
 <?php if (!empty($patch_id)) { ?>
 <div class="description"><a href="patchTitles.php">Software Titles</a> <span class="glyphicon glyphicon-chevron-right"></span> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right"></span></div>
@@ -420,10 +421,8 @@ $(function () {
 
 					<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
 						<div class="row">
-							<div class="col-sm-12">
-								<div class="dataTables_button">
-									<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createComponent"<?php echo (sizeof($components) > 0 ? " disabled" : "") ?>><span class="glyphicon glyphicon-plus"></span> New</button>
-								</div>
+							<div class="col-sm-12 text-right">
+								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createComponent"<?php echo (sizeof($components) > 0 ? " disabled" : "") ?>><span class="glyphicon glyphicon-plus"></span> New</button>
 							</div>
 						</div>
 					</div>
@@ -1078,10 +1077,8 @@ $(function () {
 
 					<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
 						<div class="row">
-							<div class="col-sm-12">
-								<div class="dataTables_button">
-									<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createKillApp"><span class="glyphicon glyphicon-plus"></span> New</button>
-								</div>
+							<div class="col-sm-12 text-right">
+								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createKillApp"><span class="glyphicon glyphicon-plus"></span> New</button>
 							</div>
 						</div>
 					</div>

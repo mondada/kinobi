@@ -143,6 +143,7 @@ $(document).ready(function(){
 </script>
 
 <link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+<link rel="stylesheet" href="theme/buttons.bootstrap.css" />
 
 <script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
@@ -152,14 +153,16 @@ $(document).ready(function(){
 <script type="text/javascript">
 $(document).ready(function() {
 	$('#backups').DataTable( {
-		buttons: [ {
-			text: '<span class="glyphicon glyphicon-plus"></span> Upload',
+		buttons: [
+			{
+				text: '<span class="glyphicon glyphicon-plus"></span> Upload',
+				className: 'btn-primary btn-sm',
 				action: function ( e, dt, node, config ) {
                     $("#uploadBackup").modal();
 				}
 			}
 		],
-		"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
+		"dom": "<'row'<'col-sm-4'f><'col-sm-4 text-center'i><'col-sm-4 text-right'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 		"order": [ 1, 'desc' ],
 		"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
 		"pageLength": 5,

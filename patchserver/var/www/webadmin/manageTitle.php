@@ -372,6 +372,7 @@ $(function () {
 <script type="text/javascript" src="scripts/ace/ace.js"></script>
 
 <link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+<link rel="stylesheet" href="theme/buttons.bootstrap.css" />
 
 <script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
@@ -381,14 +382,16 @@ $(function () {
 <script type="text/javascript">
 $(document).ready(function() {
 	$('#ext_attrs').DataTable( {
-		buttons: [ {
-			text: '<span class="glyphicon glyphicon-plus"></span> New',
+		buttons: [
+			{
+				text: '<span class="glyphicon glyphicon-plus"></span> New',
+				className: 'btn-primary btn-sm',
 				action: function ( e, dt, node, config ) {
                     $("#createEA").modal();
 				}
 			}
 		],
-		"dom": "<'row'<'col-sm-12'B>>" + "<'row'<'col-sm-12'tr>>",
+		"dom": "<'row'<'col-sm-12 text-right'B>>" + "<'row'<'col-sm-12'tr>>",
 		"order": [ 0, 'asc' ],
 		"columns": [
 			null,
@@ -396,14 +399,16 @@ $(document).ready(function() {
 		]
 	});
 	$('#patches').DataTable( {
-		buttons: [ {
-			text: '<span class="glyphicon glyphicon-plus"></span> New',
+		buttons: [
+			{
+				text: '<span class="glyphicon glyphicon-plus"></span> New',
+				className: 'btn-primary btn-sm',
 				action: function ( e, dt, node, config ) {
                     $("#createPatch").modal();
 				}
 			}
 		],
-		"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
+		"dom": "<'row'<'col-sm-4'f><'col-sm-4 text-center'i><'col-sm-4 text-right'B>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 		"order": [ 1, 'asc' ],
 		"lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
 		"columns": [
