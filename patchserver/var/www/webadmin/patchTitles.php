@@ -152,7 +152,7 @@ $(document).ready(function() {
 					<tr>
 						<td>
 							<?php if (sizeof($sw_title['error']) == 0) { ?>
-							<div class="checkbox checkbox-primary">
+							<div class="checkbox checkbox-primary" style="margin-top: 0;">
 								<input type="checkbox" class="styled" name="enable_title" id="enable_title" value="<?php echo $sw_title['id']; ?>" onChange="javascript:ajaxPost('patchCtl.php?title_id='+this.value, 'title_enabled='+this.checked);" <?php echo ($sw_title['enabled'] == "1") ? "checked " : ""; ?>/>
 								<label/>
 							</div>

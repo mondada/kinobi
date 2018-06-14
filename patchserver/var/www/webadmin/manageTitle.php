@@ -849,7 +849,7 @@ $(document).ready(function() {
 							<tr>
 								<td>
 									<?php if (sizeof($patch['error']) == 0) { ?>
-									<div class="checkbox checkbox-primary">
+									<div class="checkbox checkbox-primary" style="margin-top: 0;">
 										<input type="checkbox" class="styled" name="enable_patch" id="enable_patch" value="<?php echo $patch['id']; ?>" onChange="togglePatch(this); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($patch['enabled'] == "1") ? "checked" : ""; ?>/>
 										<label/>
 									</div>
