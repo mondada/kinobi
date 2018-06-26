@@ -58,7 +58,8 @@ fi
 # Insert database control in settings.php
 if ! grep -q "patchSettings.php" /var/www/html/webadmin/settings.php; then
 	sed -i 's:<strong>Shares</strong>:<strong>Services</strong>:g' /var/www/html/webadmin/settings.php
-	sed -i '/<a href="AFP.php">/i\
+	if grep -q "AFP.php" /var/www/html/webadmin/settings.php; then
+		sed -i '/<a href="AFP.php">/i\
 				<a href="patchSettings.php">\
 					<p><img src="images/settings/PatchManagement.png" alt="Patch"></p>\
 					<p>Patch</p>\
@@ -67,6 +68,18 @@ if ! grep -q "patchSettings.php" /var/www/html/webadmin/settings.php; then
 			<!-- /Column -->\
 			<!-- Column -->\
 			<div class="col-xs-3 col-sm-2 settings-item">' /var/www/html/webadmin/settings.php
+	fi
+	if grep -q "sharing.php" /var/www/html/webadmin/settings.php; then
+		sed -i '/<a href="sharing.php">/i\
+				<a href="patchSettings.php">\
+					<p><img src="images/settings/PatchManagement.png" alt="Patch"></p>\
+					<p>Patch</p>\
+				</a>\
+			</div>\
+			<!-- /Column -->\
+			<!-- Column -->\
+			<div class="col-xs-3 col-sm-2 settings-item">' /var/www/html/webadmin/settings.php
+	fi
 fi
 # Insert patch source in dashboard.php
 if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
