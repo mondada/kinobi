@@ -179,7 +179,7 @@ $(document).ready(function() {
 <h2>Patch</h2>
 
 <div class="row">
-	<div class="col-sm-12 col-md-9"> 
+	<div class="col-xs-12">
 
 		<form action="patchSettings.php" method="post" name="Database" id="Database" enctype="multipart/form-data">
 
