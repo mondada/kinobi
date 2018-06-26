@@ -175,7 +175,7 @@ $(document).ready(function() {
 } );
 </script>
 
-<div class="description"><a href="settings.php">Settings</a> <span class="glyphicon glyphicon-chevron-right"></span></div>
+<div class="description"><a href="settings.php">Settings</a> <span class="glyphicon glyphicon-chevron-right"></span> <span class="text-muted">Services</span> <span class="glyphicon glyphicon-chevron-right"></span></div>
 <h2>Patch</h2>
 
 <div class="row">
