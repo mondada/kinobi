@@ -69,8 +69,8 @@ if ! grep -q "patchSettings.php" /var/www/html/webadmin/settings.php; then
 			<!-- Column -->\
 			<div class="col-xs-3 col-sm-2 settings-item">' /var/www/html/webadmin/settings.php
 	fi
-	if grep -q "sharing.php" /var/www/html/webadmin/settings.php; then
-		sed -i '/<a href="sharing.php">/i\
+	if grep -q "sharingSettings.php" /var/www/html/webadmin/settings.php; then
+		sed -i '/<a href="sharingSettings.php">/i\
 				<a href="patchSettings.php">\
 					<p><img src="images/settings/PatchManagement.png" alt="Patch"></p>\
 					<p>Patch</p>\
