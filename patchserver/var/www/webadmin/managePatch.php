@@ -337,7 +337,6 @@ $(function () {
 </script>
 
 <link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
-<link rel="stylesheet" href="theme/buttons.bootstrap.css" />
 
 <?php if (!empty($patch_id)) { ?>
 <div class="description"><a href="patchTitles.php">Software Titles</a> <span class="glyphicon glyphicon-chevron-right"></span> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right"></span></div>
@@ -421,169 +420,175 @@ $(function () {
 
 					<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
 						<div class="row">
-							<div class="col-sm-12 text-right">
-								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createComponent"<?php echo (sizeof($components) > 0 ? " disabled" : "") ?>><span class="glyphicon glyphicon-plus"></span> New</button>
+							<div class="col-sm-12">
+								<div class="dataTables_paginate">
+									<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createComponent"<?php echo (sizeof($components) > 0 ? " disabled" : "") ?>><span class="glyphicon glyphicon-plus"></span> New</button>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-striped">
+									<?php foreach ($components as $component) { ?>
+									<thead>
+										<tr>
+											<th colspan="3">Name</th>
+											<th colspan="3">Version</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td colspan="3">
+												<div class="has-feedback">
+													<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['name']; ?>" />
+												</div>
+											</td>
+											<td colspan="3">
+												<div class="has-feedback">
+													<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['version']; ?>" />
+												</div>
+											</td>
+											<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteComp<?php echo $component['id']; ?>">Delete</button></td>
+										</tr>
+									</tbody>
+									<thead>
+										<tr>
+											<td colspan="7">
+												<h5><strong>Criteria</strong> <small>Criteria used to determine which computers in your environment have this patch version installed.<br>The following values are the same as a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria must be ordered in the same way that smart group criteria is ordered.</small></h5>
+												<?php if (sizeof($component['criteria']) == 0) { ?>
+												<div style="padding-top: 8px;">
+													<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one criteria is required for the component to be valid.</div>
+												</div>
+												<?php } ?>
+											</td>
+										</tr>
+										<tr>
+											<th>Order</th>
+											<th>Criteria</th>
+											<th colspan="2">Operator</th>
+											<th>Value</th>
+											<th>and/or</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php foreach ($component['criteria'] as $criteria) { ?>
+										<tr>
+											<td>
+												<div class="has-feedback">
+													<input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" />
+												</div>
+											</td>
+											<td>
+												<div class="has-feedback">
+													<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+														<?php foreach ($ext_attrs as $ext_attr) { ?>
+														<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($criteria['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
+														<?php } ?>
+														<option value="Application Bundle ID"<?php echo ($criteria['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
+														<option value="Application Title"<?php echo ($criteria['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
+														<option value="Application Version"<?php echo ($criteria['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
+														<option value="Architecture Type"<?php echo ($criteria['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
+														<option value="Boot Drive Available MB"<?php echo ($criteria['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
+														<option value="Drive Capacity MB"<?php echo ($criteria['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
+														<option value="Make"<?php echo ($criteria['name'] == "Make" ? " selected" : "") ?> >Make</option>
+														<option value="Model"<?php echo ($criteria['name'] == "Model" ? " selected" : "") ?> >Model</option>
+														<option value="Model Identifier"<?php echo ($criteria['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
+														<option value="Number of Processors"<?php echo ($criteria['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
+														<option value="Operating System"<?php echo ($criteria['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
+														<option value="Operating System Build"<?php echo ($criteria['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
+														<option value="Operating System Name"<?php echo ($criteria['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
+														<option value="Operating System Version"<?php echo ($criteria['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
+														<option value="Optical Drive"<?php echo ($criteria['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
+														<option value="Platform"<?php echo ($criteria['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
+														<option value="Processor Speed MHz"<?php echo ($criteria['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
+														<option value="Processor Type"<?php echo ($criteria['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
+														<option value="SMC Version"<?php echo ($criteria['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
+														<option value="Total Number of Cores"<?php echo ($criteria['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
+														<option value="Total RAM MB"<?php echo ($criteria['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
+													</select>
+												</div>
+												<input type="hidden" id="criteria_type[<?php echo $criteria['id']; ?>]" value="<?php echo $criteria['type']; ?>"/>
+											</td>
+											<td colspan="2">
+												<div class="has-feedback">
+													<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+														<option value="is"<?php echo ($criteria['operator'] == "is" ? " selected" : "") ?> >is</option>
+														<option value="is not"<?php echo ($criteria['operator'] == "is not" ? " selected" : "") ?> >is not</option>
+														<?php
+														switch($criteria['name']) {
+														case "Application Title": ?>
+														<option value="has"<?php echo ($criteria['operator'] == "has" ? " selected" : "") ?> >has</option>
+														<option value="does not have"<?php echo ($criteria['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
+														<?php break;
+														case "Boot Drive Available MB":
+														case "Drive Capacity MB":
+														case "Number of Processors":
+														case "Processor Speed MHz":
+														case "Total Number of Cores":
+														case "Total RAM MB": ?>
+														<option value="more than"<?php echo ($criteria['operator'] == "more than" ? " selected" : "") ?> >more than</option>
+														<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+														<?php break;
+														case "Operating System Version": ?>
+														<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
+														<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+														<option value="greater than"<?php echo ($criteria['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
+														<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?> >less than</option>
+														<option value="greater than or equal"<?php echo ($criteria['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
+														<option value="less than or equal"<?php echo ($criteria['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
+														<?php default: ?>
+														<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
+														<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+														<?php } ?>
+													</select>
+												</div>
+											</td>
+											<td>
+												<div class="has-feedback">
+													<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $criteria['value']; ?>" />
+												</div>
+											</td>
+											<td>
+												<div class="has-feedback">
+													<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+														<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
+														<option value="0"<?php echo ($criteria['is_and'] == "0" ? " selected" : "") ?> >or</option>
+													</select>
+												</div>
+											</td>
+											<td align="right">
+												<input type="hidden" name="criteria_comp_id[<?php echo $criteria['id']; ?>]" value="<?php echo $component['id']; ?>"/>
+												<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteCriteria<?php echo $criteria['id']; ?>">Delete</button>
+											</td>
+										</tr>
+										<?php } ?>
+										<tr>
+											<td colspan="7" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#createCriteria<?php echo $component['id']; ?>"><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										</tr>
+									</tbody>
+
+									<?php } ?>
+									<?php if (sizeof($components) == 0) { ?>
+									<thead>
+										<tr>
+											<th colspan="3">Name</th>
+											<th colspan="3">Version</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td align="center" valign="top" colspan="7" class="dataTables_empty">No data available in table</td>
+										</tr>
+									</tbody>
+									<?php } ?>
+								</table>
 							</div>
 						</div>
 					</div>
 
-					<table class="table table-striped">
-						<?php foreach ($components as $component) { ?>
-						<thead>
-							<tr>
-								<th colspan="3">Name</th>
-								<th colspan="3">Version</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td colspan="3">
-									<div class="has-feedback">
-										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['name']; ?>" />
-									</div>
-								</td>
-								<td colspan="3">
-									<div class="has-feedback">
-										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['version']; ?>" />
-									</div>
-								</td>
-								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteComp<?php echo $component['id']; ?>">Delete</button></td>
-							</tr>
-						</tbody>
-						<thead>
-							<tr>
-								<td colspan="7">
-									<h5><strong>Criteria</strong> <small>Criteria used to determine which computers in your environment have this patch version installed.<br>The following values are the same as a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria must be ordered in the same way that smart group criteria is ordered.</small></h5>
-									<?php if (sizeof($component['criteria']) == 0) { ?>
-									<div style="padding-top: 8px;">
-										<div class="text-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> At least one criteria is required for the component to be valid.</div>
-									</div>
-									<?php } ?>
-								</td>
-							</tr>
-							<tr>
-								<th>Order</th>
-								<th>Criteria</th>
-								<th colspan="2">Operator</th>
-								<th>Value</th>
-								<th>and/or</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ($component['criteria'] as $criteria) { ?>
-							<tr>
-								<td>
-									<div class="has-feedback">
-										<input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" />
-									</div>
-								</td>
-								<td>
-									<div class="has-feedback">
-										<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
-											<?php foreach ($ext_attrs as $ext_attr) { ?>
-											<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($criteria['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
-											<?php } ?>
-											<option value="Application Bundle ID"<?php echo ($criteria['name'] == "Application Bundle ID" ? " selected" : "") ?> >Application Bundle ID</option>
-											<option value="Application Title"<?php echo ($criteria['name'] == "Application Title" ? " selected" : "") ?> >Application Title</option>
-											<option value="Application Version"<?php echo ($criteria['name'] == "Application Version" ? " selected" : "") ?> >Application Version</option>
-											<option value="Architecture Type"<?php echo ($criteria['name'] == "Architecture Type" ? " selected" : "") ?> >Architecture Type</option>
-											<option value="Boot Drive Available MB"<?php echo ($criteria['name'] == "Boot Drive Available MB" ? " selected" : "") ?> >Boot Drive Available MB</option>
-											<option value="Drive Capacity MB"<?php echo ($criteria['name'] == "Drive Capacity MB" ? " selected" : "") ?> >Drive Capacity MB</option>
-											<option value="Make"<?php echo ($criteria['name'] == "Make" ? " selected" : "") ?> >Make</option>
-											<option value="Model"<?php echo ($criteria['name'] == "Model" ? " selected" : "") ?> >Model</option>
-											<option value="Model Identifier"<?php echo ($criteria['name'] == "Model Identifier" ? " selected" : "") ?> >Model Identifier</option>
-											<option value="Number of Processors"<?php echo ($criteria['name'] == "Number of Processors" ? " selected" : "") ?> >Number of Processors</option>
-											<option value="Operating System"<?php echo ($criteria['name'] == "Operating System" ? " selected" : "") ?> >Operating System</option>
-											<option value="Operating System Build"<?php echo ($criteria['name'] == "Operating System Build" ? " selected" : "") ?> >Operating System Build</option>
-											<option value="Operating System Name"<?php echo ($criteria['name'] == "Operating System Name" ? " selected" : "") ?> >Operating System Name</option>
-											<option value="Operating System Version"<?php echo ($criteria['name'] == "Operating System Version" ? " selected" : "") ?> >Operating System Version</option>
-											<option value="Optical Drive"<?php echo ($criteria['name'] == "Optical Drive" ? " selected" : "") ?> >Optical Drive</option>
-											<option value="Platform"<?php echo ($criteria['name'] == "Platform" ? " selected" : "") ?> >Platform</option>
-											<option value="Processor Speed MHz"<?php echo ($criteria['name'] == "Processor Speed MHz" ? " selected" : "") ?> >Processor Speed MHz</option>
-											<option value="Processor Type"<?php echo ($criteria['name'] == "Processor Type" ? " selected" : "") ?> >Processor Type</option>
-											<option value="SMC Version"<?php echo ($criteria['name'] == "SMC Version" ? " selected" : "") ?> >SMC Version</option>
-											<option value="Total Number of Cores"<?php echo ($criteria['name'] == "Total Number of Cores" ? " selected" : "") ?> >Total Number of Cores</option>
-											<option value="Total RAM MB"<?php echo ($criteria['name'] == "Total RAM MB" ? " selected" : "") ?> >Total RAM MB</option>
-										</select>
-									</div>
-									<input type="hidden" id="criteria_type[<?php echo $criteria['id']; ?>]" value="<?php echo $criteria['type']; ?>"/>
-								</td>
-								<td colspan="2">
-									<div class="has-feedback">
-										<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
-											<option value="is"<?php echo ($criteria['operator'] == "is" ? " selected" : "") ?> >is</option>
-											<option value="is not"<?php echo ($criteria['operator'] == "is not" ? " selected" : "") ?> >is not</option>
-											<?php
-											switch($criteria['name']) {
-											case "Application Title": ?>
-											<option value="has"<?php echo ($criteria['operator'] == "has" ? " selected" : "") ?> >has</option>
-											<option value="does not have"<?php echo ($criteria['operator'] == "does not have" ? " selected" : "") ?> >does not have</option>
-											<?php break;
-											case "Boot Drive Available MB":
-											case "Drive Capacity MB":
-											case "Number of Processors":
-											case "Processor Speed MHz":
-											case "Total Number of Cores":
-											case "Total RAM MB": ?>
-											<option value="more than"<?php echo ($criteria['operator'] == "more than" ? " selected" : "") ?> >more than</option>
-											<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?> >less than</option>
-											<?php break;
-											case "Operating System Version": ?>
-											<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
-											<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-											<option value="greater than"<?php echo ($criteria['operator'] == "greater than" ? " selected" : "") ?> >greater than</option>
-											<option value="less than"<?php echo ($criteria['operator'] == "less than" ? " selected" : "") ?> >less than</option>
-											<option value="greater than or equal"<?php echo ($criteria['operator'] == "greater than or equal" ? " selected" : "") ?> >greater than or equal</option>
-											<option value="less than or equal"<?php echo ($criteria['operator'] == "less than or equal" ? " selected" : "") ?> >less than or equal</option>
-											<?php default: ?>
-											<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
-											<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
-											<?php } ?>
-										</select>
-									</div>
-								</td>
-								<td>
-									<div class="has-feedback">
-										<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $criteria['value']; ?>" />
-									</div>
-								</td>
-								<td>
-									<div class="has-feedback">
-										<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
-											<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
-											<option value="0"<?php echo ($criteria['is_and'] == "0" ? " selected" : "") ?> >or</option>
-										</select>
-									</div>
-								</td>
-								<td align="right">
-									<input type="hidden" name="criteria_comp_id[<?php echo $criteria['id']; ?>]" value="<?php echo $component['id']; ?>"/>
-									<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteCriteria<?php echo $criteria['id']; ?>">Delete</button>
-								</td>
-							</tr>
-							<?php } ?>
-							<tr>
-								<td colspan="7" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#createCriteria<?php echo $component['id']; ?>"><span class="glyphicon glyphicon-plus"></span> Add</button></td>
-							</tr>
-						</tbody>
-
-						<?php } ?>
-						<?php if (sizeof($components) == 0) { ?>
-						<thead>
-							<tr>
-								<th colspan="3">Name</th>
-								<th colspan="3">Version</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td align="center" valign="top" colspan="7" class="dataTables_empty">No data available in table</td>
-							</tr>
-						</tbody>
-						<?php } ?>
-					</table>
 
 					<div class="modal fade" id="createComponent" tabindex="-1" role="dialog">
 						<div class="modal-dialog" role="document">
@@ -1077,40 +1082,45 @@ $(function () {
 
 					<div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
 						<div class="row">
-							<div class="col-sm-12 text-right">
-								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createKillApp"><span class="glyphicon glyphicon-plus"></span> New</button>
+							<div class="col-sm-12">
+								<div class="dataTables_paginate">
+									<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createKillApp"><span class="glyphicon glyphicon-plus"></span> New</button>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<table id="kill_apps" class="table table-striped">
+									<thead>
+										<tr>
+											<th><nobr>Application Name</nobr></th>
+											<th><nobr>Bundle Identifier</nobr></th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php foreach ($kill_apps as $kill_app) { ?><tr>
+											<td>
+												<div class="has-feedback">
+													<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'app_name', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['app_name']; ?>" />
+												</div>
+											</td>
+											<td>
+												<div class="has-feedback">
+													<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'bundle_id', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['bundle_id']; ?>" />
+												</div>
+											</td>
+											<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteKillApp<?php echo $kill_app['id']; ?>">Delete</button></td>
+										</tr><?php } ?>
+										<?php if (sizeof($kill_apps) == 0) { ?><tr>
+											<td align="center" valign="top" colspan="3" class="dataTables_empty">No data available in table</td>
+										</tr><?php } ?>
+									</tbody>
+									</tbody>
+								</table>
 							</div>
 						</div>
 					</div>
-
-					<table id="kill_apps" class="table table-striped">
-						<thead>
-							<tr>
-								<th><nobr>Application Name</nobr></th>
-								<th><nobr>Bundle Identifier</nobr></th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ($kill_apps as $kill_app) { ?><tr>
-								<td>
-									<div class="has-feedback">
-										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'app_name', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['app_name']; ?>" />
-									</div>
-								</td>
-								<td>
-									<div class="has-feedback">
-										<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'bundle_id', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['bundle_id']; ?>" />
-									</div>
-								</td>
-								<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#deleteKillApp<?php echo $kill_app['id']; ?>">Delete</button></td>
-							</tr><?php } ?>
-							<?php if (sizeof($kill_apps) == 0) { ?><tr>
-								<td align="center" valign="top" colspan="3" class="dataTables_empty">No data available in table</td>
-							</tr><?php } ?>
-						</tbody>
-						</tbody>
-					</table>
 
 					<div class="modal fade" id="createKillApp" tabindex="-1" role="dialog">
 						<div class="modal-dialog" role="document">
