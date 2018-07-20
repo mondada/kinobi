@@ -50,10 +50,8 @@ cp -R ./resources/html/* /var/www/html/ >> $logFile
 ln -s /var/www/html/v1.php /srv/SUS/html/v1.php 2>/dev/null
 # Insert menu link in header.php
 if ! grep -q "patchTitles.php" /var/www/html/webadmin/inc/header.php; then
-	sed -i '/^                        <li class="<?php if ($pageURI == "SUS.php")/i\
-                        <li class="<?php if ($pageURI == "patchTitles.php") { echo "active"; } ?>"><a href="patchTitles.php"><span class="glyphicon glyphicon-refresh marg-right"></span>Patch Definitions</a></li>' /var/www/html/webadmin/inc/header.php
-	sed -i '/^                <li class="<?php if ($pageURI == "SUS.php")/i\
-                <li class="<?php if ($pageURI == "patchTitles.php") { echo "active"; } ?>"><a href="patchTitles.php"><span class="glyphicon glyphicon-refresh marg-right"></span>Patch Definitions</a></li>' /var/www/html/webadmin/inc/header.php
+	sed -i '/$pageURI == "SUS.php"/i\
+                <li id="patch" class="<?php if ($pageURI == "patchTitles.php") { echo "active"; } ?>"><a href="patchTitles.php"><span class="glyphicon glyphicon-refresh marg-right"></span>Patch Definitions</a></li>' /var/www/html/webadmin/inc/header.php
 fi
 # Insert database control in settings.php
 if ! grep -q "patchSettings.php" /var/www/html/webadmin/settings.php; then
@@ -71,19 +69,84 @@ if ! grep -q "patchSettings.php" /var/www/html/webadmin/settings.php; then
 	fi
 	if grep -q "sharingSettings.php" /var/www/html/webadmin/settings.php; then
 		sed -i '/<a href="sharingSettings.php">/i\
-				<a href="patchSettings.php">\
-					<p><img src="images/settings/PatchManagement.png" alt="Patch"></p>\
-					<p>Patch</p>\
-				</a>\
-			</div>\
-			<!-- /Column -->\
-			<!-- Column -->\
-			<div class="col-xs-3 col-sm-2 settings-item">' /var/www/html/webadmin/settings.php
+										<a href="patchSettings.php">\
+											<p><img src="images/settings/PatchManagement.png" alt="Patch"></p>\
+											<p>Patch</p>\
+										</a>\
+									</div>\
+									<!-- /Column -->\
+									<!-- Column -->\
+									<div class="col-xs-3 col-sm-2 settings-item">' /var/www/html/webadmin/settings.php
 	fi
 fi
 # Insert patch source in dashboard.php
 if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
-	sed -i '/Software Update Server/i\
+	if grep -q "SoftwareUpdateServer.png" /var/www/html/webadmin/dashboard.php; then
+		sed -i '/>Software Update Server</i\
+					<strong>Patch External Source</strong>\
+				</div>\
+				<?php\
+				include "inc/dbConnect.php";\
+				if (isset($pdo)) {\
+					$title_count = $pdo->query("SELECT COUNT(id) FROM titles")->fetchColumn();\
+				}\
+\
+				function patchExec($cmd) {\
+					return shell_exec("sudo /bin/sh scripts/patchHelper.sh ".escapeshellcmd($cmd)." 2>&1");\
+				}\
+				?>\
+\
+				<div class="panel-body">\
+					<div class="row">\
+						<!-- Column -->\
+						<div class="col-xs-4 col-md-2 dashboard-item">\
+							<a href="patchTitles.php">\
+								<p><img src="images/settings/PatchManagement.png" alt="Patch Management"></p>\
+							</a>\
+						</div>\
+						<!-- /Column -->\
+\
+						<!-- Column -->\
+						<div class="col-xs-4 col-md-2">\
+							<div class="bs-callout bs-callout-default">\
+								<h5><strong>Number of Titles</strong></h5>\
+								<span class="text-muted"><?php echo $title_count; ?></span>\
+							</div>\
+						</div>\
+						<!-- /Column -->\
+\
+						<!-- Column -->\
+						<div class="col-xs-4 col-md-2">\
+							<div class="bs-callout bs-callout-default">\
+								<h5><strong>SSL Enabled</strong></h5>\
+								<span class="text-muted"><?php echo (trim(patchExec("getSSLstatus")) == "true" ? "Yes" : "No") ?></span>\
+							</div>\
+						</div>\
+						<!-- /Column -->\
+\
+						<div class="clearfix visible-xs-block visible-sm-block"></div>\
+\
+						<!-- Column -->\
+						<div class="col-xs-4 col-md-2 visible-xs-block visible-sm-block"></div>\
+						<!-- /Column -->\
+\
+						<!-- Column -->\
+						<div class="col-xs-4 col-md-2">\
+							<div class="bs-callout bs-callout-default">\
+								<h5><strong>Hostname</strong></h5>\
+								<span class="text-muted"><?php echo $_SERVER["HTTP_HOST"]."/v1.php"; ?></span>\
+							</div>\
+						</div>\
+						<!-- /Column -->\
+					</div>\
+					<!-- /Row -->\
+				</div>\
+			</div>\
+\
+			<div class="panel panel-default panel-main">\
+				<div class="panel-heading">' /var/www/html/webadmin/dashboard.php
+	else
+		sed -i '/>Software Update Server</i\
 		<strong>Patch External Source</strong>\
 	</div>\
 	<?php\
@@ -108,8 +171,6 @@ if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
 			</div>\
 			<!-- /Column -->\
 \
-			<div class="clearfix visible-xs-block visible-sm-block"></div>\
-\
 			<!-- Column -->\
 			<div class="col-xs-6 col-md-2">\
 				<div class="bs-callout bs-callout-default">\
@@ -118,6 +179,8 @@ if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
 				</div>\
 			</div>\
 			<!-- /Column -->\
+\
+			<div class="clearfix visible-xs-block visible-sm-block"></div>\
 \
 			<!-- Column -->\
 			<div class="col-xs-6 col-md-2">\
@@ -134,6 +197,7 @@ if ! grep -q "Patch External Source" /var/www/html/webadmin/dashboard.php; then
 \
 <div class="panel panel-default panel-main">\
 	<div class="panel-heading">' /var/www/html/webadmin/dashboard.php
+	fi
 fi
 
 # Prevent writes to the webadmin's database helper script
