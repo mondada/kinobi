@@ -123,7 +123,7 @@ function updateDate(element, table, field, row_id, offset = false) {
 function updateTimestamp(row_id) {
 	ajaxPost("patchCtl.php?title_id="+row_id, "title_modified=true");
 }
- 
+
 function validNameId(element, labelId = false) {
 	hideSuccess(element);
 	if (existingIds.indexOf(element.value) == -1 && /^([A-Za-z0-9.-]){1,255}$/.test(element.value)) {
