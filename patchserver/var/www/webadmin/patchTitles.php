@@ -72,7 +72,10 @@ if (isset($pdo)) {
 
 	// Remove Expired Subscription
 	if (isset($token) && $token['timestamp'] - (14*24*60*60) >= $token['expires'] || $conf->getSetting("kinobi_url") == "" && $conf->getSetting("kinobi_token") == "") {
-		$pdo->exec('DELETE FROM titles WHERE source_id = "1"');
+		$removed = $pdo->exec('DELETE FROM titles WHERE source_id = "1"');
+		if (!empty($removed)) {
+			$warning_msg = "Titles imported from Kinobi have been removed.";
+		}
 	}
 
 	// Software Title Summary
