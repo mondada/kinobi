@@ -6,6 +6,18 @@ include "inc/functions.php";
 
 $title = "Software Title";
 
+// Check for subscription
+if ($conf->getSetting("kinobi_url") != "" && $conf->getSetting("kinobi_token") != "") {
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $conf->getSetting("kinobi_url"));
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, "token=".$conf->getSetting("kinobi_token"));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	$result = curl_exec($ch);
+	curl_close ($ch);
+	$token = json_decode($result, true);
+}
+
 include "inc/header.php";
 include "inc/dbConnect.php";
 
@@ -22,6 +34,10 @@ if (isset($pdo)) {
 }
 
 if (!empty($title_id)) {
+
+	if (isset($token['patch'])) {
+		include $token['patch'];
+	}
 
 	// Create Extension Attribute
 	if (isset($_POST['create_ea'])) {
@@ -406,6 +422,21 @@ if (!empty($title_id)) {
 					});
 					$('#patches').DataTable( {
 						buttons: [
+<?php if (isset($token['patch'])) { ?>
+							{
+								extend: 'collection',
+								text: '<span class="glyphicon glyphicon-share-alt"></span> Import</span>',
+								className: 'btn-primary btn-sm btn-table',
+								buttons: [
+									{
+										text: 'Upload JSON',
+										action: function ( e, dt, node, config ) {
+											$("#upload_json-modal").modal();
+										}
+									}
+								]
+							},
+<?php } ?>
 							{
 								text: '<span class="glyphicon glyphicon-plus"></span> New',
 								className: 'btn-primary btn-sm',

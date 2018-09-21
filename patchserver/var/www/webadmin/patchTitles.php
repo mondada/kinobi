@@ -30,8 +30,8 @@ if (isset($token['import'])) {
 	include $token['refresh'];
 	include $token['import'];
 }
-if (isset($token['upload'])) {
-	include $token['upload'];
+if (isset($token['title'])) {
+	include $token['title'];
 }
 
 if (isset($pdo)) {
@@ -151,7 +151,7 @@ if (isset($pdo)) {
 				$(document).ready(function() {
 					$('#sw_titles').DataTable( {
 						buttons: [
-<?php if (isset($token['import']) || isset($token['upload'])) { ?>
+<?php if (isset($token['import']) || isset($token['title'])) { ?>
 							{
 								extend: 'collection',
 								text: '<span class="glyphicon glyphicon-share-alt"></span> Import</span>',
@@ -165,7 +165,7 @@ if (isset($pdo)) {
 										}
 									},
 <?php }
-if (isset($token['upload'])) { ?>
+if (isset($token['title'])) { ?>
 									{
 										text: 'Upload JSON',
 										action: function ( e, dt, node, config ) {

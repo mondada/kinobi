@@ -1,8 +1,5 @@
 <?php
 
-$req_auth = false;
-$tokens = array();
-
 $request = explode('/', trim($_SERVER['PATH_INFO'], '/'));
 
 if (sizeof($request) > 0) {
@@ -10,31 +7,34 @@ if (sizeof($request) > 0) {
 	include "webadmin/inc/config.php";
 	include "webadmin/inc/dbConnect.php";
 
-	if (!$req_auth || isset($_POST['token']) && in_array($_POST['token'], $tokens)) {
-
 		if (isset($pdo)) {
+
+			// Check for subscription
+			if ($conf->getSetting("kinobi_url") != "" && $conf->getSetting("kinobi_token") != "") {
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $conf->getSetting("kinobi_url"));
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, "token=".$conf->getSetting("kinobi_token"));
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$result = curl_exec($ch);
+				curl_close ($ch);
+				$token = json_decode($result, true);
+			}
+
+			// Remove Expired Subscription
+			if (isset($token) && $token['timestamp'] - (14*24*60*60) >= $token['expires'] || $conf->getSetting("kinobi_url") == "" && $conf->getSetting("kinobi_token") == "") {
+				$pdo->exec('DELETE FROM titles WHERE source_id = "1"');
+			}
+
+			if (isset($token['refresh'])) {
+				include $token['refresh'];
+			}
+
+			if (isset($token['api'])) {
+				include $token['api'];
+			}
+
 			if ($request[0] == "software") {
-
-				// Check for subscription
-				if ($conf->getSetting("kinobi_url") != "" && $conf->getSetting("kinobi_token") != "") {
-					$ch = curl_init();
-					curl_setopt($ch, CURLOPT_URL, $conf->getSetting("kinobi_url"));
-					curl_setopt($ch, CURLOPT_POST, true);
-					curl_setopt($ch, CURLOPT_POSTFIELDS, "token=".$conf->getSetting("kinobi_token"));
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-					$result = curl_exec($ch);
-					curl_close ($ch);
-					$token = json_decode($result, true);
-				}
-
-				// Remove Expired Subscription
-				if (isset($token) && $token['timestamp'] - (14*24*60*60) >= $token['expires'] || $conf->getSetting("kinobi_url") == "" && $conf->getSetting("kinobi_token") == "") {
-					$pdo->exec('DELETE FROM titles WHERE source_id = "1"');
-				}
-
-				if (isset($token['refresh'])) {
-					include $token['refresh'];
-				}
 
 				$response = array();
 				if (empty($request[1])) {
@@ -143,7 +143,7 @@ if (sizeof($request) > 0) {
 				}
 			}
 		}
-	}
+
 }
 
 if (is_array($response)) {
