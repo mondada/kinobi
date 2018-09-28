@@ -16,6 +16,22 @@ if (!($_SESSION['isAuthUser'])) {
 		return shell_exec("sudo /bin/sh scripts/patchHelper.sh ".escapeshellcmd($cmd)." 2>&1");
 	}
 
+	if (isset($_POST['service'])) {
+		if ($_POST['service'] == "enable") {
+			$conf->setSetting("patch", "enabled");
+		} else {
+			$conf->setSetting("patch", "disabled");
+		}
+	}
+
+	if (isset($_POST['dashboard'])) {
+		if ($_POST['dashboard'] == "true") {
+			$conf->setSetting("showpatch", "true");
+		} else {
+			$conf->setSetting("showpatch", "false");
+		}
+	}
+
 	// Download Backup
 	if (isset($_GET['download'])) {
 		$filename = $_GET['download'];
@@ -69,7 +85,7 @@ if (!($_SESSION['isAuthUser'])) {
 		$stmt = $pdo->prepare('UPDATE patches SET enabled = ? WHERE id = ?');
 		$stmt->execute([$patch_enabled, $_GET['patch_id']]);
 	}
-	
+
 	// Update Field w/Table
 	if (isset($pdo) && isset($_GET['table']) && isset($_GET['field']) && isset($_POST['value']) && isset($_GET['id'])) {
 		$stmt = $pdo->prepare('UPDATE '.$_GET['table'].' SET '.$_GET['field'].' = ? WHERE id = ?');

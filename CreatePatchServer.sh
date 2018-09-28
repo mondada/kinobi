@@ -12,6 +12,7 @@ echo ""
 timeEcho "Building Patch Server Installer..."
 
 # Clean-up old files
+rm -f KinobiInstaller.run 2>&1 > /dev/null
 rm -f PatchServerInstaller.run 2>&1 > /dev/null
 rm -Rf temp 2>&1 > /dev/null
 
@@ -32,7 +33,7 @@ find temp -name .svn | xargs rm -Rf # Clean out SVN garbage
 
 # Generate final installer
 timeEcho "Creating final installer..."
-bash makeself/makeself.sh temp/installer/ PatchServerInstaller.run "Patch Server Installer" "bash install.sh"
+bash makeself/makeself.sh temp/installer/ KinobiInstaller.run "Patch Server Installer" "bash install.sh"
 
 timeEcho "Cleaning up..."
 rm -Rf temp 2>&1 > /dev/null

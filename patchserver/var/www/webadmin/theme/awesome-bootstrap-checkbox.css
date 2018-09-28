@@ -30,15 +30,17 @@
   left: 0;
   top: 0;
   margin-left: -20px;
-  padding-left: 3px;
-  padding-top: 1px;
-  font-size: 11px;
+  padding-left: 4px;
+  padding-top: 2px;
+  font-size: 9px;
   color: #555555;
+  line-height: 1.4;
 }
 .checkbox input[type="checkbox"],
 .checkbox input[type="radio"] {
   opacity: 0;
   z-index: 1;
+  cursor: pointer;
 }
 .checkbox input[type="checkbox"]:focus + label::before,
 .checkbox input[type="radio"]:focus + label::before {
@@ -50,6 +52,21 @@
 .checkbox input[type="radio"]:checked + label::after {
   font-family: "Glyphicons Halflings";
   content: "\e013";
+}
+.checkbox input[type="checkbox"]:indeterminate + label::after,
+.checkbox input[type="radio"]:indeterminate + label::after {
+  display: block;
+  content: "";
+  width: 10px;
+  height: 3px;
+  background-color: #555555;
+  border-radius: 2px;
+  margin-left: -16.5px;
+  margin-top: 7px;
+}
+.checkbox input[type="checkbox"]:disabled,
+.checkbox input[type="radio"]:disabled {
+  cursor: not-allowed;
 }
 .checkbox input[type="checkbox"]:disabled + label,
 .checkbox input[type="radio"]:disabled + label {
@@ -117,56 +134,59 @@
   color: #fff;
 }
 
-.checkbox.checkbox-sm label::before {
-  width: 30px;
-  height: 30px;
-  top: -13px;
+.checkbox-primary input[type="checkbox"]:indeterminate + label::before,
+.checkbox-primary input[type="radio"]:indeterminate + label::before {
+  background-color: #337ab7;
+  border-color: #337ab7;
 }
-.checkbox.checkbox-sm label::after {
-  width: 30px;
-  height: 30px;
-  padding-left: 4px;
-  font-size: 20px;
-  left: 1px;
-  top: -13px;
+
+.checkbox-primary input[type="checkbox"]:indeterminate + label::after,
+.checkbox-primary input[type="radio"]:indeterminate + label::after {
+  background-color: #fff;
 }
-.checkbox.checkbox-sm label {
-  padding-left: 18px;
-  top: 13px;
+
+.checkbox-danger input[type="checkbox"]:indeterminate + label::before,
+.checkbox-danger input[type="radio"]:indeterminate + label::before {
+  background-color: #d9534f;
+  border-color: #d9534f;
 }
-.checkbox.checkbox-md label::before {
-  width: 34px;
-  height: 34px;
-  top: -17px;
+
+.checkbox-danger input[type="checkbox"]:indeterminate + label::after,
+.checkbox-danger input[type="radio"]:indeterminate + label::after {
+  background-color: #fff;
 }
-.checkbox.checkbox-md label::after {
-  width: 34px;
-  height: 34px;
-  padding-left: 4px;
-  font-size: 24px;
-  left: 1px;
-  top: -18px;
+
+.checkbox-info input[type="checkbox"]:indeterminate + label::before,
+.checkbox-info input[type="radio"]:indeterminate + label::before {
+  background-color: #5bc0de;
+  border-color: #5bc0de;
 }
-.checkbox.checkbox-md label {
-  padding-left: 22px;
-  top: 17px;
+
+.checkbox-info input[type="checkbox"]:indeterminate + label::after,
+.checkbox-info input[type="radio"]:indeterminate + label::after {
+  background-color: #fff;
 }
-.checkbox.checkbox-lg label::before {
-  width: 46px;
-  height: 46px;
-  top: -28px;
+
+.checkbox-warning input[type="checkbox"]:indeterminate + label::before,
+.checkbox-warning input[type="radio"]:indeterminate + label::before {
+  background-color: #f0ad4e;
+  border-color: #f0ad4e;
 }
-.checkbox.checkbox-lg label::after {
-  width: 46px;
-  height: 46px;
-  padding-left: 4px;
-  font-size: 36px;
-  left: 1px;
-  top: -31px;
+
+.checkbox-warning input[type="checkbox"]:indeterminate + label::after,
+.checkbox-warning input[type="radio"]:indeterminate + label::after {
+  background-color: #fff;
 }
-.checkbox.checkbox-lg label {
-  padding-left: 34px;
-  top: 32px;
+
+.checkbox-success input[type="checkbox"]:indeterminate + label::before,
+.checkbox-success input[type="radio"]:indeterminate + label::before {
+  background-color: #5cb85c;
+  border-color: #5cb85c;
+}
+
+.checkbox-success input[type="checkbox"]:indeterminate + label::after,
+.checkbox-success input[type="radio"]:indeterminate + label::after {
+  background-color: #fff;
 }
 
 .radio {
@@ -216,6 +236,7 @@
 .radio input[type="radio"] {
   opacity: 0;
   z-index: 1;
+  cursor: pointer;
 }
 .radio input[type="radio"]:focus + label::before {
   outline: thin dotted;
@@ -227,6 +248,9 @@
   -ms-transform: scale(1, 1);
   -o-transform: scale(1, 1);
   transform: scale(1, 1);
+}
+.radio input[type="radio"]:disabled {
+  cursor: not-allowed;
 }
 .radio input[type="radio"]:disabled + label {
   opacity: 0.65;
@@ -300,56 +324,4 @@ input[type="radio"] .styled:checked + label::before {
 input[type="checkbox"] .styled:checked + label::after,
 input[type="radio"] .styled:checked + label::after {
   color: #fff;
-}
-
-.radio.radio-sm label::before {
-  width: 30px;
-  height: 30px;
-  top: -13px;
-}
-.radio.radio-sm label::after {
-  width: 22px;
-  height: 22px;
-  padding-left: 4px;
-  font-size: 20px;
-  left: 4px;
-  top: -9px;
-}
-.radio.radio-sm label {
-  padding-left: 18px;
-  top: 13px;
-}
-.radio.radio-md label::before {
-  width: 34px;
-  height: 34px;
-  top: -17px;
-}
-.radio.radio-md label::after {
-  width: 26px;
-  height: 26px;
-  padding-left: 4px;
-  font-size: 24px;
-  left: 4px;
-  top: -13px;
-}
-.radio.radio-md label {
-  padding-left: 22px;
-  top: 17px;
-}
-.radio.radio-lg label::before {
-  width: 46px;
-  height: 46px;
-  top: -28px;
-}
-.radio.radio-lg label::after {
-  width: 36px;
-  height: 36px;
-  padding-left: 4px;
-  font-size: 36px;
-  left: 5px;
-  top: -23px;
-}
-.radio.radio-lg label {
-  padding-left: 34px;
-  top: 32px;
 }

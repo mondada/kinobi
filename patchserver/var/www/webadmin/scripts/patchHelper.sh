@@ -89,7 +89,7 @@ echo $(crontab -l 2>/dev/null | grep "${0}" | awk '{print $5}')
 ;;
 
 setSchedule)
-days="${2}"
+# $2: days
 tmpfile=$(mktemp /tmp/crontab.XXXXXX)
 crontab -l 2>/dev/null | grep -v "${0}" > ${tmpfile}
 echo "0 0 * * ${2} /var/www/html/webadmin/scripts/patchHelper.sh backupDB > /dev/null 2>&1" >> ${tmpfile}
