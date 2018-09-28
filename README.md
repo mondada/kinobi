@@ -16,6 +16,7 @@ For full documentation and installation guide, please see the [Kinobi wiki](http
 
 ## Requirements
 Kinobi is designed to run on [NetSUS 4.1.0 or later](https://github.com/jamf/NetSUS). Accordingly, Kinobi shares the [same system requirements](https://github.com/jamf/NetSUS#requirements) as NetSUS.
+**Note**: NetSUS 5.0 is recommended. If you are running NetSUS 5.0, you should install Kinobi 1.1.
 
 ## Getting Help
 Discussion regarding Kinobi can be found on the `#kinobi-dev` channel on the [MacAdmins](https://macadmins.herokuapp.com) Slack group.
