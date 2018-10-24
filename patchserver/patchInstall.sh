@@ -33,6 +33,7 @@ if [[ $(which apt-get 2>&-) != "" ]]; then
 	www_user=www-data
 	www_service=apache2
 elif [[ $(which yum 2>&-) != "" ]]; then
+	yum_install php-pdo
 	yum_install php-sqlite
 	yum_install perl-XML-XPath
 	www_user=apache
