@@ -1,3 +1,26 @@
+/**
+ * Kinobi - external patch source for Jamf Pro
+ *
+ * @author      Duncan McCracken <duncan.mccracken@mondada.coma.au>
+ * @copyright   2018-2019 Mondada Pty Ltd
+ * @link        https://mondada.github.io
+ * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
+ * @version     1.2
+ *
+ */
+
+function getHTTPObj() {
+	return new XMLHttpRequest();
+}
+
+function ajaxPost(url, data) {
+	var http = getHTTPObj();
+	http.open("POST", url, false);
+	http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	http.send(data);
+	return http.responseText;
+}
+
 function enableButton(buttonId, enable) {
 	document.getElementById(buttonId).disabled = !enable;
 }
@@ -98,6 +121,23 @@ function validInteger(element, labelId = false) {
 function updateInteger(element, table, field, row_id, offset = false) {
 	hideWarning(element);
 	if (element.value != "" && element.value == parseInt(element.value)) {
+		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
+		showSuccess(element, offset);
+	}
+}
+
+function validVersion(element, labelId = false) {
+	hideSuccess(element);
+	if (patchVersions.indexOf(element.value) == -1 && /^.{1,255}$/.test(element.value)) {
+		hideError(element, labelId);
+	} else {
+		showError(element, labelId);
+	}
+}
+
+function updateVersion(element, table, field, row_id, offset = false) {
+	hideWarning(element);
+	if (patchVersions.indexOf(element.value) == -1 && /^.{1,255}$/.test(element.value)) {
 		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
 		showSuccess(element, offset);
 	}
@@ -242,7 +282,7 @@ function validCriteria(button, sort_order, name, operator, type) {
 
 function validPatch(button, sort_order, version, released, min_os) {
 	var validSortOrder = document.getElementById(sort_order).value != "" && document.getElementById(sort_order).value == parseInt(document.getElementById(sort_order).value);
-	var validVersion = /^.{1,255}$/.test(document.getElementById(version).value);
+	var validVersion = patchVersions.indexOf(document.getElementById(version).value) == -1 && /^.{1,255}$/.test(document.getElementById(version).value);
 	var validReleased = /^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(document.getElementById(released).value);
 	var validMinOS = /^.{1,255}$/.test(document.getElementById(min_os).value);
 	enableButton(button, validSortOrder && validVersion && validReleased && validMinOS);

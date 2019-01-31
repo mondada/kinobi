@@ -1,165 +1,253 @@
 <?php
 
-$request = explode('/', trim($_SERVER['PATH_INFO'], '/'));
+/**
+ * Kinobi - external patch source for Jamf Pro
+ *
+ * @author      Duncan McCracken <duncan.mccracken@mondada.coma.au>
+ * @copyright   2018-2019 Mondada Pty Ltd
+ * @link        https://mondada.github.io
+ * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
+ * @version     1.2
+ *
+ */
 
-if (sizeof($request) > 0) {
-
+// Settings
+if (file_exists("webadmin/inc/config.php")) {
 	include "webadmin/inc/config.php";
-	include "webadmin/inc/dbConnect.php";
+}
+include "webadmin/inc/patch/functions.php";
 
-		if (isset($pdo)) {
+// Database
+include "webadmin/inc/patch/database.php";
 
-			// Check for subscription
-			if ($conf->getSetting("kinobi_url") != "" && $conf->getSetting("kinobi_token") != "") {
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $conf->getSetting("kinobi_url"));
-				curl_setopt($ch, CURLOPT_POST, true);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, "token=".$conf->getSetting("kinobi_token"));
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				$result = curl_exec($ch);
-				curl_close ($ch);
-				$token = json_decode($result, true);
-			}
+// Slim Framework
+require "../kinobi/bin/Slim/Slim.php";
+\Slim\Slim::registerAutoloader();
+$app = new \Slim\Slim();
 
-			// Remove Expired Subscription
-			if (isset($token) && $token['timestamp'] - (14*24*60*60) >= $token['expires'] || $conf->getSetting("kinobi_url") == "" && $conf->getSetting("kinobi_token") == "") {
-				$pdo->exec('DELETE FROM titles WHERE source_id = "1"');
-			}
+// Service
+$app->service = (isset($conf) ? $conf->getSetting("patch") !== "disabled" : true);
 
-			if (isset($token['refresh'])) {
-				include $token['refresh'];
-			}
+// Authorization
+$api = $kinobi->getSetting("api");
 
-			if (isset($token['api'])) {
-				include $token['api'];
-			}
+$app->authorzied = ($api['reqauth'] ? false : "0");
 
-			if ($request[0] == "software") {
+if ($api['authtype'] == "token") {
+	if (isset($_SERVER['Authorization'])) {
+		$auth_header = trim($_SERVER['Authorization']);
+	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+		$auth_header = trim($_SERVER['HTTP_AUTHORIZATION']);
+	} elseif (function_exists("apache_request_headers")) {
+		$request_headers = apache_request_headers();
+		$request_headers = array_combine(array_map("ucwords", array_keys($request_headers)), array_values($request_headers));
 
-				$response = array();
-				if (empty($request[1])) {
-					// This endpoint returns an array of Software Title Summary objects
-					$stmt = $pdo->query('SELECT name, publisher, modified AS "lastModified", current AS "currentVersion", name_id AS "id" FROM titles WHERE enabled = 1');
-					while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
-						// $sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s", $sw_title['lastModified']/1000).(gettype($sw_title['lastModified']/1000) == "double" ? ".".substr($sw_title['lastModified'], -3) : "")."Z";
-						$sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $sw_title['lastModified']);
-						array_push($response, $sw_title);
-					}
-				} else {
-					// This endpoint returns a subset array of Software Title Summary objects that match any of the given {ids}
-					foreach (explode(',', trim($request[1], ',')) as $name_id) {
-						$stmt = $pdo->prepare('SELECT name, publisher, modified AS "lastModified", current AS "currentVersion", name_id AS "id" FROM titles WHERE enabled = 1 AND name_id = ?');
-						$stmt->execute([$name_id]);
-						while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
-							// $sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s", $sw_title['lastModified']/1000).(gettype($sw_title['lastModified']/1000) == "double" ? ".".substr($sw_title['lastModified'], -3) : "")."Z";
-							$sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $sw_title['lastModified']);
-							array_push($response, $sw_title);
-						}
-					}
-				}
-			}
-			if ($request[0] === "patch") {
-				if (isset($request[1])) {
-					// This endpoint returns a Software Title object
-					$stmt = $pdo->prepare('SELECT id AS "title_id", name, publisher, app_name AS "appName", bundle_id AS "bundleId", modified AS "lastModified", current AS "currentVersion", name_id AS "id" FROM titles WHERE enabled = 1 AND name_id = ?');
-					$stmt->execute([$request[1]]);
-					$response = $stmt->fetch(PDO::FETCH_ASSOC);
-					if ($response) {
-						// $response['lastModified'] = gmdate("Y-m-d\TH:i:s", $response['lastModified']/1000).(gettype($response['lastModified']/1000) == "double" ? ".".substr($response['lastModified'], -3) : "")."Z";
-						$response['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $response['lastModified']);
-						// requirements
-						$response['requirements'] = array();
-						$stmt = $pdo->query('SELECT name, operator, value, type, is_and AS "and" FROM requirements WHERE title_id = "'.$response['title_id'].'" ORDER BY sort_order');
-						while ($requirement = $stmt->fetch(PDO::FETCH_ASSOC)) {
-							if ($requirement['and'] === null) {
-								unset($requirement['and']);
-							} else {
-								$requirement['and'] = ($requirement['and'] === "0") ? false: true;
-							}
-							array_push($response['requirements'], $requirement);
-						}
-						// patches
-						$response['patches'] = array();
-						$stmt = $pdo->query('SELECT id, version, released AS "releaseDate", standalone, min_os AS "minimumOperatingSystem", reboot FROM patches WHERE title_id = "'.$response['title_id'].'" AND enabled = 1 ORDER BY sort_order');
-						while ($patch = $stmt->fetch(PDO::FETCH_ASSOC)) {
-							// $patch['releaseDate'] = gmdate("Y-m-d\TH:i:s", $patch['releaseDate']/1000).(gettype($patch['releaseDate']/1000) == "double" ? ".".substr($patch['releaseDate'], -3) : "")."Z";
-							$patch['releaseDate'] = gmdate("Y-m-d\TH:i:s\Z", $patch['releaseDate']);
-							$patch['standalone'] = ($patch['standalone'] === "0") ? false: true;
-							$patch['reboot'] = ($patch['reboot'] === "1") ? true: false;
-							// killApps
-							$patch['killApps'] = $pdo->query('SELECT bundle_id AS "bundleId", app_name AS "appName" FROM kill_apps WHERE patch_id = "'.$patch['id'].'"')->fetchAll(PDO::FETCH_ASSOC);
-							// components
-							$patch['components'] = array();
-							$comp_stmt = $pdo->query('SELECT id, name, version FROM components WHERE patch_id = "'.$patch['id'].'"');
-							while ($component = $comp_stmt->fetch(PDO::FETCH_ASSOC)) {
-								// criteria
-								$component['criteria'] = array();
-								$criteria_stmt = $pdo->query('SELECT name, operator, value, type, is_and AS "and" FROM criteria WHERE component_id = "'.$component['id'].'" ORDER BY sort_order');
-								while ($criteria = $criteria_stmt->fetch(PDO::FETCH_ASSOC)) {
-									if ($criteria['and'] === null) {
-										unset($criteria['and']);
-									} else {
-										$criteria['and'] = ($criteria['and'] === "0") ? false: true;
-									}
-									array_push($component['criteria'], $criteria);
-								}
-								unset($component['id']);
-								array_push($patch['components'], $component);
-							}
-							// capabilities
-							$patch['capabilities'] = array();
-							$cap_stmt = $pdo->query('SELECT name, operator, value, type, is_and AS "and" FROM capabilities WHERE patch_id = "'.$patch['id'].'" ORDER BY sort_order');
-							while ($capability = $cap_stmt->fetch(PDO::FETCH_ASSOC)) {
-								if ($capability['and'] === null) {
-									unset($capability['and']);
-								} else {
-									$capability['and'] = ($capability['and'] === "0") ? false: true;
-								}
-								array_push($patch['capabilities'], $capability);
-							}
-							// dependencies
-							$patch['dependencies'] = array();
-							$dep_stmt = $pdo->query('SELECT name, operator, value, type, is_and AS "and" FROM dependencies WHERE patch_id = "'.$patch['id'].'" ORDER BY sort_order');
-							while ($dependency = $dep_stmt->fetch(PDO::FETCH_ASSOC)) {
-								if ($dependency['and'] === null) {
-									unset($dependency['and']);
-								} else {
-									$dependency['and'] = ($dependency['and'] === "0") ? false: true;
-								}
-								array_push($patch['dependencies'], $dependency);
-							}
-							unset($patch['id']);
-							array_push($response['patches'], $patch);
-						}
-						// extensionAttributes
-						$response['extensionAttributes'] = array();
-						$stmt =  $pdo->query('SELECT key_id AS "key", script AS "value", name AS "displayName" FROM ext_attrs WHERE title_id = "'.$response['title_id'].'"');
-						while ($ext_attr = $stmt->fetch(PDO::FETCH_ASSOC)) {
-							$ext_attr['value'] = base64_encode($ext_attr['value']);
-							array_push($response['extensionAttributes'], $ext_attr);
-						}
-						unset($response['title_id']);
-					}
-				}
+		if (isset($request_headers['Authorization'])) {
+			$auth_header = trim($request_headers['Authorization']);
+		}
+	}
+
+	if (isset($auth_header)) {
+		if (preg_match("/Bearer\s(\S+)/", $auth_header, $matches)) {
+			$api_token = $matches[1];
+		}
+	}
+
+	if (isset($api_token)) {
+		$users = $kinobi->getSetting("users");
+
+		$api_tokens = array();
+		foreach ($users as $key => $value) {
+			if (isset($value['token']) && isset($value['api']) && (!isset($value['expires']) || $value['expires'] > time())) {
+				$api_tokens[$value['token']] = $value['api'];
 			}
 		}
 
+		$app->authorzied = (array_key_exists($api_token, $api_tokens) ? $api_tokens[$api_token] : $app->authorzied);
+	}
 }
 
-if (is_array($response)) {
-	header("Content-Type: application/json");
-	print_r(json_encode($response));
-} else {
-	header($_SERVER['SERVER_PROTOCOL']." 404 Not Found");
-	echo "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">
-<html><head>
-<title>404 Not Found</title>
-</head><body>
-<h1>Not Found</h1>
-<p>The requested URL /v1.php".$_SERVER['PATH_INFO']." was not found on this server.</p>
-<hr>
-<address>".$_SERVER['SERVER_SIGNATURE']."</address>
-</body></html>";
+if ($api['authtype'] == "basic") {
+	if (!isset($_SERVER['PHP_AUTH_USER'])) {
+		header("WWW-Authenticate: Basic realm=\"v1\"");
+	} else {
+		$username = $_SERVER['PHP_AUTH_USER'];
+		$password = hash("sha256", $_SERVER['PHP_AUTH_PW']);
+	
+		$users = $kinobi->getSetting("users");
+
+		$app->authorzied = (array_key_exists($username, $users) && $users[$username]['password'] == $password && (!isset($users[$username]['expires']) || $users[$username]['expires'] > time()) && isset($users[$username]['api']) ? $users[$username]['api'] : $app->authorzied);
+	}
 }
 
-?>
+$app->unauthorized = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">" . PHP_EOL . "<html><head>" . PHP_EOL . "<title>401 Unauthorized</title>" . PHP_EOL . "</head><body>" . PHP_EOL . "<h1>Unauthorized</h1>" . PHP_EOL . "<p>This server could not verify that you" . PHP_EOL . "are authorized to access the document" . PHP_EOL . "requested.  Either you supplied the wrong" . PHP_EOL . "credentials (e.g., bad password), or your" . PHP_EOL . "browser doesn't understand how to supply" . PHP_EOL . "the credentials required.</p>" . (empty($_SERVER['SERVER_SIGNATURE']) ? "" : PHP_EOL . "<hr>" . PHP_EOL . "<address>" . $_SERVER['SERVER_SIGNATURE'] . "</address>") . PHP_EOL . "</body></html>" . PHP_EOL;
+$app->bad_request = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">" . PHP_EOL . "<html><head>" . PHP_EOL . "<title>400 Bad Request</title>" . PHP_EOL . "</head><body>" . PHP_EOL . "<h1>Bad Request</h1>" . PHP_EOL . "<p>Your browser sent a request that this server could not understand.<br />" . PHP_EOL . "</p>" . (empty($_SERVER['SERVER_SIGNATURE']) ? "" : PHP_EOL . "<hr>" . PHP_EOL . "<address>" . $_SERVER['SERVER_SIGNATURE'] . "</address>") . PHP_EOL . "</body></html>" . PHP_EOL;
+
+// Subscription
+$subs_resp = false;
+$subs = $kinobi->getSetting("subscription");
+if (!empty($subs['url']) && !empty($subs['token'])) {
+    $subs_resp = fetchJsonArray($subs['url'], $subs['token']);
+}
+
+// Refresh
+include "webadmin/inc/patch/refresh.php";
+
+// Software
+$app->get(
+    "/software(/(:ids))",
+    function ($ids = null) use ($app, $pdo) {
+        if ($app->service) {
+            if ($pdo) {
+                if (false !== $app->authorzied) {
+                    $result = getSoftwareTitleSummary($pdo, $ids);
+
+                    $response = $app->response();
+                    $response['Content-Type'] = "application/json";
+                    $response->status(200);
+                    $response->body(json_encode($result));
+                } else {
+                    $app->halt(401, $app->unauthorized);
+                }
+            } else {
+                $app->error();
+            }
+        } else {
+            $app->notFound();
+        }
+    }
+);
+
+// Patch
+$app->get(
+    "/patch/:id",
+    function ($id) use ($app, $pdo) {
+        if ($app->service) {
+            if ($pdo) {
+                if (false !== $app->authorzied) {
+                    $result = getSoftwareTitle($pdo, $id);
+
+                    if (null !== $result) {
+                        $response = $app->response();
+                        $response['Content-Type'] = "application/json";
+                        $response->status(200);
+                        $response->body(json_encode($result));
+                    } else {
+                        $app->notFound();
+                    }
+                } else {
+                    $app->halt(401, $app->unauthorized);
+                }
+            } else {
+                $app->error();
+            }
+        } else {
+            $app->notFound();
+        }
+    }
+);
+
+// Test Software
+$app->get(
+    "/test/software(/(:ids))",
+    function ($ids = null) use ($app, $pdo) {
+        if ($app->service) {
+            if ($pdo) {
+                if (false !== $app->authorzied) {
+                    $result = getSoftwareTitleSummary($pdo, $ids, 0);
+
+                    $response = $app->response();
+                    $response['Content-Type'] = "application/json";
+                    $response->status(200);
+                    $response->body(json_encode($result));
+                } else {
+                    $app->halt(401, $app->unauthorized);
+                }
+            } else {
+                $app->error();
+            }
+        } else {
+            $app->notFound();
+        }
+    }
+);
+
+// Test Patch
+$app->get(
+    "/test/patch/:id",
+    function ($id) use ($app, $pdo) {
+        if ($app->service) {
+            if ($pdo) {
+                if (false !== $app->authorzied) {
+                    $result = getSoftwareTitle($pdo, $id, 0);
+
+                    if (null !== $result) {
+                        $response = $app->response();
+                        $response['Content-Type'] = "application/json";
+                        $response->status(200);
+                        $response->body(json_encode($result));
+                    } else {
+                        $app->notFound();
+                    }
+                } else {
+                    $app->halt(401, $app->unauthorized);
+                }
+            } else {
+                $app->error();
+            }
+        } else {
+            $app->notFound();
+        }
+    }
+);
+
+// Backup Database
+$app->get(
+    "/backup/:uuid",
+    function ($uuid) use ($app, $kinobi) {
+        if ($app->service) {
+            if ($uuid == $kinobi->getSetting("uuid")) {
+				$db = $kinobi->getSetting("pdo");
+				$backup = $kinobi->getSetting("backup");
+				$timestamp = time();
+
+				include_once("webadmin/inc/patch/mysqldump.php");
+
+				if ($db['dsn']['prefix'] == "mysql") {
+					$dbname = $db['dsn']['dbname'];
+					$dump = new Mysqldump(
+						$db['dsn']['prefix'].":host=".$db['dsn']['host'].";port=".$db['dsn']['port'].";dbname=".$db['dsn']['dbname'],
+						$db['username'],
+						openssl_decrypt($db['passwd'], "AES-128-CTR", $uuid, 0, substr(md5($db['username']), 0, 16)),
+						array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
+					);
+				}
+
+				if ($db['dsn']['prefix'] == "sqlite") {
+					$dbname = basename($db['dsn']['dbpath']);
+					if ($pos = strpos($dbname, ".")) {
+						$dbname = substr($dbname, 0, $pos);
+					}
+					$dump = new Mysqldump(
+						$db['dsn']['prefix'].":".$db['dsn']['dbpath'],
+						null,
+						null,
+						array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
+					);
+				}
+
+				$dump->start($backup['path']."/".$dbname."-".$timestamp.".sql.gz");
+            } else {
+				$app->halt(401, $app->unauthorized);
+            }
+        } else {
+            $app->notFound();
+        }
+    }
+);
+
+if (isset($subs_resp['endpoint'])) {
+    include $subs_resp['endpoint'];
+}
+
+$app->run();

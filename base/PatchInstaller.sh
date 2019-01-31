@@ -3,8 +3,6 @@
 
 export PATH="/bin:$PATH"
 
-netsusdir=/var/appliance
-
 #==== Check Requirements - Root User ======================#
 
 if [[ "$(id -u)" != "0" ]]; then
@@ -25,9 +23,6 @@ clean-fail() {
   umask "$OLD_UMASK"
   exit 1
 }
-
-# Create NetSUS directory (needed immediately for logging)
-mkdir -p $netsusdir/logs
 
 source utils/logger.sh
 
@@ -60,7 +55,13 @@ done
 log "Starting the Patch Definition Server Installation"
 log "Checking installation requirements..."
 
+# Check for a 64-bit OS
+bash checks/test64bitRequirements.sh || clean-fail
+
 failedAnyChecks=0
+# Check for Valid OS
+bash checks/testOSRequirements.sh || failedAnyChecks=1
+
 # Check for Valid NetSUS
 bash checks/testNetSUSRequirements.sh || failedAnyChecks=1
 
@@ -106,6 +107,13 @@ else
 fi
 
 #==== Initial Cleanup tasks ===============================#
+
+# Set SELinux policy
+if sestatus | grep -q enforcing ; then
+  log "Setting SELINUX mode to permissive"
+  sed -i "s/SELINUX=enforcing/SELINUX=permissive/" /etc/selinux/config
+  setenforce permissive
+fi
 
 #==== Install Components ==================================#
 

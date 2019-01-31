@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export logFile="/var/appliance/logs/patchinstaller.log"
+export logFile="/var/log/patchinstaller.log"
 
 mkLogDir() {
     if [ ! -f "$logFile" ]

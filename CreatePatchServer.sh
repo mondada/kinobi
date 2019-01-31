@@ -21,10 +21,13 @@ mkdir -p temp/installer/checks
 mkdir -p temp/installer/resources
 mkdir -p temp/installer/utils
 cp -R base/PatchInstaller.sh temp/installer/install.sh
+cp -R base/test64bitRequirements.sh temp/installer/checks/test64bitRequirements.sh
 cp -R base/testNetSUSRequirements.sh temp/installer/checks/testNetSUSRequirements.sh
+cp -R base/testOSRequirements.sh temp/installer/checks/testOSRequirements.sh
 cp -R includes/logger.sh temp/installer/utils/logger.sh
 cp -R patchserver/patchInstall.sh temp/installer/install-patch_v1.sh
-cp -R patchserver/var/appliance/db/* temp/installer/resources/
+cp -R patchserver/var/Slim temp/installer/resources/Slim
+cp -R patchserver/var/appliance/db/patch_v1.sqlite temp/installer/resources/patch_v1.sqlite
 cp -R patchserver/var/www temp/installer/resources/html
 if [ -x "/usr/bin/xattr" ]; then find temp -exec xattr -c {} \; ;fi # Remove OS X extended attributes
 find temp -name .DS_Store -delete # Clean out .DS_Store files

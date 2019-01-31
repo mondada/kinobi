@@ -1,43 +1,57 @@
 <?php
 
-include "inc/config.php";
+/**
+ * Kinobi - external patch source for Jamf Pro
+ *
+ * @author      Duncan McCracken <duncan.mccracken@mondada.coma.au>
+ * @copyright   2018-2019 Mondada Pty Ltd
+ * @link        https://mondada.github.io
+ * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
+ * @version     1.2
+ *
+ */
+
+if (file_exists("inc/config.php")) {
+	include "inc/config.php";
+}
 include "inc/auth.php";
-include "inc/functions.php";
+if (file_exists("inc/functions.php")) {
+	include "inc/functions.php";
+}
+include "inc/patch/functions.php";
 
 $title = "Software Title";
 
 // Check for subscription
-if ($conf->getSetting("kinobi_url") != "" && $conf->getSetting("kinobi_token") != "") {
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $conf->getSetting("kinobi_url"));
-	curl_setopt($ch, CURLOPT_POST, true);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, "token=".$conf->getSetting("kinobi_token"));
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	$result = curl_exec($ch);
-	curl_close ($ch);
-	$token = json_decode($result, true);
+$subs = $kinobi->getSetting("subscription");
+if (!empty($subs['url']) && !empty($subs['token'])) {
+	$subs_resp = fetchJsonArray($subs['url'], $subs['token']);
 }
 
 include "inc/header.php";
-include "inc/dbConnect.php";
+include "inc/patch/database.php";
 
 $sw_title_name_ids = array();
 $ext_attr_keys = array();
 $error_msg = "";
+$success_msg = "";
 
-if (isset($pdo)) {
+// Standalone
+$netsus = isset($conf);
 
-	$stmt = $pdo->prepare('SELECT id FROM titles WHERE source_id = 0 AND id = ?');
-	$stmt->execute([$_GET['id']]);
+if ($pdo) {
+
+	$stmt = $pdo->prepare('SELECT id FROM titles WHERE id = ?');
+	$stmt->execute(array((isset($_GET['id']) ? $_GET['id'] : null)));
 	$title_id = $stmt->fetchColumn();
 
 }
 
 if (!empty($title_id)) {
 
-	if (isset($token['patch'])) {
-		include $token['patch'];
-	}
+	// Software Title
+	$sw_title = $pdo->query('SELECT name, publisher, app_name, bundle_id, modified, current, name_id, enabled, source_id FROM titles WHERE id = "'.$title_id.'"')->fetch(PDO::FETCH_ASSOC);
+	$sw_title['error'] = array();
 
 	// Create Extension Attribute
 	if (isset($_POST['create_ea'])) {
@@ -45,9 +59,10 @@ if (!empty($title_id)) {
 		$ea_script = $_POST['ea_script'][0];
 		$ea_name = $_POST['ea_name'][0];
 		$stmt = $pdo->prepare('INSERT INTO ext_attrs (title_id, key_id, script, name) VALUES (?, ?, ?, ?)');
-		$stmt->execute([$title_id, $ea_key_id, $ea_script, $ea_name]);
+		$stmt->execute(array($title_id, $ea_key_id, $ea_script, $ea_name));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -58,21 +73,22 @@ if (!empty($title_id)) {
 		$ea_script = $_POST['ea_script'][$ea_id];
 		$ea_name = $_POST['ea_name'][$ea_id];
 		$stmt = $pdo->prepare('SELECT key_id FROM ext_attrs WHERE id = ?');
-		$stmt->execute([$ea_id]);
+		$stmt->execute(array($ea_id));
 		$old_key_id = $stmt->fetchColumn();
 		$pdo->beginTransaction();
 		$stmt = $pdo->prepare('UPDATE requirements SET name = ? WHERE name = ?');
-		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt->execute(array($ea_key_id, $old_key_id));
 		$stmt = $pdo->prepare('UPDATE capabilities SET name = ? WHERE name = ?');
-		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt->execute(array($ea_key_id, $old_key_id));
 		$stmt = $pdo->prepare('UPDATE dependencies SET name = ? WHERE name = ?');
-		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt->execute(array($ea_key_id, $old_key_id));
 		$stmt = $pdo->prepare('UPDATE criteria SET name = ? WHERE name = ?');
-		$stmt->execute([$ea_key_id, $old_key_id]);
+		$stmt->execute(array($ea_key_id, $old_key_id));
 		$stmt = $pdo->prepare('UPDATE ext_attrs SET key_id = ?, script = ?, name = ? WHERE id = ?');
-		$stmt->execute([$ea_key_id, $ea_script, $ea_name, $ea_id]);
+		$stmt->execute(array($ea_key_id, $ea_script, $ea_name, $ea_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 		$pdo->commit();
 	}
@@ -83,17 +99,18 @@ if (!empty($title_id)) {
 		$ea_key_id = $_POST['delete_ea_key_id'];
 		$pdo->beginTransaction();
 		$stmt = $pdo->prepare('DELETE FROM requirements WHERE name = ?');
-		$stmt->execute([$ea_key_id]);
+		$stmt->execute(array($ea_key_id));
 		$stmt = $pdo->prepare('DELETE FROM capabilities WHERE name = ?');
-		$stmt->execute([$ea_key_id]);
+		$stmt->execute(array($ea_key_id));
 		$stmt = $pdo->prepare('DELETE FROM dependencies WHERE name = ?');
-		$stmt->execute([$ea_key_id]);
+		$stmt->execute(array($ea_key_id));
 		$stmt = $pdo->prepare('DELETE FROM criteria WHERE name = ?');
-		$stmt->execute([$ea_key_id]);
+		$stmt->execute(array($ea_key_id));
 		$stmt = $pdo->prepare('DELETE FROM ext_attrs WHERE id = ?');
-		$stmt->execute([$ea_id]);
+		$stmt->execute(array($ea_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 		$pdo->commit();
 	}
@@ -102,16 +119,17 @@ if (!empty($title_id)) {
 	if (isset($_POST['create_rqmt'])) {
 		$rqmt_name = $_POST['rqmt_name'][0];
 		$rqmt_operator = $_POST['rqmt_operator'][0];
-		$rqmt_value = "";
+		$rqmt_value = $_POST['rqmt_value'][0];
 		$rqmt_type = $_POST['rqmt_type'][0];
 		$rqmt_order = $_POST['rqmt_order'][0];
 		$rqmt_and = "1";
 		$stmt = $pdo->prepare('UPDATE requirements SET sort_order = sort_order + 1 WHERE title_id = ? AND sort_order >= ?');
-		$stmt->execute([$title_id, $rqmt_order]);
+		$stmt->execute(array($title_id, $rqmt_order));
 		$stmt = $pdo->prepare('INSERT INTO requirements (title_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
-		$stmt->execute([$title_id, $rqmt_name, $rqmt_operator, $rqmt_value, $rqmt_type, $rqmt_and, $rqmt_order]);
+		$stmt->execute(array($title_id, $rqmt_name, $rqmt_operator, $rqmt_value, $rqmt_type, $rqmt_and, $rqmt_order));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -120,11 +138,12 @@ if (!empty($title_id)) {
 		$rqmt_id = $_POST['delete_rqmt'];
 		$rqmt_order = $_POST['delete_rqmt_order'];
 		$stmt = $pdo->prepare('UPDATE requirements SET sort_order = sort_order - 1 WHERE title_id = ? AND sort_order > ?');
-		$stmt->execute([$title_id, $rqmt_order]);
+		$stmt->execute(array($title_id, $rqmt_order));
 		$stmt = $pdo->prepare('DELETE FROM requirements WHERE id = ?');
-		$stmt->execute([$rqmt_id]);
+		$stmt->execute(array($rqmt_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -137,24 +156,39 @@ if (!empty($title_id)) {
 		$patch_reboot = ($_POST['patch_reboot'][0] == "1") ? "1" : "0";
 		$patch_order = $_POST['patch_order'][0];
 		$stmt = $pdo->prepare('UPDATE patches SET sort_order = sort_order + 1 WHERE title_id = ? AND sort_order >= ?');
-		$stmt->execute([$title_id, $patch_order]);
+		$stmt->execute(array($title_id, $patch_order));
 		$stmt = $pdo->prepare('INSERT INTO patches (title_id, version, released, standalone, min_os, reboot, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
-		$stmt->execute([$title_id, $patch_version, $patch_released, $patch_standalone, $patch_min_os, $patch_reboot, $patch_order]);
-		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+		$stmt->execute(array($title_id, $patch_version, $patch_released, $patch_standalone, $patch_min_os, $patch_reboot, $patch_order));
+		if ($stmt->errorCode() == '00000') {
+            $success_msg = "Created Patch Version '<a href=\"managePatch.php?id=".$pdo->lastInsertId()."\">".$patch_version."</a>'.";
+		} else {
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
+	}
+
+	if (isset($subs_resp['upload'])) {
+		include $subs_resp['upload'];
 	}
 
 	// Delete Patch
 	if (isset($_POST['delete_patch'])) {
 		$patch_id = $_POST['delete_patch'];
 		$patch_order = $_POST['delete_patch_order'];
+		$patch_version = $_POST['delete_patch_version'];
 		$stmt = $pdo->prepare('UPDATE patches SET sort_order = sort_order - 1 WHERE title_id = ? AND sort_order > ?');
-		$stmt->execute([$title_id, $patch_order]);
+		$stmt->execute(array($title_id, $patch_order));
 		$stmt = $pdo->prepare('DELETE FROM patches WHERE id = ?');
-		$stmt->execute([$patch_id]);
+		$stmt->execute(array($patch_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
+		}
+		if ($stmt->errorCode() == '00000') {
+			$success_msg = "Deleted Patch Version '".$patch_version."'.";
+		} else {
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -165,19 +199,16 @@ if (!empty($title_id)) {
 	 || isset($_POST['create_rqmt'])
 	 || isset($_POST['delete_rqmt'])
 	 || isset($_POST['create_patch'])
-	 || isset($_POST['delete_patch'])) {
+	 || isset($_POST['delete_patch'])
+	 || !empty($success_msg)) {
 		$title_modified = time();
 		$stmt = $pdo->prepare('UPDATE titles SET modified = ? WHERE id = ?');
-		$stmt->execute([$title_modified, $title_id]);
+		$stmt->execute(array($title_modified, $title_id));
 	}
 
 	// ####################################################################
 	// End of GET/POST parsing
 	// ####################################################################
-
-	// Software Title
-	$sw_title = $pdo->query('SELECT name, publisher, app_name, bundle_id, modified, current, name_id, enabled FROM titles WHERE id = "'.$title_id.'"')->fetch(PDO::FETCH_ASSOC);
-	$sw_title['error'] = array();
 
 	// Software Title Name IDs
 	$sw_title_name_ids = $pdo->query('SELECT name_id FROM titles WHERE id <> "'.$title_id.'" ORDER BY name_id')->fetchAll(PDO::FETCH_COLUMN);
@@ -224,9 +255,10 @@ if (!empty($title_id)) {
 		if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
 			$patch['enabled'] == "0";
 			$disable = $pdo->query('UPDATE patches SET enabled = 0 WHERE id = ?');
-			$disable->execute([$patch['id']]);
+			$disable->execute(array($patch['id']));
 			if ($disable->errorCode() != '00000') {
-				$error_msg = $disable->errorInfo()[2];
+				$errorInfo = $disable->errorInfo();
+				$error_msg = $errorInfo[2];
 			}
 		}
 		array_push($patches, $patch);
@@ -241,15 +273,16 @@ if (!empty($title_id)) {
 	if (sizeof($sw_title['error']) > 0 && $sw_title['enabled'] == "1") {
 		$sw_title['enabled'] = "0";
 		$disable = $pdo->prepare('UPDATE titles SET enabled = 0 WHERE id = ?');
-		$disable->execute([$title_id]);
+		$disable->execute(array($title_id));
 		if ($disable->errorCode() != '00000') {
-			$error_msg = $disable->errorInfo()[2];
+			$errorInfo = $disable->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
 } else {
 
-	$error_msg = "Invalid Software Title ID '".$_GET['id']."'";
+	$error_msg = "Invalid Software Title ID '".(isset($_GET['id']) ? $_GET['id'] : null)."'";
 
 }
 ?>
@@ -258,6 +291,9 @@ if (!empty($title_id)) {
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
 
 			<style>
+				.btn-table {
+					width: 75px;
+				}
 				.checkbox-error {
 					font-size: 17px;
 				}
@@ -290,12 +326,14 @@ if (!empty($title_id)) {
 					.checkbox-error {
 						padding-left: 16px;
 					}
-					#nav-title {
-						left: 220px;
-					}
 					#tab-content {
 						margin-top: 119px;
 					}
+<?php if ($netsus) { ?>
+					#nav-title {
+						left: 220px;
+					}
+<?php } ?>
 				}
 			</style>
 
@@ -310,13 +348,15 @@ if (!empty($title_id)) {
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
 
 			<script type="text/javascript" src="scripts/ace/ace.js"></script>
-
+<?php if (!empty($title_id)) { ?>
 			<script type="text/javascript">
-				var existingIds = [<?php echo "\"".implode('", "', $sw_title_name_ids)."\""; ?>];
-				var existingKeys = [<?php echo "\"".implode('", "', $ext_attr_keys)."\""; ?>];
-				var extAttrKeys = [<?php echo "\"".implode('", "', array_map(function($el){ return $el['key_id']; }, $ext_attrs))."\""; ?>];
 				var titleEnabled = <?php echo $sw_title['enabled']; ?>;
+				var existingIds = [<?php echo (sizeof($sw_title_name_ids) > 0 ? "\"".implode('", "', $sw_title_name_ids)."\"" : ""); ?>];
+				var existingKeys = [<?php echo (sizeof($ext_attr_keys) > 0 ? "\"".implode('", "', $ext_attr_keys)."\"" : ""); ?>];
+				var extAttrKeys = [<?php echo (sizeof($ext_attrs) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['key_id']; }, $ext_attrs))."\"" : ""); ?>];
+				var sizeOfEas = <?php echo sizeof($ext_attrs); ?>;
 				var sizeOfRqmts = <?php echo sizeof($requirements); ?>;
+				var patchVersions = [<?php echo (sizeof($patches) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['version']; }, $patches))."\"" : ""); ?>];
 				var enabledPatches = <?php echo array_sum(array_map(function($el){ return $el['enabled']; }, $patches)); ?>;
 			</script>
 
@@ -382,6 +422,31 @@ if (!empty($title_id)) {
 					toggleTitleEnable();
 					ajaxPost('patchCtl.php?patch_id='+element.value, 'patch_enabled='+element.checked);
 				}
+				function newRqmtModal() {
+					var app_name = document.getElementById('app_name');
+					var bundle_id = document.getElementById('bundle_id');
+					var rqmt_name = document.getElementById('rqmt_name[0]');
+					var rqmt_value = document.getElementById('rqmt_value[0]');
+					if (sizeOfRqmts == 0 && sizeOfEas == 0) { rqmt_name.value = 'Application Bundle ID'; }
+					if (sizeOfRqmts == 0 && sizeOfEas == 1) { rqmt_name.value = extAttrKeys[0]; }
+					selectCriteria(rqmt_name, 'rqmt_type[0]', 'rqmt_operator[0]');
+					if (rqmt_name.value == 'Application Bundle ID') {
+						rqmt_value.value = bundle_id.value;
+					} else {
+						rqmt_value.value = '';
+					}
+					validCriteria('create_rqmt', 'rqmt_order[0]', 'rqmt_name[0]', 'rqmt_operator[0]', 'rqmt_type[0]');
+				}
+				function newPatchModal() {
+					var current = document.getElementById('current');
+					var new_version = document.getElementById('patch_version[0]');
+					if (patchVersions.indexOf(current.value) == -1) {
+						new_version.value = current.value;
+					} else {
+						new_version.value = '';
+					}
+					validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');
+				}
 			</script>
 
 			<script type="text/javascript">
@@ -407,7 +472,7 @@ if (!empty($title_id)) {
 						buttons: [
 							{
 								text: '<span class="glyphicon glyphicon-plus"></span> New',
-								className: 'btn-primary btn-sm',
+								className: 'btn-primary btn-sm btn-table',
 								action: function ( e, dt, node, config ) {
 									$("#create_ea-modal").modal();
 								}
@@ -422,7 +487,7 @@ if (!empty($title_id)) {
 					});
 					$('#patches').DataTable( {
 						buttons: [
-<?php if (isset($token['patch'])) { ?>
+<?php if (isset($subs_resp['upload'])) { ?>
 							{
 								extend: 'collection',
 								text: '<span class="glyphicon glyphicon-share-alt"></span> Import</span>',
@@ -431,7 +496,7 @@ if (!empty($title_id)) {
 									{
 										text: 'Upload JSON',
 										action: function ( e, dt, node, config ) {
-											$("#upload_json-modal").modal();
+											$("#upload_patch-modal").modal();
 										}
 									}
 								]
@@ -439,8 +504,9 @@ if (!empty($title_id)) {
 <?php } ?>
 							{
 								text: '<span class="glyphicon glyphicon-plus"></span> New',
-								className: 'btn-primary btn-sm',
+								className: 'btn-primary btn-sm btn-table',
 								action: function ( e, dt, node, config ) {
+									newPatchModal();
 									$("#create_patch-modal").modal();
 								}
 							}
@@ -459,8 +525,13 @@ if (!empty($title_id)) {
 							{ "orderable": false }
 						]
 					});
+<?php if ($sw_title['source_id'] > 0) { ?>
+					$('#ext_attrs').DataTable().buttons().disable();
+					$('#patches').DataTable().buttons().disable();
+<?php } ?>
 				} );
 			</script>
+<?php } ?>
 
 			<script type="text/javascript">
 				$(document).ready(function(){
@@ -483,7 +554,7 @@ if (!empty($title_id)) {
 			<nav id="nav-title" class="navbar navbar-default navbar-fixed-top">
 				<div style="padding: 19px 20px 1px;">
 					<div class="description"><a href="patchTitles.php">Patch Definitions</a> <span class="glyphicon glyphicon-chevron-right"> </span></div>
-					<h2 id="heading"><?php echo (empty($title_id) ? "Error" : $sw_title['name']); ?></h2>
+					<h2 id="heading"><?php echo (empty($title_id) ? "Error" : htmlentities($sw_title['name'])); ?></h2>
 				</div>
 <?php if (!empty($title_id)) { ?>
 				<div style="padding: 16px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
@@ -517,27 +588,27 @@ if (!empty($title_id)) {
 						<div style="padding: 8px 20px 1px;">
 							<h5 id="name_label"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validString(this, 'name_label');" onKeyUp="validString(this, 'name_label');" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $sw_title['name']; ?>" />
+								<input type="text" class="form-control input-sm" onFocus="validString(this, 'name_label');" onKeyUp="validString(this, 'name_label');" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo htmlentities($sw_title['name']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="publisher_label"><strong>Publisher</strong> <small>Publisher of the patch management software title.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validString(this, 'publisher_label');" onKeyUp="validString(this, 'publisher_label');" onChange="updateString(this, 'titles', 'publisher', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['publisher']; ?>" />
+								<input type="text" class="form-control input-sm" onFocus="validString(this, 'publisher_label');" onKeyUp="validString(this, 'publisher_label');" onChange="updateString(this, 'titles', 'publisher', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo htmlentities($sw_title['publisher']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="app_name_label"><strong>Application Name</strong> <small>Deprecated.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'app_name_label');" onKeyUp="validOrEmptyString(this, 'app_name_label');" onChange="updateOrEmptyString(this, 'titles', 'app_name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['app_name']; ?>" />
+								<input type="text" id="app_name" class="form-control input-sm" onFocus="validOrEmptyString(this, 'app_name_label');" onKeyUp="validOrEmptyString(this, 'app_name_label');" onChange="updateOrEmptyString(this, 'titles', 'app_name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo htmlentities($sw_title['app_name']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="bundle_id_label"><strong>Bundle Identifier</strong> <small>Deprecated.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validOrEmptyString(this, 'bundle_id_label');" onKeyUp="validOrEmptyString(this, 'bundle_id_label');" onChange="updateOrEmptyString(this, 'titles', 'bundle_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo $sw_title['bundle_id']; ?>" />
+								<input type="text" id="bundle_id" class="form-control input-sm" onFocus="validOrEmptyString(this, 'bundle_id_label');" onKeyUp="validOrEmptyString(this, 'bundle_id_label');" onChange="updateOrEmptyString(this, 'titles', 'bundle_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Optional]" value="<?php echo htmlentities($sw_title['bundle_id']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="current_label"><strong>Current Version</strong> <small>Used for reporting the latest version of the patch management software title to Jamf Pro.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['current']; ?>" />
+								<input id="current" type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo htmlentities($sw_title['current']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on this external source.<br><strong>Note:</strong> The <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validNameId(this, 'name_id_label');" onKeyUp="validNameId(this, 'name_id_label');" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $sw_title['name_id']; ?>" />
+								<input type="text" class="form-control input-sm" onFocus="validNameId(this, 'name_id_label');" onKeyUp="validNameId(this, 'name_id_label');" onChange="updateNameId(this, 'titles', 'name_id', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo htmlentities($sw_title['name_id']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 							</div>
 						</div>
 
@@ -560,8 +631,8 @@ if (!empty($title_id)) {
 								<tbody>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 									<tr>
-										<td><a data-toggle="modal" href="#edit_ea-<?php echo $ext_attr['id']; ?>" data-backdrop="static" onClick="existingKeys.splice(existingKeys.indexOf('<?php echo $ext_attr['key_id']; ?>'), 1); eaNameValue = document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]').value; eaKeyValue = document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]').value; eaScriptValue = document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value;"><?php echo $ext_attr['name']; ?></a></td>
-										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_ea-modal" onClick="$('#delete_ea-title').text('<?php echo $ext_attr['name']; ?>'); $('#delete_ea_key_id').val('<?php echo $ext_attr['key_id']; ?>'); $('#delete_ea').val('<?php echo $ext_attr['id']; ?>');">Delete</button></td>
+										<td><a data-toggle="modal" href="#edit_ea-<?php echo $ext_attr['id']; ?>" data-backdrop="static" onClick="existingKeys.splice(existingKeys.indexOf('<?php echo $ext_attr['key_id']; ?>'), 1); eaNameValue = document.getElementById('ea_name[<?php echo $ext_attr['id']; ?>]').value; eaKeyValue = document.getElementById('ea_key_id[<?php echo $ext_attr['id']; ?>]').value; eaScriptValue = document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value;"><?php echo htmlentities($ext_attr['name']); ?></a></td>
+										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_ea-modal" onClick="$('#delete_ea-title').text('<?php echo htmlentities($ext_attr['name']); ?>'); $('#delete_ea_key_id').val('<?php echo $ext_attr['key_id']; ?>'); $('#delete_ea').val('<?php echo $ext_attr['id']; ?>');" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 								</tobdy>
@@ -637,12 +708,12 @@ if (!empty($title_id)) {
 
 										<h5 id="ea_name_label[<?php echo $ext_attr['id']; ?>]"><strong>Display Name</strong> <small>Used on the Jamf Pro Patch Management &gt; Extension Attributes tab.</small></h5>
 										<div class="form-group" style="max-width: 452px;">
-											<input type="text" name="ea_name[<?php echo $ext_attr['id']; ?>]" id="ea_name[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onKeyUp="validString(this, 'ea_name_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" onBlur="validString(this, 'ea_name_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo $ext_attr['name']; ?>" />
+											<input type="text" name="ea_name[<?php echo $ext_attr['id']; ?>]" id="ea_name[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onKeyUp="validString(this, 'ea_name_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" onBlur="validString(this, 'ea_name_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo htmlentities($ext_attr['name']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 										</div>
 
 										<h5 id="ea_key_id_label[<?php echo $ext_attr['id']; ?>]"><strong>Key</strong> <small>Identifier unique within Jamf Pro. It is used by criteria objects and displayed in the Jamf Pro computer inventory information.<!-- <br><strong>Note:</strong> Duplicate keys are not allowed. --></small></h5>
 										<div class="form-group" style="max-width: 452px;">
-											<input type="text" name="ea_key_id[<?php echo $ext_attr['id']; ?>]" id="ea_key_id[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onKeyUp="validEaKeyid(this, 'ea_key_id_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" onBlur="validEaKeyid(this, 'ea_key_id_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo $ext_attr['key_id']; ?>" />
+											<input type="text" name="ea_key_id[<?php echo $ext_attr['id']; ?>]" id="ea_key_id[<?php echo $ext_attr['id']; ?>]" class="form-control input-sm" onKeyUp="validEaKeyid(this, 'ea_key_id_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" onBlur="validEaKeyid(this, 'ea_key_id_label[<?php echo $ext_attr['id']; ?>]'); validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');" placeholder="[Required]" value="<?php echo htmlentities($ext_attr['key_id']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 										</div>
 
 										<h5><strong>Script</strong> <small>Standard extension attribute script which must return a <span style="font-family:monospace;">&lt;result&gt;</span>.</small></h5>
@@ -661,16 +732,22 @@ if (!empty($title_id)) {
 										var editor<?php echo $ext_attr['id']; ?> = ace.edit("ea_script<?php echo $ext_attr['id']; ?>");
 										editor<?php echo $ext_attr['id']; ?>.setShowPrintMargin(false);
 										setModeEditor<?php echo $ext_attr['id']; ?>();
+<?php if ($sw_title['source_id'] > 0) { ?>
+										editor<?php echo $ext_attr['id']; ?>.setReadOnly(true);
+										editor<?php echo $ext_attr['id']; ?>.session.setMode("ace/mode/text");
+<?php } ?>
 										editor<?php echo $ext_attr['id']; ?>.getSession().on('change', function(e) {
 											document.getElementById('ea_script[<?php echo $ext_attr['id']; ?>]').value = editor<?php echo $ext_attr['id']; ?>.getValue();
 											setModeEditor<?php echo $ext_attr['id']; ?>();
 										});
+<?php if ($sw_title['source_id'] == 0) { ?>
 										$('#ea_script<?php echo $ext_attr['id']; ?>').focusin(function() {
 											validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');
 										});
 										$('#ea_script<?php echo $ext_attr['id']; ?>').focusout(function() {
 											validEa('save_ea[<?php echo $ext_attr['id']; ?>]', 'ea_name[<?php echo $ext_attr['id']; ?>]', 'ea_key_id[<?php echo $ext_attr['id']; ?>]');
 										});
+<?php } ?>
 										</script>
 
 									</div>
@@ -735,11 +812,11 @@ if (!empty($title_id)) {
 									<tr>
 										<td>
 											<div class="has-feedback">
-												<input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" /></td>
+												<input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/></td>
 											</div>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);">
+												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($requirement['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -770,7 +847,7 @@ if (!empty($title_id)) {
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" >
+												<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($requirement['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($requirement['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php
@@ -804,22 +881,22 @@ switch($requirement['name']) {
 										</td>
 										<td>
 											<div class="has-feedback">
-												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo $requirement['value']; ?>" />
+												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo htmlentities($requirement['value']); ?>"  <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);">
+												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
 											</div>
 										</td>
-										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_rqmt-modal" onClick="$('#delete_rqmt_order').val('<?php echo $requirement['sort_order']; ?>'); $('#delete_rqmt').val('<?php echo $requirement['id']; ?>');">Delete</button></td>
+										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_rqmt-modal" onClick="$('#delete_rqmt_order').val('<?php echo $requirement['sort_order']; ?>'); $('#delete_rqmt').val('<?php echo $requirement['id']; ?>');" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_rqmt-modal"><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_rqmt-modal" onClick="newRqmtModal();" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>
@@ -866,6 +943,7 @@ switch($requirement['name']) {
 											</select>
 											<input type="hidden" name="rqmt_type[0]" id="rqmt_type[0]" value="recon" />
 											<input type="hidden" name="rqmt_operator[0]" id="rqmt_operator[0]" value="is" />
+											<input type="hidden" name="rqmt_value[0]" id="rqmt_value[0]" value="" />
 										</div>
 
 									</div>
@@ -909,7 +987,20 @@ switch($requirement['name']) {
 								</div>
 							</div>
 
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (!empty($success_msg) ? "" : "hidden"); ?>">
+								<div class="panel-body">
+									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $success_msg; ?></div>
+								</div>
+							</div>
+
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (!empty($error_msg) ? "" : "hidden"); ?>">
+								<div class="panel-body">
+									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $error_msg; ?></div>
+								</div>
+							</div>
+
 							<div class="text-muted" style="font-size: 12px;">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</div>
+							<!-- <pre><?php // print_r($patch_versions); ?></pre> -->
 						</div>
 
 						<div style="padding: 8px 20px 1px; overflow-x: auto;">
@@ -932,7 +1023,7 @@ switch($requirement['name']) {
 										<td>
 <?php if (sizeof($patch['error']) == 0) { ?>
 											<div class="checkbox checkbox-primary checkbox-inline">
-												<input type="checkbox" class="styled" name="enable_patch" id="enable_patch" value="<?php echo $patch['id']; ?>" onChange="togglePatch(this); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($patch['enabled'] == "1") ? "checked" : ""; ?>/>
+												<input type="checkbox" class="styled" name="enable_patch" id="enable_patch" value="<?php echo $patch['id']; ?>" onChange="togglePatch(this); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($patch['enabled'] == "1") ? "checked" : ""; ?> <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 												<label/>
 											</div>
 <?php } else { ?>
@@ -942,12 +1033,12 @@ switch($requirement['name']) {
 <?php } ?>
 										</td>
 										<td><input type="hidden" name="patch_order[<?php echo $patch['id']; ?>]" value="<?php echo $patch['sort_order']; ?>"/><?php echo $patch['sort_order']; ?></td>
-										<td><a href="managePatch.php?id=<?php echo $patch['id']; ?>"><?php echo $patch['version']; ?></a></td>
+										<td><a href="managePatch.php?id=<?php echo $patch['id']; ?>"><?php echo htmlentities($patch['version']); ?></a></td>
 										<td><?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?></td>
-										<td><?php echo $patch['min_os']; ?></td>
+										<td><?php echo htmlentities($patch['min_os']); ?></td>
 										<td><?php echo ($patch['standalone'] == "1" ? "Yes" : "No") ?></td>
 										<td><?php echo ($patch['reboot'] == "1" ? "Yes" : "No") ?></td>
-										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_patch-modal" onClick="$('#delete_patch-title').text('<?php echo $patch['version']; ?>'); $('#delete_patch_order').val('<?php echo $patch['sort_order']; ?>'); $('#delete_patch').val('<?php echo $patch['id']; ?>');">Delete</button></td>
+										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_patch-modal" onClick="$('#delete_patch-title').text('<?php echo htmlentities($patch['version']); ?>'); $('#delete_patch_version').val('<?php echo $patch['version']; ?>'); $('#delete_patch_order').val('<?php echo $patch['sort_order']; ?>'); $('#delete_patch').val('<?php echo $patch['id']; ?>');" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 								</tbody>
@@ -970,7 +1061,7 @@ switch($requirement['name']) {
 
 										<h5 id="patch_version_label[0]"><strong>Version</strong> <small>Version associated with this patch.</small></h5>
 										<div class="form-group">
-											<input type="text" name="patch_version[0]" id="patch_version[0]" class="form-control input-sm" onKeyUp="validString(this, 'patch_version_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validString(this, 'patch_version_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="" />
+											<input type="text" name="patch_version[0]" id="patch_version[0]" class="form-control input-sm" onKeyUp="validVersion(this, 'patch_version_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validVersion(this, 'patch_version_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="" />
 										</div>
 
 										<h5 id="patch_released_label[0]"><strong>Release Date</strong> <small>Date that this patch version was released.</small></h5>
@@ -979,7 +1070,7 @@ switch($requirement['name']) {
 												<span class="input-group-addon input-sm" style="color: #555; background-color: #eee; border: 1px solid #ccc; border-right: 0;">
 													<span class="glyphicon glyphicon-calendar"></span>
 												</span>
-												<input type="text" name="patch_released[0]" id="patch_released[0]" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'patch_released_label[0]');" onKeyUp="validDate(this, 'patch_released_label[0]');" onBlur="validDate(this, 'patch_released_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
+												<input type="text" name="patch_released[0]" id="patch_released[0]" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'patch_released_label[0]');" onKeyUp="validDate(this, 'patch_released_label[0]');" onBlur="validDate(this, 'patch_released_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", time()); ?>" />
 											</div>
 										</div>
 
@@ -991,7 +1082,7 @@ switch($requirement['name']) {
 
 										<h5 id="patch_min_os_label[0]"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 										<div class="form-group">
-											<input type="text" name="patch_min_os[0]" id="patch_min_os[0]" class="form-control input-sm" onKeyUp="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" />
+											<input type="text" name="patch_min_os[0]" id="patch_min_os[0]" class="form-control input-sm" onKeyUp="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" onBlur="validString(this, 'patch_min_os_label[0]'); validPatch('create_patch', 'patch_order[0]', 'patch_version[0]', 'patch_released[0]', 'patch_min_os[0]');" placeholder="[Required]" value="<?php echo (sizeof($patches) > 0 ? $patches[0]['min_os'] : ""); ?>" />
 										</div>
 
 										<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">Yes</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">No</span> specifies that the computer will not be restarted.</small></h5>
@@ -1019,6 +1110,7 @@ switch($requirement['name']) {
 									</div>
 									<div class="modal-body">
 										<input type="hidden" id="delete_patch_order" name="delete_patch_order" value=""/>
+										<input type="hidden" id="delete_patch_version" name="delete_patch_version" value=""/>
 										<div class="text-muted">This action is permanent and cannot be undone.</div>
 									</div>
 									<div class="modal-footer">
@@ -1033,7 +1125,6 @@ switch($requirement['name']) {
 					</div><!-- /.tab-pane -->
 
 				</div> <!-- end .tab-content -->
-
 			</form><!-- end form patchDefinition -->
 <?php } else { ?>
 			<div style="padding: 64px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">

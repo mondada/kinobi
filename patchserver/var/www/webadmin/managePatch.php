@@ -1,23 +1,45 @@
 <?php
 
-include "inc/config.php";
+/**
+ * Kinobi - external patch source for Jamf Pro
+ *
+ * @author      Duncan McCracken <duncan.mccracken@mondada.coma.au>
+ * @copyright   2018-2019 Mondada Pty Ltd
+ * @link        https://mondada.github.io
+ * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
+ * @version     1.2
+ *
+ */
+
+if (file_exists("inc/config.php")) {
+	include "inc/config.php";
+}
 include "inc/auth.php";
-include "inc/functions.php";
+if (file_exists("inc/functions.php")) {
+	include "inc/functions.php";
+}
+include "inc/patch/functions.php";
 
 $title = "Patch";
 
 include "inc/header.php";
-include "inc/dbConnect.php";
+include "inc/patch/database.php";
 
 $patches_select = array();
 $error_msg = "";
 
-if (isset($pdo)) {
+// Standalone
+$netsus = isset($conf);
 
-	$stmt = $pdo->prepare('SELECT patches.id FROM patches JOIN titles ON titles.id = patches.title_id WHERE titles.source_id = 0 AND patches.id = ?');
-	$stmt->execute([$_GET['id']]);
-	$patch_id = $stmt->fetchColumn();
-
+if ($pdo) {
+	$stmt = $pdo->prepare('SELECT patches.id, source_id FROM patches JOIN titles ON titles.id = patches.title_id WHERE patches.id = ?');
+	$stmt->execute(array((isset($_GET['id']) ? $_GET['id'] : null)));
+	while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$patch_id = $result['id'];
+		$source_id = $result['source_id'];
+	}
+} else {
+	$patch_id = null;
 }
 
 if (!empty($patch_id)) {
@@ -27,9 +49,10 @@ if (!empty($patch_id)) {
 		$comp_name = $_POST['comp_name'][0];
 		$comp_version = $_POST['comp_version'][0];
 		$stmt = $pdo->prepare('INSERT INTO components (patch_id, name, version) VALUES (?, ?, ?)');
-		$stmt->execute([$patch_id, $comp_name, $comp_version]);
+		$stmt->execute(array($patch_id, $comp_name, $comp_version));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -37,9 +60,10 @@ if (!empty($patch_id)) {
 	if (isset($_POST['delete_comp'])) {
 		$comp_id = $_POST['delete_comp'];
 		$stmt = $pdo->prepare('DELETE FROM components WHERE id = ?');
-		$stmt->execute([$comp_id]);
+		$stmt->execute(array($comp_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -48,16 +72,17 @@ if (!empty($patch_id)) {
 		$criteria_comp_id = implode($_POST['create_criteria']);
 		$criteria_name = $_POST['new_criteria_name'][$criteria_comp_id];
 		$criteria_operator = $_POST['new_criteria_operator'][$criteria_comp_id];
-		$criteria_value = "";
+		$criteria_value = $_POST['new_criteria_value'][$criteria_comp_id];
 		$criteria_type = $_POST['new_criteria_type'][$criteria_comp_id];
 		$criteria_order = $_POST['new_criteria_order'][$criteria_comp_id];
 		$criteria_and = "1";
 		$stmt = $pdo->prepare('UPDATE criteria SET sort_order = sort_order + 1 WHERE component_id = ? AND sort_order >= ?');
-		$stmt->execute([$criteria_comp_id, $criteria_order]);
+		$stmt->execute(array($criteria_comp_id, $criteria_order));
 		$stmt = $pdo->prepare('INSERT INTO criteria (component_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
-		$stmt->execute([$criteria_comp_id, $criteria_name, $criteria_operator, $criteria_value, $criteria_type, $criteria_and, $criteria_order]);
+		$stmt->execute(array($criteria_comp_id, $criteria_name, $criteria_operator, $criteria_value, $criteria_type, $criteria_and, $criteria_order));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -67,11 +92,12 @@ if (!empty($patch_id)) {
 		$criteria_comp_id = $_POST['delete_criteria_comp_id'];
 		$criteria_order = $_POST['delete_criteria_order'];
 		$stmt = $pdo->prepare('UPDATE criteria SET sort_order = sort_order - 1 WHERE component_id = ? AND sort_order > ?');
-		$stmt->execute([$criteria_comp_id, $criteria_order]);
+		$stmt->execute(array($criteria_comp_id, $criteria_order));
 		$stmt = $pdo->prepare('DELETE FROM criteria WHERE id = ?');
-		$stmt->execute([$criteria_id]);
+		$stmt->execute(array($criteria_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -84,11 +110,12 @@ if (!empty($patch_id)) {
 		$dep_order = $_POST['dep_order'][0];
 		$dep_and = "1";
 		$stmt = $pdo->prepare('UPDATE dependencies SET sort_order = sort_order + 1 WHERE patch_id = ? AND sort_order >= ?');
-		$stmt->execute([$patch_id, $dep_order]);
+		$stmt->execute(array($patch_id, $dep_order));
 		$stmt = $pdo->prepare('INSERT INTO dependencies (patch_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
-		$stmt->execute([$patch_id, $dep_name, $dep_operator, $dep_value, $dep_type, $dep_and, $dep_order]);
+		$stmt->execute(array($patch_id, $dep_name, $dep_operator, $dep_value, $dep_type, $dep_and, $dep_order));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -97,11 +124,12 @@ if (!empty($patch_id)) {
 		$dep_id = $_POST['delete_dep'];
 		$dep_order = $_POST['delete_dep_order'];
 		$stmt = $pdo->prepare('UPDATE dependencies SET sort_order = sort_order - 1 WHERE patch_id = ? AND sort_order > ?');
-		$stmt->execute([$patch_id, $dep_order]);
+		$stmt->execute(array($patch_id, $dep_order));
 		$stmt = $pdo->prepare('DELETE FROM dependencies WHERE id = ?');
-		$stmt->execute([$dep_id]);
+		$stmt->execute(array($dep_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -109,16 +137,17 @@ if (!empty($patch_id)) {
 	if (isset($_POST['create_cap'])) {
 		$cap_name = $_POST['cap_name'][0];
 		$cap_operator = $_POST['cap_operator'][0];
-		$cap_value = "";
+		$cap_value = $_POST['cap_value'][0];
 		$cap_type = $_POST['cap_type'][0];
 		$cap_order = $_POST['cap_order'][0];
 		$cap_and = "1";
 		$stmt = $pdo->prepare('UPDATE capabilities SET sort_order = sort_order + 1 WHERE patch_id = ? AND sort_order >= ?');
-		$stmt->execute([$patch_id, $cap_order]);
+		$stmt->execute(array($patch_id, $cap_order));
 		$stmt = $pdo->prepare('INSERT INTO capabilities (patch_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
-		$stmt->execute([$patch_id, $cap_name, $cap_operator, $cap_value, $cap_type, $cap_and, $cap_order]);
+		$stmt->execute(array($patch_id, $cap_name, $cap_operator, $cap_value, $cap_type, $cap_and, $cap_order));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -127,11 +156,12 @@ if (!empty($patch_id)) {
 		$cap_id = $_POST['delete_cap'];
 		$cap_order = $_POST['delete_cap_order'];
 		$stmt = $pdo->prepare('UPDATE capabilities SET sort_order = sort_order - 1 WHERE patch_id = ? AND sort_order > ?');
-		$stmt->execute([$patch_id, $cap_order]);
+		$stmt->execute(array($patch_id, $cap_order));
 		$stmt = $pdo->prepare('DELETE FROM capabilities WHERE id = ?');
-		$stmt->execute([$cap_id]);
+		$stmt->execute(array($cap_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -140,9 +170,10 @@ if (!empty($patch_id)) {
 		$kill_app_name = $_POST['kill_app_name'][0];
 		$kill_bundle_id = $_POST['kill_bundle_id'][0];
 		$stmt = $pdo->prepare('INSERT INTO kill_apps (patch_id, bundle_id, app_name) VALUES (?, ?, ?)');
-		$stmt->execute([$patch_id, $kill_bundle_id, $kill_app_name]);
+		$stmt->execute(array($patch_id, $kill_bundle_id, $kill_app_name));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -150,9 +181,10 @@ if (!empty($patch_id)) {
 	if (isset($_POST['delete_kill_app'])) {
 		$kill_app_id = $_POST['delete_kill_app'];
 		$stmt = $pdo->prepare('DELETE FROM kill_apps WHERE id = ?');
-		$stmt->execute([$kill_app_id]);
+		$stmt->execute(array($kill_app_id));
 		if ($stmt->errorCode() != '00000') {
-			$error_msg = $stmt->errorInfo()[2];
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
@@ -168,11 +200,11 @@ if (!empty($patch_id)) {
 	 || isset($_POST['create_dep'])
 	 || isset($_POST['delete_dep'])) {
 		$stmt = $pdo->prepare('SELECT title_id FROM patches WHERE id = ?');
-		$stmt->execute([$patch_id]);
+		$stmt->execute(array($patch_id));
 		$title_id = $stmt->fetchColumn();
 		$title_modified = time();
 		$stmt = $pdo->prepare('UPDATE titles SET modified = ? WHERE id = ?');
-		$stmt->execute([$title_modified, $title_id]);
+		$stmt->execute(array($title_modified, $title_id));
 	}
 
 	// ####################################################################
@@ -185,6 +217,9 @@ if (!empty($patch_id)) {
 	$patch['reboot'] = ($patch['reboot'] == "1") ? "1": "0";
 	$patch['enabled'] = ($patch['enabled'] == "1") ? "1" : "0";
 	$patch['error'] = array();
+
+	// Patch Versions
+	$patches = $pdo->query('SELECT version FROM patches WHERE title_id = "'.$patch['title_id'].'" AND id <> "'.$patch_id.'" ORDER BY sort_order')->fetchAll(PDO::FETCH_COLUMN);
 
 	// Kill Applications
 	$kill_apps = $pdo->query('SELECT id, bundle_id, app_name FROM kill_apps WHERE patch_id = "'.$patch_id.'"')->fetchAll(PDO::FETCH_ASSOC);
@@ -234,15 +269,16 @@ if (!empty($patch_id)) {
 	if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
 		$patch['enabled'] = "0";
 		$disable = $pdo->prepare('UPDATE patches SET enabled = 0 WHERE id = ?');
-		$disable->execute([$patch_id]);
+		$disable->execute(array($patch_id));
 		if ($disable->errorCode() != '00000') {
-			$error_msg = $disable->errorInfo()[2];
+			$errorInfo = $disable->errorInfo();
+			$error_msg = $errorInfo[2];
 		}
 	}
 
 } else {
 
-	$error_msg = "Invalid Patch ID '".$_GET["id"]."'";
+	$error_msg = "Invalid Patch ID '".(isset($_GET['id']) ? $_GET['id'] : null)."'";
 
 }
 ?>
@@ -250,6 +286,9 @@ if (!empty($patch_id)) {
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
 
 			<style>
+				.btn-table {
+					width: 75px;
+				}
 				#tab-content {
 					margin-top: 295px;
 				}
@@ -265,12 +304,14 @@ if (!empty($patch_id)) {
 					z-index: 90;
 				}
 				@media(min-width:768px) {
-					#nav-title {
-						left: 220px;
-					}
 					#tab-content {
 						margin-top: 119px;
 					}
+<?php if ($netsus) { ?>
+					#nav-title {
+						left: 220px;
+					}
+<?php } ?>
 				}
 			</style>
 
@@ -278,13 +319,22 @@ if (!empty($patch_id)) {
 			<script type="text/javascript" src="scripts/bootstrap/transition.js"></script>
 			<script type="text/javascript" src="scripts/bootstrap/collapse.js"></script>
 			<script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
-
+<?php if (!empty($patch_id)) { ?>
 			<script type="text/javascript">
-				var extAttrKeys = [<?php echo "\"".implode('", "', array_map(function($el){ return $el['key_id']; }, $ext_attrs))."\""; ?>];
+				var patchVersions = [<?php echo (sizeof($patches) > 0 ? "\"".implode('", "', $patches)."\"" : ""); ?>];
 				var patchEnabled = <?php echo $patch['enabled']; ?>;
+				var extAttrKeys = [<?php echo (sizeof($ext_attrs) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['key_id']; }, $ext_attrs))."\"" : ""); ?>];
+				var sizeOfEas = <?php echo sizeof($ext_attrs); ?>;
+				var sizeOfComps = <?php echo sizeof($components); ?>;
+				var sizeOfCriteria = [];
+<?php foreach ($components as $component) { ?>
+					sizeOfCriteria[<?php echo $component['id']; ?>] = <?php echo sizeof($component['criteria']); ?>;
+<?php } ?>
 				var componentsError = <?php echo (in_array("components", $patch['error']) ? "1" : "0"); ?>;
 				var criteriaError = <?php echo (in_array("criteria", $patch['error']) ? "1" : "0"); ?>;
+				var sizeOfCaps = <?php echo sizeof($capabilities); ?>;
 				var capabilitiesError = <?php echo (in_array("capabilities", $patch['error']) ? "1" : "0"); ?>;
+				var sizeOfKillApps = <?php echo sizeof($kill_apps); ?>;
 			</script>
 
 			<script type="text/javascript" src="scripts/patchValidation.js"></script>
@@ -322,6 +372,69 @@ if (!empty($patch_id)) {
 						patchEnabled = 1;
 					}
 				}
+				function newCompModal() {
+					var version = document.getElementById('version');
+					var comp_name = document.getElementById('comp_name[0]');
+					var comp_version = document.getElementById('comp_version[0]');
+					if (sizeOfComps == 0) {
+						comp_name.value = '<?php echo htmlentities($patch['name']); ?>';
+						comp_version.value = version.value;
+					} else {
+						comp_name.value = '';
+						comp_version.value = '';
+					}
+					validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');
+				}
+				function newCriteriaModal(compId) {
+					var version = document.getElementById('version');
+					var criteria_name = document.getElementById('new_criteria_name['+compId+']');
+					var criteria_value = document.getElementById('new_criteria_value['+compId+']');
+					if (sizeOfCriteria[compId] == 0 && sizeOfEas == 0) { criteria_name.value = 'Application Bundle ID'; }
+					if (sizeOfCriteria[compId] == 1 && sizeOfEas == 0) { criteria_name.value = "Application Version"; }
+					if (sizeOfCriteria[compId] == 0 && sizeOfEas == 1) { criteria_name.value = extAttrKeys[0]; }
+					selectCriteria(criteria_name, 'new_criteria_type['+compId+']', 'new_criteria_operator['+compId+']');
+					switch (criteria_name.value) {
+						case extAttrKeys[0]:
+						case "Application Version":
+							criteria_value.value = version.value;
+							break;
+						case "Application Bundle ID":
+							criteria_value.value = "<?php echo htmlentities($patch['bundle_id']); ?>";
+							break;
+						case "Application Title":
+							criteria_value.value = "<?php echo htmlentities($patch['app_name']); ?>";
+							break;
+						default:
+							criteria_value.value = "";
+					}
+					validCriteria('create_criteria['+compId+']', 'new_criteria_order['+compId+']', 'new_criteria_name['+compId+']', 'new_criteria_operator['+compId+']', 'new_criteria_type['+compId+']');
+				}
+				function newCapModal() {
+					var min_os = document.getElementById("min_os");
+					var cap_name = document.getElementById('cap_name[0]');
+					var cap_operator = document.getElementById('cap_operator[0]');
+					var cap_value = document.getElementById('cap_value[0]');
+					selectCriteria(cap_name, 'cap_type[0]', 'cap_operator[0]');
+					if (sizeOfCaps == 0) {
+						cap_name.value = 'Operating System Version';
+						cap_operator.value = 'greater than or equal';
+					}
+					if (cap_name.value == 'Operating System Version') {
+						cap_value.value = min_os.value;
+					} else {
+						cap_value.value = '';
+					}
+					validCriteria('create_cap', 'cap_order[0]', 'cap_name[0]', 'cap_operator[0]', 'cap_type[0]');
+				}
+				function newKillAppModal() {
+					var kill_app_name = document.getElementById('kill_app_name[0]');
+					var kill_bundle_id = document.getElementById('kill_bundle_id[0]');
+					if (sizeOfKillApps == 0) {
+						kill_app_name.value = "<?php echo htmlentities($patch['app_name']); ?>";
+						kill_bundle_id.value = "<?php echo htmlentities($patch['bundle_id']); ?>";
+					}
+					validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');
+				}
 			</script>
 
 			<script type="text/javascript">
@@ -340,7 +453,7 @@ if (!empty($patch_id)) {
 					});
 				});
 			</script>
-
+<?php } ?>
 			<script type="text/javascript">
 				$(document).ready(function(){
 					$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
@@ -361,7 +474,7 @@ if (!empty($patch_id)) {
 
 			<nav id="nav-title" class="navbar navbar-default navbar-fixed-top">
 				<div style="padding: 19px 20px 1px;">
-					<div class="description"><a href="patchTitles.php">Patch Definitions</a> <span class="glyphicon glyphicon-chevron-right"></span> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right <?php echo (empty($patch_id) ? "hidden" : ""); ?>"></span></div>
+					<div class="description"><a href="patchTitles.php">Patch Definitions</a> <span class="glyphicon glyphicon-chevron-right"></span><?php if (!empty($patch_id)) { ?> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right"></span><?php } ?></div>
 					<h2 id="heading"><?php echo (empty($patch_id) ? "Error" : $patch['version']); ?></h2>
 				</div>
 <?php if (!empty($patch_id)) { ?>
@@ -397,11 +510,11 @@ if (!empty($patch_id)) {
 						<div style="padding: 8px 20px 1px;">
 							<h5 id="sort_order_label"><strong>Sort Order</strong></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validInteger(this, 'sort_order_label');" onKeyUp="validInteger(this, 'sort_order_label');" onChange="updateInteger(this, 'patches', 'sort_order', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['sort_order']; ?>" />
+								<input type="text" class="form-control input-sm" onFocus="validInteger(this, 'sort_order_label');" onKeyUp="validInteger(this, 'sort_order_label');" onChange="updateInteger(this, 'patches', 'sort_order', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="version_label"><strong>Version</strong> <small>Version associated with this patch.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validString(this, 'version_label');" onKeyUp="validString(this, 'version_label');" onChange="updateString(this, 'patches', 'version', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo $patch['version']; ?>" />
+								<input type="text" id="version" class="form-control input-sm" onFocus="validVersion(this, 'version_label');" onKeyUp="validVersion(this, 'version_label');" onChange="updateVersion(this, 'patches', 'version', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo htmlentities($patch['version']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5 id="released_label"><strong>Release Date</strong> <small>Date that this patch version was released.</small></h5>
 							<div class="form-group">
@@ -409,23 +522,23 @@ if (!empty($patch_id)) {
 									<span class="input-group-addon input-sm" style="color: #555; background-color: #eee; border: 1px solid #ccc; border-right: 0;">
 										<span class="glyphicon glyphicon-calendar"></span>
 									</span>
-									<input type="text" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'released_label');" onKeyUp="validDate(this, 'released_label');" onBlur="validDate(this, 'released_label'); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" />
+									<input type="text" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validDate(this, 'released_label');" onKeyUp="validDate(this, 'released_label');" onBlur="validDate(this, 'released_label'); updateDate(this, 'patches', 'released', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", $patch['released']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 								</div>
 							</div>
 							<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">Yes</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">No</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+								<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 									<option value="1" <?php echo ($patch['standalone'] == "1" ? " selected" : "") ?> >Yes</option>
 									<option value="0" <?php echo ($patch['standalone'] == "0" ? " selected" : "") ?> >No</option>
 								</select>
 							</div>
 							<h5 id="min_os_label"><strong>Minimum Operating System</strong> <small>Lowest macOS version capable of installing this patch.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" class="form-control input-sm" onFocus="validString(this, 'min_os_label');" onKeyUp="validString(this, 'min_os_label');" onChange="updateString(this, 'patches', 'min_os', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['min_os']; ?>" />
+								<input type="text" id="min_os" class="form-control input-sm" onFocus="validString(this, 'min_os_label');" onKeyUp="validString(this, 'min_os_label');" onChange="updateString(this, 'patches', 'min_os', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($patch['min_os']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 							</div>
 							<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">Yes</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">No</span> specifies that the computer will not be restarted.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-									<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+									<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 										<option value="0" <?php echo ($patch['reboot'] == "0" ? " selected" : "") ?> >No</option>
 										<option value="1" <?php echo ($patch['reboot'] == "1" ? " selected" : "") ?> >Yes</option>
 									</select>
@@ -451,7 +564,7 @@ if (!empty($patch_id)) {
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="dataTables_paginate">
-											<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create_comp-modal"<?php echo (sizeof($components) > 0 ? " disabled" : "") ?>><span class="glyphicon glyphicon-plus"></span> New</button>
+											<button type="button" class="btn btn-primary btn-sm btn-table" data-toggle="modal" data-target="#create_comp-modal" onClick="newCompModal();" <?php echo (sizeof($components) > 0 || $source_id > 0 ? "disabled" : "") ?>><span class="glyphicon glyphicon-plus"></span> New</button>
 										</div>
 									</div>
 								</div>
@@ -470,15 +583,15 @@ if (!empty($patch_id)) {
 												<tr>
 													<td colspan="3">
 														<div class="has-feedback">
-															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['name']; ?>" />
+															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($component['name']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
 													<td colspan="3">
 														<div class="has-feedback">
-															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $component['version']; ?>" />
+															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($component['version']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
-													<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_comp-modal" onClick="$('#delete_comp').val('<?php echo $component['id']; ?>');">Delete</button></td>
+													<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_comp-modal" onClick="$('#delete_comp').val('<?php echo $component['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button></td>
 												</tr>
 											</tbody>
 											<thead style="background-color: #f9f9f9;">
@@ -508,12 +621,12 @@ if (!empty($patch_id)) {
 												<tr>
 													<td>
 														<div class="has-feedback">
-															<input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" />
+															<input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
 													<td>
 														<div class="has-feedback">
-															<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+															<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 																<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($criteria['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -544,7 +657,7 @@ if (!empty($patch_id)) {
 													</td>
 													<td colspan="2">
 														<div class="has-feedback">
-															<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+															<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 																<option value="is"<?php echo ($criteria['operator'] == "is" ? " selected" : "") ?> >is</option>
 																<option value="is not"<?php echo ($criteria['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php switch($criteria['name']) {
@@ -577,12 +690,12 @@ if (!empty($patch_id)) {
 													</td>
 													<td>
 														<div class="has-feedback">
-															<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $criteria['value']; ?>" />
+															<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo htmlentities($criteria['value']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
 													<td>
 														<div class="has-feedback">
-															<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+															<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 																<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
 																<option value="0"<?php echo ($criteria['is_and'] == "0" ? " selected" : "") ?> >or</option>
 															</select>
@@ -590,12 +703,12 @@ if (!empty($patch_id)) {
 													</td>
 													<td align="right">
 														<input type="hidden" name="criteria_comp_id[<?php echo $criteria['id']; ?>]" value="<?php echo $component['id']; ?>"/>
-														<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_criteria-modal" onClick="$('#delete_criteria_comp_id').val('<?php echo $component['id']; ?>'); $('#delete_criteria_order').val('<?php echo $criteria['sort_order']; ?>'); $('#delete_criteria').val('<?php echo $criteria['id']; ?>');">Delete</button>
+														<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_criteria-modal" onClick="$('#delete_criteria_comp_id').val('<?php echo $component['id']; ?>'); $('#delete_criteria_order').val('<?php echo $criteria['sort_order']; ?>'); $('#delete_criteria').val('<?php echo $criteria['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button>
 													</td>
 												</tr>
 <?php } ?>
 												<tr>
-													<td colspan="7" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_criteria-<?php echo $component['id']; ?>"><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+													<td colspan="7" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_criteria-<?php echo $component['id']; ?>" onClick="newCriteriaModal('<?php echo $component['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 												</tr>
 											</tbody>
 <?php }
@@ -630,18 +743,18 @@ if (sizeof($components) == 0) { ?>
 
 										<h5 id="comp_name_label[0]"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
 										<div class="form-group">
-											<input type="text" name="comp_name[0]" id="comp_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'comp_name_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" onBlur="validString(this, 'comp_name_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="<?php echo (sizeof($components) == 0 ? $patch['name'] : "") ?>"/>
+											<input type="text" name="comp_name[0]" id="comp_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'comp_name_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" onBlur="validString(this, 'comp_name_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="" />
 										</div>
 
 										<h5 id="comp_version_label[0]"><strong>Version</strong> <small>Version associated with this patch.</small></h5>
 										<div class="form-group">
-											<input type="text" name="comp_version[0]" id="comp_version[0]" class="form-control input-sm" onKeyUp="validString(this, 'comp_version_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" onBlur="validString(this, 'comp_version_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="<?php echo (sizeof($components) == 0 ? $patch['version'] : "") ?>"/>
+											<input type="text" name="comp_version[0]" id="comp_version[0]" class="form-control input-sm" onKeyUp="validString(this, 'comp_version_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" onBlur="validString(this, 'comp_version_label[0]'); validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');" placeholder="[Required]" value="" />
 										</div>
 
 									</div>
 									<div class="modal-footer">
 										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="create_comp" id="create_comp" class="btn btn-primary btn-sm" <?php echo (sizeof($components) == 0 && $patch['name'] != "" && $patch['version'] != "" ? "" : "disabled") ?>>Save</button>
+										<button type="submit" name="create_comp" id="create_comp" class="btn btn-primary btn-sm" disabled >Save</button>
 									</div>
 								</div>
 							</div>
@@ -709,6 +822,7 @@ if (sizeof($components) == 0) { ?>
 											</select>
 											<input type="hidden" name="new_criteria_type[<?php echo $component['id']; ?>]" id="new_criteria_type[<?php echo $component['id']; ?>]" value="recon" />
 											<input type="hidden" name="new_criteria_operator[<?php echo $component['id']; ?>]" id="new_criteria_operator[<?php echo $component['id']; ?>]" value="is" />
+											<input type="hidden" name="new_criteria_value[<?php echo $component['id']; ?>]" id="new_criteria_value[<?php echo $component['id']; ?>]" value="" />
 										</div>
 
 									</div>
@@ -767,12 +881,12 @@ if (sizeof($components) == 0) { ?>
 									<tr>
 										<td>
 											<div class="has-feedback">
-												<input type="text" size="3" name="dep_order[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'dependencies', 'sort_order', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $dependency['sort_order']; ?>" />
+												<input type="text" size="3" name="dep_order[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'dependencies', 'sort_order', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $dependency['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'dep_operator[<?php echo $dependency['id']; ?>]', 'dep_type[<?php echo $dependency['id']; ?>]', 'dependencies', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'dep_operator[<?php echo $dependency['id']; ?>]', 'dep_type[<?php echo $dependency['id']; ?>]', 'dependencies', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($dependency['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -803,7 +917,7 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="dep_operator[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'dependencies', 'operator', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+												<select id="dep_operator[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'dependencies', 'operator', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($dependency['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($dependency['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php switch($dependency['name']) {
@@ -836,22 +950,22 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'dependencies', 'value', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $dependency['value']; ?>" />
+												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'dependencies', 'value', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo htmlentities($dependency['value']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($dependency['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($dependency['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
 											</div>
 										</td>
-										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_dep-modal" onClick="$('#delete_dep_order').val('<?php echo $dependency['sort_order']; ?>'); $('#delete_dep').val('<?php echo $dependency['id']; ?>');">Delete</button></td>
+										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_dep-modal" onClick="$('#delete_dep_order').val('<?php echo $dependency['sort_order']; ?>'); $('#delete_dep').val('<?php echo $dependency['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_dep-modal"><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_dep-modal" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>
@@ -961,12 +1075,12 @@ if (sizeof($components) == 0) { ?>
 									<tr>
 										<td>
 											<div class="has-feedback">
-												<input type="text" size="3" name="cap_order[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'capabilities', 'sort_order', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $capability['sort_order']; ?>" />
+												<input type="text" size="3" name="cap_order[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'capabilities', 'sort_order', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $capability['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'cap_operator[<?php echo $capability['id']; ?>]', 'cap_type[<?php echo $capability['id']; ?>]', 'capabilities', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'cap_operator[<?php echo $capability['id']; ?>]', 'cap_type[<?php echo $capability['id']; ?>]', 'capabilities', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($capability['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -997,7 +1111,7 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="cap_operator[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'capabilities', 'operator', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" >
+												<select id="cap_operator[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'capabilities', 'operator', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($capability['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($capability['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php switch($capability['name']) {
@@ -1030,28 +1144,28 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'capabilities', 'value', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo $capability['value']; ?>" />
+												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'capabilities', 'value', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo htmlentities($capability['value']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);">
+												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($capability['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($capability['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
 											</div>
 										</td>
-										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_cap-modal" onClick="$('#delete_cap_order').val('<?php echo $capability['sort_order']; ?>'); $('#delete_cap').val('<?php echo $capability['id']; ?>');">Delete</button></td>
+										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_cap-modal" onClick="$('#delete_cap_order').val('<?php echo $capability['sort_order']; ?>'); $('#delete_cap').val('<?php echo $capability['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_cap-modal"><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_cap-modal" onClick="newCapModal();" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>
 						</div>
 
-						<!-- Delete Capability Modal -->
+						<!-- New Capability Modal -->
 						<div class="modal fade" id="create_cap-modal" tabindex="-1" role="dialog">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
@@ -1092,6 +1206,7 @@ if (sizeof($components) == 0) { ?>
 											</select>
 											<input type="hidden" name="cap_type[0]" id="cap_type[0]" value="recon" />
 											<input type="hidden" name="cap_operator[0]" id="cap_operator[0]" value="is" />
+											<input type="hidden" name="cap_value[0]" id="cap_value[0]" value="" />
 										</div>
 
 									</div>
@@ -1137,7 +1252,7 @@ if (sizeof($components) == 0) { ?>
 								<div class="row">
 									<div class="col-sm-12">
 										<div class="dataTables_paginate">
-											<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create_kill_app-modal"><span class="glyphicon glyphicon-plus"></span> New</button>
+											<button type="button" class="btn btn-primary btn-sm btn-table" data-toggle="modal" data-target="#create_kill_app-modal" onClick="newKillAppModal();" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> New</button>
 										</div>
 									</div>
 								</div>
@@ -1156,15 +1271,15 @@ if (sizeof($components) == 0) { ?>
 												<tr>
 													<td>
 														<div class="has-feedback">
-															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'app_name', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['app_name']; ?>" />
+															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'app_name', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($kill_app['app_name']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
 													<td>
 														<div class="has-feedback">
-															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'bundle_id', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $kill_app['bundle_id']; ?>" />
+															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'kill_apps', 'bundle_id', <?php echo $kill_app['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($kill_app['bundle_id']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
-													<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_kill_app-modal" onClick="$('#delete_kill_app-title').text('<?php echo $kill_app['app_name']; ?>'); $('#delete_kill_app').val('<?php echo $kill_app['id']; ?>');">Delete</button></td>
+													<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_kill_app-modal" onClick="$('#delete_kill_app-title').text('<?php echo htmlentities($kill_app['app_name']); ?>'); $('#delete_kill_app').val('<?php echo $kill_app['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button></td>
 												</tr>
 <?php }
 if (sizeof($kill_apps) == 0) { ?>
@@ -1190,12 +1305,12 @@ if (sizeof($kill_apps) == 0) { ?>
 
 										<h5 id="kill_app_name_label[0]"><strong>Application Name</strong> <small>Name of the application that will be stopped before a patch policy runs.</small></h5>
 										<div class="form-group">
-											<input type="text" name="kill_app_name[0]" id="kill_app_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'kill_app_name_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" onBlur="validString(this, 'kill_app_name_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" />
+											<input type="text" name="kill_app_name[0]" id="kill_app_name[0]" class="form-control input-sm" onKeyUp="validString(this, 'kill_app_name_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" onBlur="validString(this, 'kill_app_name_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" value="" />
 										</div>
 
 										<h5 id="kill_bundle_id_label[0]"><strong>Bundle Identifier</strong> <small>Bundle identifier of the applications that will be stopped before a patch policy runs.</small></h5>
 										<div class="form-group">
-											<input type="text" name="kill_bundle_id[0]" id="kill_bundle_id[0]" class="form-control input-sm" onKeyUp="validString(this, 'kill_bundle_id_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" onBlur="validString(this, 'kill_bundle_id_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" />
+											<input type="text" name="kill_bundle_id[0]" id="kill_bundle_id[0]" class="form-control input-sm" onKeyUp="validString(this, 'kill_bundle_id_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" onBlur="validString(this, 'kill_bundle_id_label[0]'); validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');" placeholder="[Required]" value="" />
 										</div>
 
 									</div>
@@ -1220,7 +1335,7 @@ if (sizeof($kill_apps) == 0) { ?>
 									</div>
 									<div class="modal-footer">
 										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="delete_kill_app" id="delete_kill_app" class="btn btn-danger btn-sm" value="<?php echo $kill_app['id']; ?>">Delete</button>
+										<button type="submit" name="delete_kill_app" id="delete_kill_app" class="btn btn-danger btn-sm" value="">Delete</button>
 									</div>
 								</div>
 							</div>
