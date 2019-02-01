@@ -28,7 +28,6 @@ yum_install() {
 if [[ $(which apt-get 2>&-) != "" ]]; then
 	log "Updating package lists..."
 	apt-get -q update >> $logFile
-# To Do: Check packages for Ubuntu 14, 16, 18
 	log "Installing dependencies..."
 	apt_install apache2-utils
 	apt_install libapache2-mod-php5
@@ -43,7 +42,6 @@ if [[ $(which apt-get 2>&-) != "" ]]; then
 	www_user=www-data
 	www_service=apache2
 elif [[ $(which yum 2>&-) != "" ]]; then
-# To Do: Check packages for CentOS/RHEL 6, 7
 	log "Installing dependencies..."
 	yum_install mod_ssl
 	yum_install php
