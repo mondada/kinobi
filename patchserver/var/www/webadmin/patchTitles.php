@@ -40,6 +40,20 @@ $success_msg = "";
 $netsus = isset($conf);
 
 if ($pdo) {
+	// Remove Software Title
+	if (isset($_POST['remove_title'])) {
+		$rem_title_id = $_POST['remove_title'];
+		$title_name = $_POST['remove_title_name'];
+		$stmt = $pdo->prepare("DELETE FROM titles WHERE id = ?");
+		$stmt->execute([$rem_title_id]);
+		if ($stmt->errorCode() == '00000') {
+			$success_msg = "Removed Software Title: ".$title_name.".";
+		} else {
+			$errorInfo = $stmt->errorInfo();
+			$error_msg = $errorInfo[2];
+		}
+	}
+
 	// Delete Software Title
 	if (isset($_POST['delete_title'])) {
 		$del_title_id = $_POST['delete_title'];
