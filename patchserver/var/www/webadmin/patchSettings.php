@@ -587,19 +587,19 @@ if (empty($api_users)) {
 				function validSubscribe() {
 					var subs_url = document.getElementById('subs_url');
 					var subs_token = document.getElementById('subs_token');
-					if (/^.{1,255}$/.test(subs_url.value)) {
-						hideError(subs_url, 'kinobi_url_label');
+					if (/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/.test(subs_url.value)) {
+						hideError(subs_url, 'subs_url_label');
 					} else {
-						showError(subs_url, 'kinobi_url_label');
+						showError(subs_url, 'subs_url_label');
 					}
 					if (/^.{1,255}$/.test(subs_token.value)) {
-						hideError(subs_token, 'kinobi_token_label');
+						hideError(subs_token, 'subs_token_label');
 					} else {
-						showError(subs_token, 'kinobi_token_label');
+						showError(subs_token, 'subs_token_label');
 					}
-					if (/^.{1,255}$/.test(subs_url.value) && /^.{1,255}$/.test(subs_token.value) || subs_url.value == "" && subs_token.value == "") {
-						hideError(subs_url, 'kinobi_url_label');
-						hideError(subs_token, 'kinobi_token_label');
+					if (/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/.test(subs_url.value) && /^.{1,255}$/.test(subs_token.value) || subs_url.value == "" && subs_token.value == "") {
+						hideError(subs_url, 'subs_url_label');
+						hideError(subs_token, 'subs_token_label');
 						$('#subscribe').prop('disabled', false);
 					} else {
 						$('#subscribe').prop('disabled', true);
@@ -1509,12 +1509,12 @@ if (empty($api_users)) {
 							</div>
 <?php } ?>
 
-							<h5 id="kinobi_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
+							<h5 id="subs_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
 								<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['url']; ?>"/>
 							</div>
 
-							<h5 id="kinobi_token_label"><strong>Token</strong> <small>Auth token for the subscription server.</small></h5>
+							<h5 id="subs_token_label"><strong>Token</strong> <small>Auth token for the subscription server.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
 								<input type="text" name="subs_token" id="subs_token" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['token']; ?>"/>
 							</div>
