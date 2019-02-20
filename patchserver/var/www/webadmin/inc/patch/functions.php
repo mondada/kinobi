@@ -113,6 +113,9 @@ $kinobi = new KinobiConfig();
 if (is_null($kinobi->getSetting("uuid"))) {
 	$kinobi->setSetting("uuid", createUuid());
 }
+if (is_null($kinobi->getSetting("cloud"))) {
+	$kinobi->setSetting("cloud", false);
+}
 if (is_null($kinobi->getSetting("users"))) {
 	$kinobi->setSetting("users", array("webadmin" => array("password" => hash("sha256", "webadmin"), "web" => true)));
 }
