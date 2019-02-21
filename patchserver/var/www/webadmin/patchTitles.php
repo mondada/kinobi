@@ -409,6 +409,26 @@ if (isset($subs_resp['upload'])) { ?>
 				</div>
 				<!-- /.modal -->
 
+				<!-- Remove Title Modal -->
+				<div class="modal fade" id="remove_title-modal" tabindex="-1" role="dialog">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h3 class="modal-title">Remove <span id="remove_title-title">Title</span>?</h3>
+							</div>
+							<div class="modal-body">
+								<div class="text-muted">The title may be re-added from a Kinobi subscription.</div>
+								<input type="hidden" id="remove_title_name" name="remove_title_name" value=""/>
+							</div>
+							<div class="modal-footer">
+								<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
+								<button type="submit" name="remove_title" id="remove_title" class="btn btn-primary btn-sm pull-right" value="">Remove</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- /.modal -->
+
 			</form> <!-- end form patchTitle -->
 <?php } else { ?>
 			<div style="padding: 79px 20px 1px; background-color: #f9f9f9;">
