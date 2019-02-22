@@ -51,6 +51,9 @@ function formatSize($size, $precision = 1) {
 $service = (isset($conf) ? $conf->getSetting("patch") == "enabled" : true);
 $dashboard = (isset($conf) ? $conf->getSetting("showpatch") != "false" : true);
 
+// Cloud Configuration
+$cloud = $kinobi->getSetting("cloud");
+
 // Get Retention or Migrate from Webadmin Config
 $retention = (isset($conf) ? $conf->getSetting("retention") : "");
 if (!empty($retention)) {
@@ -343,6 +346,10 @@ foreach ($users as $key => $value) {
 		array_push($api_users, $key);
 	}
 }
+if (sizeof($web_users) == 1 && isset($users[implode($web_users)]['expires'])) {
+	unset($users[implode($web_users)]['expires']);
+	$kinobi->setSetting("users", $users);
+}
 
 // API Security
 $api = $kinobi->getSetting("api");
@@ -368,6 +375,8 @@ if (empty($api_users)) {
 				#tab-content {
 <?php if ($netsus > 4) { ?>
 					margin-top: 341px;
+<?php } elseif ($cloud) { ?>
+					margin-top: 252px;
 <?php } else { ?>
 					margin-top: 295px;
 <?php } ?>
@@ -885,9 +894,13 @@ if (empty($api_users)) {
 						<label><strong>Show in Dashboard</strong><br><span style="font-size: 75%; color: #777;">Display service status in the NetSUS dashboard.</span></label>
 					</div>
 					<ul class="nav nav-tabs nav-justified" id="top-tabs" style="margin-bottom: -1px;">
-						<li class="active"><a class="tab-font" href="#users-tab" role="tab" data-toggle="tab">Authentication</a></li>
+<?php if (isset($subs_resp['endpoint']) || $netsus == 0) { ?>
+						<li><a class="tab-font" href="#users-tab" role="tab" data-toggle="tab">Authentication</a></li>
+<?php }
+if (!$cloud) { ?>
 						<li><a class="tab-font" href="#database-tab" role="tab" data-toggle="tab" <?php echo (empty($pdo_error) ? "" : "style=\"color: #a94442;\"") ?>><span id="database-tab-icon" class="glyphicon glyphicon-exclamation-sign <?php echo (empty($pdo_error) ? "hidden" : "") ?>"></span> Database</a></li>
-						<li><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="schedule-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Backup</a></li>
+<?php } ?>
+						<li class="active"><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="schedule-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Backup</a></li>
 						<li><a class="tab-font" href="#restore-tab" role="tab" data-toggle="tab">Restore</a></li>
 						<li><a class="tab-font" href="#subscription-tab" role="tab" data-toggle="tab"><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "hidden" : "")) : "hidden"); ?>"></span> Subscription</a></li>
 					</ul>
@@ -898,7 +911,8 @@ if (empty($api_users)) {
 
 				<div id="tab-content" class="tab-content">
 
-					<div class="tab-pane active fade in" id="users-tab">
+<?php if (isset($subs_resp['endpoint']) || $netsus == 0) { ?>
+					<div class="tab-pane fade in" id="users-tab">
 
 						<div style="padding: 9px 20px 1px;">
 							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($api_error) ? "hidden" : ""); ?>">
@@ -922,9 +936,9 @@ if (empty($api_users)) {
 										<th>Token</th>
 										<th><!-- Warning --></th>
 										<th>Expires</th>
-										<th class="<?php echo ($netsus > 0 ? "hidden" : ""); ?>">Web Admin</th>
-										<th>API Read</th>
-										<th class="<?php echo (isset($subs_resp['endpoint']) ? "" : "hidden"); ?>">API Write</th>
+										<th><?php echo ($netsus > 0 ? "" : "Web Admin"); ?></th>
+										<th><?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "API Read" : "" : ""); ?></th>
+										<th><?php echo (isset($subs_resp['endpoint']) ? "API Write" : ""); ?></th>
 										<th><!-- Delete --></th>
 									</tr>
 								</thead>
@@ -953,24 +967,24 @@ if (empty($api_users)) {
 											<div class="dropdown">
 												<a href="#" id="expiry_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['expires']) ? gmdate("Y-m-d\TH:i:s\Z", $value['expires']) : "&lt;Never&gt;"); ?></a>
 												<ul class="dropdown-menu" aria-labelledby="expiry_<?php echo $key; ?>">
-													<li><a data-toggle="modal" href="#reset_expiry-modal" onClick="$('#reset_expiry-title').text('<?php echo $key; ?>'); $('#reset_expires').val('<?php echo (empty($value['expires']) ? "" : gmdate("Y-m-d\TH:i:s\Z", $value['expires'])); ?>'); $('#reset_expiry').val('<?php echo $key; ?>');"><?php echo (isset($value['expires']) ? "Change" : "Set"); ?></a></li>
+													<li class="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>"><a data-toggle="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "" : "modal") : "modal"); ?>" href="#reset_expiry-modal" onClick="$('#reset_expiry-title').text('<?php echo $key; ?>'); $('#reset_expires').val('<?php echo (empty($value['expires']) ? "" : gmdate("Y-m-d\TH:i:s\Z", $value['expires'])); ?>'); $('#reset_expiry').val('<?php echo $key; ?>');"><?php echo (isset($value['expires']) ? "Change" : "Set"); ?></a></li>
 												</ul>
 											</div>
 										</td>
-										<td class="<?php echo ($netsus == 0 ? "" : "hidden"); ?>">
-											<div class="checkbox checkbox-primary checkbox-inline">
+										<td>
+											<div class="checkbox checkbox-primary checkbox-inline <?php echo ($netsus == 0 ? "" : "hidden"); ?>">
 												<input type="checkbox" class="styled" name="web_ui" id="web_ui" value="<?php echo $key; ?>" onChange="toggleWebAdmin(this);" <?php echo (isset($value['web']) ? ($value['web'] ? "checked" : "") : ""); ?> <?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>/>
 												<label/>
 											</div>
 										</td>
 										<td>
-											<div class="checkbox checkbox-primary checkbox-inline">
+											<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "" : "hidden" : "hidden"); ?>">
 												<input type="checkbox" class="styled" name="api_ro" id="api_ro" value="<?php echo $key; ?>" onChange="toggleAPIRead(this);" <?php echo (isset($value['api']) ? "checked" : ""); ?> <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "disabled" : "") : ""); ?>/>
 												<label/>
 											</div>
 										</td>
-										<td class="<?php echo (isset($subs_resp['endpoint']) ? "" : "hidden"); ?>">
-											<div class="checkbox checkbox-primary checkbox-inline">
+										<td>
+											<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['endpoint']) ? "" : "hidden"); ?>">
 												<input type="checkbox" class="styled" name="api_rw" id="api_rw" value="<?php echo $key; ?>" onChange="toggleAPIWrite(this);" <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "checked" : "") : ""); ?>/>
 												<label/>
 											</div>
@@ -986,6 +1000,7 @@ if (empty($api_users)) {
 
 						<hr>
 
+<?php if (isset($subs_resp['endpoint'])) { ?>
 						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
 							<h5><strong>API Authentication Type</strong> <small>Authentication type to use for API endpoints.</small></h5>
 							<div class="form-group" style="max-width: 449px;">
@@ -1000,22 +1015,23 @@ if (empty($api_users)) {
 
 						<div style="padding: 9px 20px 1px;">
 							<div class="checkbox checkbox-primary">
-								<input name="api_reqauth" id="api_reqauth" class="styled" type="checkbox" value="true" onChange="toggleAPIAccess();" <?php echo ($api['reqauth'] ? "checked" : ""); ?> <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
-								<label><strong>Require API Authentication</strong><br><span style="font-size: 75%; color: #777;">Require authentication for API endpoints.<br><strong>Note:</strong> Jamf Pro does not currently support authentication for reading from external patch sources.</span></label>
-							</div>
-						</div>
-<?php if (isset($subs_resp['endpoint'])) { ?>
-						<hr>
-
-						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
-							<div class="checkbox checkbox-primary">
 								<input name="api_auto" id="api_auto" class="styled" type="checkbox" value="true" onChange="toggleAPIAuto();" <?php echo ($api['auto'] ? "checked" : ""); ?>>
 								<label><strong>API Auto-Enable</strong><br><span style="font-size: 75%; color: #777;">Automatically enable items imported via the API.</span></label>
 							</div>
 						</div>
+<?php if (isset($subs_resp['type']) && $subs_resp['type'] == "Server") { ?>
+						<hr>
+
+						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
+							<div class="checkbox checkbox-primary">
+								<input name="api_reqauth" id="api_reqauth" class="styled" type="checkbox" value="true" onChange="toggleAPIAccess();" <?php echo ($api['reqauth'] ? "checked" : ""); ?> <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
+								<label><strong>Require API Authentication</strong><br><span style="font-size: 75%; color: #777;">Require authentication for API endpoints.<br><strong>Note:</strong> Jamf Pro does not currently support authentication for reading from external patch sources.</span></label>
+							</div>
+						</div>
 
 						<hr>
-<?php } ?>
+<?php }
+} ?>
 
 						<!-- Add User Modal -->
 						<div class="modal fade" id="create_user-modal" tabindex="-1" role="dialog">
@@ -1133,7 +1149,9 @@ if (empty($api_users)) {
 						<!-- /.modal -->
 
 					</div> <!-- /.tab-pane -->
+<?php } ?>
 
+<?php if (!$cloud) { ?>
 					<div class="tab-pane fade in" id="database-tab">
 
 						<div style="padding: 9px 20px 16px;">
@@ -1143,13 +1161,6 @@ if (empty($api_users)) {
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo "Connected to: ".($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS)); ?></div>
 								</div>
 							</div>
-<?php // if (isset($pdo_message)) { ?>
-							<!-- <div style="margin-top: 1px; margin-bottom: 16px; border-color: #1b6d85;" class="panel panel-info">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-info glyphicon glyphicon-info-sign" style="padding-right: 12px;"></span><?php // echo $pdo_message; ?></div>
-								</div>
-							</div> -->
-<?php // } ?>
 <?php } else { ?>
 							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
 								<div class="panel-body">
@@ -1213,8 +1224,9 @@ if (empty($api_users)) {
 						</div>
 
 					</div> <!-- /.tab-pane -->
+<?php } ?>
 
-					<div class="tab-pane fade in" id="backup-tab">
+					<div class="tab-pane active fade in" id="backup-tab">
 
 						<div style="padding: 9px 20px 16px;">
 							<div id="schedule-alert-msg" style="margin-top: 11px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
@@ -1351,7 +1363,7 @@ if (empty($api_users)) {
 								</div>
 							</div>
 
-							<h5><strong>Available Backups</strong> <small>Click the backup filename to download a backup archive.<br>Backup archives are saved in <a data-toggle="modal" href="#backup_path-modal"><span style="font-family:monospace;"><?php echo $backup['path']; ?></span></a> on this server.</small></h5>
+							<h5><strong>Available Backups</strong> <small>Click the backup filename to download a backup archive.<?php if (!$cloud) { ?><br>Backup archives are saved in <a data-toggle="modal" href="#backup_path-modal"><span style="font-family:monospace;"><?php echo $backup['path']; ?></span></a> on this server.<?php } ?></small></h5>
 							
 						</div>
 
@@ -1507,7 +1519,8 @@ if (empty($api_users)) {
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expired: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
 								</div>
 							</div>
-<?php } ?>
+<?php }
+if (!$cloud) { ?>
 
 							<h5 id="subs_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
@@ -1524,7 +1537,7 @@ if (empty($api_users)) {
 							</div>
 						</div>
 
-<?php if (isset($subs_resp['endpoint'])) { ?>
+<?php if (isset($subs_resp['type']) && $subs_resp['type'] == "Server") { ?>
 						<hr>
 
 						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
@@ -1540,7 +1553,8 @@ if (empty($api_users)) {
 						</div>
 
 						<hr>
-<?php } ?>
+<?php }
+} ?>
 					</div> <!-- /.tab-pane -->
 
 				</div> <!-- end .tab-content -->
