@@ -784,7 +784,8 @@ if (empty($api_users)) {
 			<script type="text/javascript">
 				$(function () {
 					$('#add_expires_datepicker').datetimepicker({
-						format: 'YYYY-MM-DDTHH:mm:ss\\Z'
+						format: 'YYYY-MM-DDTHH:mm:ss\\Z',
+						minDate: moment().add(1, 'days')
 					});
 				});
 			</script>
@@ -792,7 +793,8 @@ if (empty($api_users)) {
 			<script type="text/javascript">
 				$(function () {
 					$('#reset_expires_datepicker').datetimepicker({
-						format: 'YYYY-MM-DDTHH:mm:ss\\Z'
+						format: 'YYYY-MM-DDTHH:mm:ss\\Z',
+						minDate: moment().add(1, 'days')
 					});
 				});
 			</script>
