@@ -684,6 +684,8 @@ if (!empty($patch_id)) {
 <?php default: ?>
 																<option value="like"<?php echo ($criteria['operator'] == "like" ? " selected" : "") ?> >like</option>
 																<option value="not like"<?php echo ($criteria['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+																<option value="matches regex"<?php echo ($criteria['operator'] == "matches regex" ? " selected" : "") ?> >matches regex</option>
+																<option value="does not match regex"<?php echo ($criteria['operator'] == "does not match regex" ? " selected" : "") ?> >does not match regex</option>
 <?php } ?>
 															</select>
 														</div>
@@ -944,6 +946,8 @@ if (sizeof($components) == 0) { ?>
 <?php default: ?>
 													<option value="like"<?php echo ($dependency['operator'] == "like" ? " selected" : "") ?> >like</option>
 													<option value="not like"<?php echo ($dependency['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+													<option value="matches regex"<?php echo ($dependency['operator'] == "matches regex" ? " selected" : "") ?> >matches regex</option>
+													<option value="does not match regex"<?php echo ($dependency['operator'] == "does not match regex" ? " selected" : "") ?> >does not match regex</option>
 <?php } ?>
 												</select>
 											</div>
@@ -1138,6 +1142,8 @@ if (sizeof($components) == 0) { ?>
 <?php default: ?>
 													<option value="like"<?php echo ($capability['operator'] == "like" ? " selected" : "") ?> >like</option>
 													<option value="not like"<?php echo ($capability['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+													<option value="matches regex"<?php echo ($capability['operator'] == "matches regex" ? " selected" : "") ?> >matches regex</option>
+													<option value="does not match regex"<?php echo ($capability['operator'] == "does not match regex" ? " selected" : "") ?> >does not match regex</option>
 <?php } ?>
 												</select>
 											</div>

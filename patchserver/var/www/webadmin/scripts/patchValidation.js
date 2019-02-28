@@ -212,7 +212,7 @@ function updateCriteria(element, operatorId, typeId, table, row_id, offset = fal
 			var options = ["is", "is not", "more than", "less than"];
 			break;
 		default:
-			var options = ["is", "is not", "like", "not like"];
+			var options = ["is", "is not", "like", "not like", "matches regex", "does not match regex"];
 	}
 	var operator = document.getElementById(operatorId);
 	var current = operator.value;

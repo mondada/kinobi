@@ -875,6 +875,8 @@ switch($requirement['name']) {
 <?php default: ?>
 													<option value="like"<?php echo ($requirement['operator'] == "like" ? " selected" : "") ?> >like</option>
 													<option value="not like"<?php echo ($requirement['operator'] == "not like" ? " selected" : "") ?> >not like</option>
+													<option value="matches regex"<?php echo ($requirement['operator'] == "matches regex" ? " selected" : "") ?> >matches regex</option>
+													<option value="does not match regex"<?php echo ($requirement['operator'] == "does not match regex" ? " selected" : "") ?> >does not match regex</option>
 <?php } ?>
 												</select>
 											</div>
