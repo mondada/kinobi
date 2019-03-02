@@ -11,8 +11,8 @@
  *
  */
 
-$subscription = $kinobi->getSetting("subscription");
-$last_checkin = (null !== $kinobi->getSetting("lastcheckin") ? $kinobi->getSetting("lastcheckin") : 0);
+$subs = $kinobi->getSetting("subscription");
+$last_checkin = (isset($subs['lastcheckin']) ? $subs['lastcheckin'] : 0);
 
 // Remove Expired Subscription
 if (!empty($subs_resp) && $subs_resp['timestamp'] - (14*24*60*60) >= $subs_resp['expires'] || empty($subs['url']) && empty($subs['token'])) {
@@ -22,7 +22,7 @@ if (!empty($subs_resp) && $subs_resp['timestamp'] - (14*24*60*60) >= $subs_resp[
 	}
 }
 
-if (isset($subs_resp['source']) && $last_checkin + $subscription['refresh'] < time()) {
+if (isset($subs_resp['source']) && $last_checkin + $subs['refresh'] < time()) {
 	require_once $subs_resp['functions'];
 
     // Get Remote /software Endpoint
@@ -50,5 +50,6 @@ if (isset($subs_resp['source']) && $last_checkin + $subscription['refresh'] < ti
         }
     }
 
-    $kinobi->setSetting("lastcheckin", time());
+	$subs['lastcheckin'] = time();
+    $kinobi->setSetting("subscription", $subs);
 }

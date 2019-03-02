@@ -126,7 +126,7 @@ if (is_null($kinobi->getSetting("backup"))) {
 	$kinobi->setSetting("backup", array("path" => dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/backup", "retention" => 7));
 }
 if (is_null($kinobi->getSetting("subscription"))) {
-	$kinobi->setSetting("subscription", array("url" => null, "token" => null, "refresh" => 3600));
+	$kinobi->setSetting("subscription", array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0));
 }
 if (is_null($kinobi->getSetting("api"))) {
 	$kinobi->setSetting("api", array("auto" => true, "reqauth" => false, "authtype" => "basic"));

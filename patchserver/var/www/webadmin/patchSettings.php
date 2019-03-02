@@ -235,10 +235,10 @@ if (isset($_POST['restore'])) {
 
 // Subscription
 if (isset($_POST['subscribe'])) {
-	$subscription = $kinobi->getSetting("subscription");
-	$subscription['url'] = (empty($_POST['subs_url']) ? null : $_POST['subs_url']);
-	$subscription['token'] = (empty($_POST['subs_token']) ? null : $_POST['subs_token']);
-	$kinobi->setSetting("subscription", $subscription);
+	$subs = $kinobi->getSetting("subscription");
+	$subs['url'] = (empty($_POST['subs_url']) ? null : $_POST['subs_url']);
+	$subs['token'] = (empty($_POST['subs_token']) ? null : $_POST['subs_token']);
+	$kinobi->setSetting("subscription", $subs);
 }
 
 // Create User
