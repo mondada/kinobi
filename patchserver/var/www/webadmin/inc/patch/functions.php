@@ -125,9 +125,76 @@ if (is_null($kinobi->getSetting("pdo"))) {
 if (is_null($kinobi->getSetting("backup"))) {
 	$kinobi->setSetting("backup", array("path" => dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/backup", "retention" => 7));
 }
-if (is_null($kinobi->getSetting("api"))) {
-	$kinobi->setSetting("api", array("auto" => true, "reqauth" => false, "authtype" => "basic"));
+
+
+// Settings functions
+
+/**
+ * Get Subscription Settings
+ *
+ * @param  object  $object  PDO database connection / Kinobi Settings Object
+ *
+ * @return array Returns an array.
+ */
+function getSettingSubscription($object)
+{
+	// $settings = $object->getSetting("subscription");
+	$settings = $object->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+
+	if (!$settings) {
+		$settings = array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0);
+	}
+
+	return $settings;
 }
+
+/**
+ * Set Subscription Settings
+ *
+ * @param  object  $object  PDO database connection / Kinobi Settings Object
+ * @param  array   $array   Subscription Settings
+ */
+function setSettingSubscription($object, $settings)
+{
+	// $object->setSetting("subscription", $settings);
+	$object->exec("DELETE FROM subscription");
+	$stmt = $object->prepare('INSERT INTO subscription (url, token, refresh, lastcheckin) VALUES (?, ?, ?, ?)');
+	$stmt->execute(array($settings['url'], $settings['token'], $settings['refresh'], $settings['lastcheckin']));
+}
+
+/**
+ * Get API Settings
+ *
+ * @param  object  $object  PDO database connection / Kinobi Settings Object
+ *
+ * @return array Returns an array.
+ */
+function getSettingApi($object)
+{
+	// $settings = $object->getSetting("api");
+	$settings = $object->query("SELECT authtype, auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+
+	if (!$settings) {
+		$settings = array("authtype" => "basic", "auto" => true, "reqauth" => false);
+	}
+
+	return $settings;
+}
+
+/**
+ * Set API Settings
+ *
+ * @param  object  $object  PDO database connection / Kinobi Settings Object
+ * @param  array   $array   API Settings
+ */
+function setSettingApi($object, $settings)
+{
+	// $object->setSetting("api", $settings);
+	$object->exec("DELETE FROM api");
+	$stmt = $object->prepare('INSERT INTO api (authtype, auto, reqauth) VALUES (?, ?, ?)');
+	$stmt->execute(array($settings['authtype'], (int)$settings['auto'], (int)$settings['reqauth']));
+}
+
 
 // Common Functions
 
@@ -166,39 +233,6 @@ function fetchJsonArray($url, $token = null)
     $title = curl_exec($ch);
     curl_close($ch);
     return json_decode($title, true);
-}
-
-/**
- * Get Subscription Settings
- *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
- *
- * @return array Returns an array.
- */
-function getSettingSubscription($object)
-{
-	// $settings = $object->getSetting("subscription");
-	$settings = $object->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-
-	if (!$settings) {
-		$settings = array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0);
-	}
-
-	return $settings;
-}
-
-/**
- * Set Subscription Settings
- *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
- * @param  array   $array   Subscription Settings
- */
-function setSettingSubscription($object, $settings)
-{
-	// $object->setSetting("subscription", $settings);
-	$object->exec("DELETE FROM subscription");
-	$stmt = $object->prepare('INSERT INTO subscription (url, token, refresh, lastcheckin) VALUES (?, ?, ?, ?)');
-	$stmt->execute(array($settings['url'], $settings['token'], $settings['refresh'], $settings['lastcheckin']));
 }
 
 /**

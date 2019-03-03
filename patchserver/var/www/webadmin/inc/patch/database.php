@@ -155,6 +155,7 @@ try {
   api tinyint(1)
 )" . $engine . $charset;
 	$pdo->exec($sql);
+*/
 
 	$sql = "CREATE TABLE IF NOT EXISTS api (
   authtype varchar(255) NOT NULL DEFAULT('basic'),
@@ -162,7 +163,6 @@ try {
   reqauth tinyint(1) NOT NULL DEFAULT(0)
 )" . $engine . $charset;
 	$pdo->exec($sql);
-*/
 
 	$sql = "CREATE TABLE IF NOT EXISTS subscription (
   url varchar(255),
