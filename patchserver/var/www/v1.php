@@ -29,7 +29,7 @@ $app = new \Slim\Slim();
 $app->service = (isset($conf) ? $conf->getSetting("patch") !== "disabled" : true);
 
 // Authorization
-$api = $kinobi->getSetting("api");
+$api = getSettingApi($pdo);
 
 $app->authorzied = ($api['reqauth'] ? false : "0");
 

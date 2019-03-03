@@ -121,31 +121,31 @@ if (!($_SESSION['isAuthUser'])) {
 
 	// API Authentication Type
 	if (isset($_POST['api_authtype'])) {
-		$api = $kinobi->getSetting("api");
+		$api = getSettingApi($pdo);
 		$api['authtype'] = $_POST['api_authtype'];
-		$kinobi->setSetting("api", $api);
+		setSettingApi($pdo, $api);
 	}
 
 	// Require API Authentication
 	if (isset($_POST['api_reqauth'])) {
-		$api = $kinobi->getSetting("api");
+		$api = getSettingApi($pdo);
 		if ($_POST['api_reqauth'] == "true") {
 			$api['reqauth'] = true;
 		} else {
 			$api['reqauth'] = false;
 		}
-		$kinobi->setSetting("api", $api);
+		setSettingApi($pdo, $api);
 	}
 
 	// API Auto-Enable
 	if (isset($_POST['api_auto'])) {
-		$api = $kinobi->getSetting("api");
+		$api = getSettingApi($pdo);
 		if ($_POST['api_auto'] == "true") {
 			$api['auto'] = true;
 		} else {
 			$api['auto'] = false;
 		}
-		$kinobi->setSetting("api", $api);
+		setSettingApi($pdo, $api);
 	}
 
 	if (isset($_POST['subs_refresh'])) {

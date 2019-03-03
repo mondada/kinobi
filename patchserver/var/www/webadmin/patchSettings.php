@@ -352,14 +352,14 @@ if (sizeof($web_users) == 1 && isset($users[implode($web_users)]['expires'])) {
 }
 
 // API Security
-$api = $kinobi->getSetting("api");
-if (empty($api_tokens) && $api['token']) {
+$api = getSettingApi($pdo);
+if (empty($api_tokens) && $api['authtype'] == "token") {
 	$api['authtype'] = "basic";
-	$kinobi->setSetting("api", $api);
+	setSettingApi($pdo, $api);
 }
 if (empty($api_users)) {
 	$api['reqauth'] = false;
-	$kinobi->setSetting("api", $api);
+	setSettingApi($pdo, $api);
 }
 ?>
 
