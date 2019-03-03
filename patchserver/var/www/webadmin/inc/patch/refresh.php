@@ -11,7 +11,7 @@
  *
  */
 
-$subs = $kinobi->getSetting("subscription");
+$subs = getSettingSubscription($pdo);
 $last_checkin = (isset($subs['lastcheckin']) ? $subs['lastcheckin'] : 0);
 
 // Remove Expired Subscription
@@ -51,5 +51,5 @@ if (isset($subs_resp['source']) && $last_checkin + $subs['refresh'] < time()) {
     }
 
 	$subs['lastcheckin'] = time();
-    $kinobi->setSetting("subscription", $subs);
+    setSubscriptionSettings($pdo, $subs);
 }

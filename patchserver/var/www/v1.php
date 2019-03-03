@@ -85,7 +85,7 @@ $app->bad_request = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">" . PHP
 
 // Subscription
 $subs_resp = false;
-$subs = $kinobi->getSetting("subscription");
+$subs = getSettingSubscription($pdo);
 if (!empty($subs['url']) && !empty($subs['token'])) {
     $subs_resp = fetchJsonArray($subs['url'], $subs['token']);
 }

@@ -235,10 +235,10 @@ if (isset($_POST['restore'])) {
 
 // Subscription
 if (isset($_POST['subscribe'])) {
-	$subs = $kinobi->getSetting("subscription");
+	$subs = getSettingSubscription($pdo);
 	$subs['url'] = (empty($_POST['subs_url']) ? null : $_POST['subs_url']);
 	$subs['token'] = (empty($_POST['subs_token']) ? null : $_POST['subs_token']);
-	$kinobi->setSetting("subscription", $subs);
+	setSubscriptionSettings($pdo, $subs);
 }
 
 // Create User
@@ -328,7 +328,7 @@ if (isset($schedule_str)) {
 }
 
 // Subscription
-$subs = $kinobi->getSetting("subscription");
+$subs = getSettingSubscription($pdo);
 if (!empty($subs['url']) && !empty($subs['token'])) {
 	$subs_resp = fetchJsonArray($subs['url'], $subs['token']);
 }

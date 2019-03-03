@@ -149,9 +149,9 @@ if (!($_SESSION['isAuthUser'])) {
 	}
 
 	if (isset($_POST['subs_refresh'])) {
-		$subs = $kinobi->getSetting("subscription");
+		$subs = getSettingSubscription($pdo);
 		$subs['refresh'] = $_POST['subs_refresh'];
-		$kinobi->setSetting("subscription", $subs);
+		setSubscriptionSettings($pdo, $subs);
 	}
 
 	// Enable / Disable Software Title

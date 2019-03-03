@@ -202,7 +202,7 @@ if (isset($pdo)) {\
 }\
 \
 // Suscription\
-$subs = $kinobi->getSetting("subscription");\
+$subs = getSettingSubscription($pdo);\
 if (!empty($subs["url"]) && !empty($subs["token"])) {\
 	$subs_resp = fetchJsonArray($subs["url"], $subs["token"]);\
 }\
@@ -309,7 +309,7 @@ if (isset($pdo)) {\
 }\
 \
 // Suscription\
-$subs = $kinobi->getSetting("subscription");\
+$subs = getSettingSubscription($pdo);\
 if (!empty($subs["url"]) && !empty($subs["token"])) {\
 	$subs_resp = fetchJsonArray($subs["url"], $subs["token"]);\
 }\

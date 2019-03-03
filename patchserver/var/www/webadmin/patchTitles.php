@@ -22,14 +22,14 @@ include "inc/patch/functions.php";
 
 $title = "Patch Definitions";
 
+include "inc/header.php";
+include "inc/patch/database.php";
+
 // Check for subscription
-$subs = $kinobi->getSetting("subscription");
+$subs = getSettingSubscription($pdo);
 if (!empty($subs['url']) && !empty($subs['token'])) {
 	$subs_resp = fetchJsonArray($subs['url'], $subs['token']);
 }
-
-include "inc/header.php";
-include "inc/patch/database.php";
 
 $sw_titles = array();
 $error_msg = "";

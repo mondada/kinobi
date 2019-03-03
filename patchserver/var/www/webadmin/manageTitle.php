@@ -22,14 +22,14 @@ include "inc/patch/functions.php";
 
 $title = "Software Title";
 
+include "inc/header.php";
+include "inc/patch/database.php";
+
 // Check for subscription
-$subs = $kinobi->getSetting("subscription");
+$subs = getSettingSubscription($pdo);
 if (!empty($subs['url']) && !empty($subs['token'])) {
 	$subs_resp = fetchJsonArray($subs['url'], $subs['token']);
 }
-
-include "inc/header.php";
-include "inc/patch/database.php";
 
 $sw_title_name_ids = array();
 $ext_attr_keys = array();
