@@ -145,6 +145,33 @@ try {
 )" . $engine . $charset;
 	$pdo->exec($sql);
 
+/*
+	$sql = "CREATE TABLE IF NOT EXISTS users (
+  id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
+  username varchar(255) NOT NULL,
+  password varchar(255) NOT NULL,
+  token varchar(255),
+  expires bigint(32),
+  api tinyint(1)
+)" . $engine . $charset;
+	$pdo->exec($sql);
+
+	$sql = "CREATE TABLE IF NOT EXISTS api (
+  authtype varchar(255) NOT NULL DEFAULT('basic'),
+  auto tinyint(1) NOT NULL DEFAULT(1),
+  reqauth tinyint(1) NOT NULL DEFAULT(0)
+)" . $engine . $charset;
+	$pdo->exec($sql);
+*/
+
+	$sql = "CREATE TABLE IF NOT EXISTS subscription (
+  url varchar(255),
+  token varchar(255),
+  refresh int(11) NOT NULL DEFAULT(3600),
+  lastcheckin bigint(32) NOT NULL DEFAULT(0)
+)" . $engine . $charset;
+	$pdo->exec($sql);
+
 	if ($db['dsn']['prefix'] == "sqlite") {
 		$source_id_type = "";
 
