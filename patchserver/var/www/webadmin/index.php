@@ -36,7 +36,7 @@ if ((isset($_POST['username'])) && (isset($_POST['password']))) {
 	$password = hash("sha256", $_POST['password']);
 
 	if (($username != "") && ($password != "")) {
-		$users = $kinobi->getSetting("users");
+		$users = getSettingUsers($kinobi);
 		$isAuth = (array_key_exists($username, $users) ? $users[$username]['password'] == $password : false);
 		if ($isAuth) {
 			$isAuth = (isset($users[$username]['web']) ? $users[$username]['web'] : false);

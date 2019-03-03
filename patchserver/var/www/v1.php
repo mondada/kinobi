@@ -54,7 +54,7 @@ if ($api['authtype'] == "token") {
 	}
 
 	if (isset($api_token)) {
-		$users = $kinobi->getSetting("users");
+		$users = getSettingUsers($kinobi);
 
 		$api_tokens = array();
 		foreach ($users as $key => $value) {
@@ -74,7 +74,7 @@ if ($api['authtype'] == "basic") {
 		$username = $_SERVER['PHP_AUTH_USER'];
 		$password = hash("sha256", $_SERVER['PHP_AUTH_PW']);
 	
-		$users = $kinobi->getSetting("users");
+		$users = getSettingUsers($kinobi);
 
 		$app->authorzied = (array_key_exists($username, $users) && $users[$username]['password'] == $password && (!isset($users[$username]['expires']) || $users[$username]['expires'] > time()) && isset($users[$username]['api']) ? $users[$username]['api'] : $app->authorzied);
 	}

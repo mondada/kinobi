@@ -243,47 +243,39 @@ if (isset($_POST['subscribe'])) {
 
 // Create User
 if (isset($_POST['create_user'])) {
-	$users = $kinobi->getSetting("users");
-	$users[$_POST['add_user']] = array("password" => hash("sha256", $_POST['add_pass']));
+	createUser($kinobi, $_POST['add_user'], hash("sha256", $_POST['add_pass']));
 	if (isset($_POST['add_token'])) {
-		$users[$_POST['add_user']]['token'] = bin2hex(openssl_random_pseudo_bytes(16));
+		setSettingUser($kinobi, $_POST['add_user'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
 	}
-	if (!empty($_POST['add_expires'])) {
-		$users[$_POST['add_user']]['expires'] = (int)date("U",strtotime($_POST['add_expires']));
+	if (empty($_POST['reset_expires'])) {
+		setSettingUser($kinobi, $_POST['add_user'], "expires", null);
+	} else {
+		setSettingUser($kinobi, $_POST['add_user'], "expires", (int)date("U",strtotime($_POST['add_expires'])));
 	}
-	$kinobi->setSetting("users", $users);
 }
 
 // Delete  User
 if (isset($_POST['delete_user'])) {
-	$users = $kinobi->getSetting("users");
-	unset($users[$_POST['delete_user']]);
-	$kinobi->setSetting("users", $users);
+	deleteUser($kinobi, $_POST['delete_user']);
 }
 
 // Reset Password
 if (isset($_POST['save_pass'])) {
-	$users = $kinobi->getSetting("users");
-	$users[$_POST['save_pass']]['password'] = hash("sha256", $_POST['reset_pass']);
-	$kinobi->setSetting("users", $users);
+	setSettingUser($kinobi, $_POST['save_pass'], "password", hash("sha256", $_POST['reset_pass']));
 }
 
 // Create Token
 if (isset($_POST['create_token']) && !empty($_POST['create_token'])) {
-	$users = $kinobi->getSetting("users");
-	$users[$_POST['create_token']]['token'] = bin2hex(openssl_random_pseudo_bytes(16));
-	$kinobi->setSetting("users", $users);
+	setSettingUser($kinobi, $_POST['create_token'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
 }
 
 // Reset Expiry
 if (isset($_POST['reset_expiry'])) {
-	$users = $kinobi->getSetting("users");
 	if (empty($_POST['reset_expires'])) {
-		unset($users[$_POST['reset_expiry']]['expires']);
+		setSettingUser($kinobi, $_POST['reset_expiry'], "expires", null);
 	} else {
-		$users[$_POST['reset_expiry']]['expires'] = (int)date("U",strtotime($_POST['reset_expires']));
+		setSettingUser($kinobi, $_POST['reset_expiry'], "expires", (int)date("U",strtotime($_POST['reset_expires'])));
 	}
-	$kinobi->setSetting("users", $users);
 }
 
 // ####################################################################
@@ -334,7 +326,7 @@ if (!empty($subs['url']) && !empty($subs['token'])) {
 }
 
 // Users
-$users = $kinobi->getSetting("users");
+$users = getSettingUsers($kinobi);
 $web_users = array();
 $api_users = array();
 $api_tokens = array_map(function($el) { if (isset($el['token'])) { return $el['token']; } }, $users);
@@ -347,8 +339,7 @@ foreach ($users as $key => $value) {
 	}
 }
 if (sizeof($web_users) == 1 && isset($users[implode($web_users)]['expires'])) {
-	unset($users[implode($web_users)]['expires']);
-	$kinobi->setSetting("users", $users);
+	setSettingUser($kinobi, implode($web_users), "expires", null);
 }
 
 // API Security

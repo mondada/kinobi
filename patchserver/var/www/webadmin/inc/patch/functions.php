@@ -130,6 +130,63 @@ if (is_null($kinobi->getSetting("backup"))) {
 // Settings functions
 
 /**
+ * Get Users
+ *
+ * @param  object  $object  PDO database connection / Kinobi Settings Object
+ *
+ * @return array Returns an array.
+ */
+function getSettingUsers($object)
+{
+	$users = $object->getSetting("users");
+
+	return $users;
+}
+
+/**
+ * Create User
+ *
+ * @param  object   $object  PDO database connection / Kinobi Settings Object
+ * @param  string   $user    Username
+ * @param  string   $passwd  Encrypted password
+ */
+function createUser($object, $user, $passwd)
+{
+	$users = $object->getSetting("users");
+	$users[$user] = array();
+	$users[$user]['password'] = $passwd;
+	$object->setSetting("users", $users);
+}
+
+/**
+ * Delete User
+ *
+ * @param  object   $object  PDO database connection / Kinobi Settings Object
+ * @param  string   $user    Username
+ */
+function deleteUser($object, $user)
+{
+	$users = $object->getSetting("users");
+	unset($users[$user]);
+	$object->setSetting("users", $users);
+}
+
+/**
+ * Set User Setting
+ *
+ * @param  object   $object  PDO database connection / Kinobi Settings Object
+ * @param  string   $user    Username
+ * @param  string   $key     Setting
+ * @param  mixed    $value
+ */
+function setSettingUser($object, $user, $key, $value)
+{
+	$users = $object->getSetting("users");
+	$users[$user][$key] = $value;
+	$object->setSetting("users", $users);
+}
+
+/**
  * Get Subscription Settings
  *
  * @param  object  $object  PDO database connection / Kinobi Settings Object

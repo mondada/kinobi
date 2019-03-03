@@ -89,34 +89,24 @@ if (!($_SESSION['isAuthUser'])) {
 
 	// Web Admin Access
 	if (isset($_POST['allow_web'])) {
-		$users = $kinobi->getSetting("users");
-		$users[$_POST['allow_web']]['web'] = true;
-		$kinobi->setSetting("users", $users);
+		setSettingUser($kinobi, $_POST['allow_web'], "web", true);
 	}
 
 	if (isset($_POST['deny_web'])) {
-		$users = $kinobi->getSetting("users");
-		unset($users[$_POST['deny_web']]['web']);
-		$kinobi->setSetting("users", $users);
+		setSettingUser($kinobi, $_POST['deny_web'], "web", null);
 	}
 
 	// API Read/Write Access
 	if (isset($_POST['allow_api'])) {
-		$users = $kinobi->getSetting("users");
-		$users[$_POST['allow_api']]['api'] = "0";
-		$kinobi->setSetting("users", $users);
+		setSettingUser($kinobi, $_POST['allow_api'], "api", "0");
 	}
 
 	if (isset($_POST['allow_api_rw'])) {
-		$users = $kinobi->getSetting("users");
-		$users[$_POST['allow_api_rw']]['api'] = "1";
-		$kinobi->setSetting("users", $users);
+		setSettingUser($kinobi, $_POST['allow_api_rw'], "api", "1");
 	}
 
 	if (isset($_POST['deny_api'])) {
-		$users = $kinobi->getSetting("users");
-		unset($users[$_POST['deny_api']]['api']);
-		$kinobi->setSetting("users", $users);
+		setSettingUser($kinobi, $_POST['deny_api'], "api", null);
 	}
 
 	// API Authentication Type
