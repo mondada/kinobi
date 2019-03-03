@@ -51,5 +51,5 @@ if (isset($subs_resp['source']) && $last_checkin + $subs['refresh'] < time()) {
     }
 
 	$subs['lastcheckin'] = time();
-    setSubscriptionSettings($pdo, $subs);
+    setSettingSubscription($pdo, $subs);
 }

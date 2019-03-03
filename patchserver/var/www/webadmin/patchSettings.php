@@ -238,7 +238,7 @@ if (isset($_POST['subscribe'])) {
 	$subs = getSettingSubscription($pdo);
 	$subs['url'] = (empty($_POST['subs_url']) ? null : $_POST['subs_url']);
 	$subs['token'] = (empty($_POST['subs_token']) ? null : $_POST['subs_token']);
-	setSubscriptionSettings($pdo, $subs);
+	setSettingSubscription($pdo, $subs);
 }
 
 // Create User

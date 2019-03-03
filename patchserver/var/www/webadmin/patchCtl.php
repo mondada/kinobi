@@ -151,7 +151,7 @@ if (!($_SESSION['isAuthUser'])) {
 	if (isset($_POST['subs_refresh'])) {
 		$subs = getSettingSubscription($pdo);
 		$subs['refresh'] = $_POST['subs_refresh'];
-		setSubscriptionSettings($pdo, $subs);
+		setSettingSubscription($pdo, $subs);
 	}
 
 	// Enable / Disable Software Title

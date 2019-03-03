@@ -193,7 +193,7 @@ function getSettingSubscription($object)
  * @param  object  $object  PDO database connection / Kinobi Settings Object
  * @param  array   $array   Subscription Settings
  */
-function setSubscriptionSettings($object, $settings)
+function setSettingSubscription($object, $settings)
 {
 	// $object->setSetting("subscription", $settings);
 	$object->exec("DELETE FROM subscription");
