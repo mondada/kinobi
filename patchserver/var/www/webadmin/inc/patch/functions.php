@@ -12,7 +12,7 @@
  */
 
 // Kinobi configuration file location
-define('KINOBI_CONF_PATH', dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/conf/kinobi.json");
+define("KINOBI_CONF_PATH", dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/conf/kinobi.json");
 
 
 /**
@@ -116,9 +116,9 @@ if (is_null($kinobi->getSetting("uuid"))) {
 if (is_null($kinobi->getSetting("cloud"))) {
 	$kinobi->setSetting("cloud", false);
 }
-if (is_null($kinobi->getSetting("users"))) {
-	$kinobi->setSetting("users", array("webadmin" => array("password" => hash("sha256", "webadmin"), "web" => true)));
-}
+// if (is_null($kinobi->getSetting("users"))) {
+// 	$kinobi->setSetting("users", array("webadmin" => array("password" => hash("sha256", "webadmin"), "web" => true)));
+// }
 if (is_null($kinobi->getSetting("pdo"))) {
 	$kinobi->setSetting("pdo", array("dsn" => array("prefix" => "sqlite", "dbpath" => dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/db/patch_v1.sqlite")));
 }
@@ -132,13 +132,19 @@ if (is_null($kinobi->getSetting("backup"))) {
 /**
  * Get Users
  *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
+ * @param  object  $pdo  PDO database connection / Kinobi Settings Object
  *
  * @return array Returns an array.
  */
-function getSettingUsers($object)
+function getSettingUsers($pdo)
 {
-	$users = $object->getSetting("users");
+	// $users = $pdo->getSetting("users");
+
+	$users = array();
+	$stmt = $pdo->query("SELECT id, username, password, token, expires, web, api FROM users");
+	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		$users[$row['username']] = $row;
+	}
 
 	return $users;
 }
@@ -146,58 +152,67 @@ function getSettingUsers($object)
 /**
  * Create User
  *
- * @param  object   $object  PDO database connection / Kinobi Settings Object
+ * @param  object   $pdo     PDO database connection / Kinobi Settings Object
  * @param  string   $user    Username
  * @param  string   $passwd  Encrypted password
  */
-function createUser($object, $user, $passwd)
+function createUser($pdo, $user, $passwd)
 {
-	$users = $object->getSetting("users");
-	$users[$user] = array();
-	$users[$user]['password'] = $passwd;
-	$object->setSetting("users", $users);
+	// $users = $pdo->getSetting("users");
+	// $users[$user] = array();
+	// $users[$user]['password'] = $passwd;
+	// $pdo->setSetting("users", $users);
+
+	$stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+	$stmt->execute(array($user, $passwd));
 }
 
 /**
  * Delete User
  *
- * @param  object   $object  PDO database connection / Kinobi Settings Object
- * @param  string   $user    Username
+ * @param  object   $pdo   PDO database connection / Kinobi Settings Object
+ * @param  string   $user  Username
  */
-function deleteUser($object, $user)
+function deleteUser($pdo, $user)
 {
-	$users = $object->getSetting("users");
-	unset($users[$user]);
-	$object->setSetting("users", $users);
+	// $users = $pdo->getSetting("users");
+	// unset($users[$user]);
+	// $pdo->setSetting("users", $users);
+
+	$stmt = $pdo->prepare("DELETE FROM users WHERE username = ?");
+	$stmt->execute(array($user));
 }
 
 /**
  * Set User Setting
  *
- * @param  object   $object  PDO database connection / Kinobi Settings Object
- * @param  string   $user    Username
- * @param  string   $key     Setting
+ * @param  object   $pdo    PDO database connection / Kinobi Settings Object
+ * @param  string   $user   Username
+ * @param  string   $key    Setting
  * @param  mixed    $value
  */
-function setSettingUser($object, $user, $key, $value)
+function setSettingUser($pdo, $user, $key, $value)
 {
-	$users = $object->getSetting("users");
-	$users[$user][$key] = $value;
-	$object->setSetting("users", $users);
+	// $users = $pdo->getSetting("users");
+	// $users[$user][$key] = $value;
+	// $pdo->setSetting("users", $users);
+
+	$stmt = $pdo->prepare("UPDATE users SET ".$key." = ? WHERE username = ?");
+	$stmt->execute(array($value, $user));
 }
 
 /**
  * Get Subscription Settings
  *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
+ * @param  object  $pdo  PDO database connection / Kinobi Settings Object
  *
  * @return array Returns an array.
  */
-function getSettingSubscription($object)
+function getSettingSubscription($pdo)
 {
-	// $settings = $object->getSetting("subscription");
-	$settings = $object->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+	// $settings = $pdo->getSetting("subscription");
 
+	$settings = $pdo->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 	if (!$settings) {
 		$settings = array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0);
 	}
@@ -208,29 +223,30 @@ function getSettingSubscription($object)
 /**
  * Set Subscription Settings
  *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
- * @param  array   $array   Subscription Settings
+ * @param  object  $pdo       PDO database connection / Kinobi Settings Object
+ * @param  array   $settings  Subscription Settings
  */
-function setSettingSubscription($object, $settings)
+function setSettingSubscription($pdo, $settings)
 {
-	// $object->setSetting("subscription", $settings);
-	$object->exec("DELETE FROM subscription");
-	$stmt = $object->prepare('INSERT INTO subscription (url, token, refresh, lastcheckin) VALUES (?, ?, ?, ?)');
+	// $pdo->setSetting("subscription", $settings);
+
+	$pdo->exec("DELETE FROM subscription");
+	$stmt = $pdo->prepare("INSERT INTO subscription (url, token, refresh, lastcheckin) VALUES (?, ?, ?, ?)");
 	$stmt->execute(array($settings['url'], $settings['token'], $settings['refresh'], $settings['lastcheckin']));
 }
 
 /**
  * Get API Settings
  *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
+ * @param  object  $pdo  PDO database connection / Kinobi Settings Object
  *
  * @return array Returns an array.
  */
-function getSettingApi($object)
+function getSettingApi($pdo)
 {
-	// $settings = $object->getSetting("api");
-	$settings = $object->query("SELECT authtype, auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+	// $settings = $pdo->getSetting("api");
 
+	$settings = $pdo->query("SELECT authtype, auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 	if (!$settings) {
 		$settings = array("authtype" => "basic", "auto" => true, "reqauth" => false);
 	}
@@ -241,14 +257,15 @@ function getSettingApi($object)
 /**
  * Set API Settings
  *
- * @param  object  $object  PDO database connection / Kinobi Settings Object
- * @param  array   $array   API Settings
+ * @param  object  $pdo       PDO database connection / Kinobi Settings Object
+ * @param  array   $settings  API Settings
  */
-function setSettingApi($object, $settings)
+function setSettingApi($pdo, $settings)
 {
-	// $object->setSetting("api", $settings);
-	$object->exec("DELETE FROM api");
-	$stmt = $object->prepare('INSERT INTO api (authtype, auto, reqauth) VALUES (?, ?, ?)');
+	// $pdo->setSetting("api", $settings);
+
+	$pdo->exec("DELETE FROM api");
+	$stmt = $pdo->prepare("INSERT INTO api (authtype, auto, reqauth) VALUES (?, ?, ?)");
 	$stmt->execute(array($settings['authtype'], (int)$settings['auto'], (int)$settings['reqauth']));
 }
 
@@ -262,7 +279,7 @@ function setSettingApi($object, $settings)
  */
 function createUuid()
 {
-	return strtoupper(sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+	return strtoupper(sprintf("%04x%04x-%04x-%04x-%04x-%04x%04x%04x",
 		mt_rand(0, 0xffff), mt_rand(0, 0xffff),
 		mt_rand(0, 0xffff),
 		mt_rand(0, 0x0fff) | 0x4000,
@@ -289,6 +306,7 @@ function fetchJsonArray($url, $token = null)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $title = curl_exec($ch);
     curl_close($ch);
+
     return json_decode($title, true);
 }
 

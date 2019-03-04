@@ -145,17 +145,16 @@ try {
 )" . $engine . $charset;
 	$pdo->exec($sql);
 
-/*
 	$sql = "CREATE TABLE IF NOT EXISTS users (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   username varchar(255) NOT NULL,
   password varchar(255) NOT NULL,
   token varchar(255),
   expires bigint(32),
+  web tinyint(1),
   api tinyint(1)
 )" . $engine . $charset;
 	$pdo->exec($sql);
-*/
 
 	$sql = "CREATE TABLE IF NOT EXISTS api (
   authtype varchar(255) NOT NULL DEFAULT('basic'),

@@ -243,38 +243,38 @@ if (isset($_POST['subscribe'])) {
 
 // Create User
 if (isset($_POST['create_user'])) {
-	createUser($kinobi, $_POST['add_user'], hash("sha256", $_POST['add_pass']));
+	createUser($pdo, $_POST['add_user'], hash("sha256", $_POST['add_pass']));
 	if (isset($_POST['add_token'])) {
-		setSettingUser($kinobi, $_POST['add_user'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
+		setSettingUser($pdo, $_POST['add_user'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
 	}
-	if (empty($_POST['reset_expires'])) {
-		setSettingUser($kinobi, $_POST['add_user'], "expires", null);
+	if (empty($_POST['add_expires'])) {
+		setSettingUser($pdo, $_POST['add_user'], "expires", null);
 	} else {
-		setSettingUser($kinobi, $_POST['add_user'], "expires", (int)date("U",strtotime($_POST['add_expires'])));
+		setSettingUser($pdo, $_POST['add_user'], "expires", (int)date("U",strtotime($_POST['add_expires'])));
 	}
 }
 
 // Delete  User
 if (isset($_POST['delete_user'])) {
-	deleteUser($kinobi, $_POST['delete_user']);
+	deleteUser($pdo, $_POST['delete_user']);
 }
 
 // Reset Password
 if (isset($_POST['save_pass'])) {
-	setSettingUser($kinobi, $_POST['save_pass'], "password", hash("sha256", $_POST['reset_pass']));
+	setSettingUser($pdo, $_POST['save_pass'], "password", hash("sha256", $_POST['reset_pass']));
 }
 
 // Create Token
 if (isset($_POST['create_token']) && !empty($_POST['create_token'])) {
-	setSettingUser($kinobi, $_POST['create_token'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
+	setSettingUser($pdo, $_POST['create_token'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
 }
 
 // Reset Expiry
 if (isset($_POST['reset_expiry'])) {
 	if (empty($_POST['reset_expires'])) {
-		setSettingUser($kinobi, $_POST['reset_expiry'], "expires", null);
+		setSettingUser($pdo, $_POST['reset_expiry'], "expires", null);
 	} else {
-		setSettingUser($kinobi, $_POST['reset_expiry'], "expires", (int)date("U",strtotime($_POST['reset_expires'])));
+		setSettingUser($pdo, $_POST['reset_expiry'], "expires", (int)date("U",strtotime($_POST['reset_expires'])));
 	}
 }
 
@@ -326,7 +326,7 @@ if (!empty($subs['url']) && !empty($subs['token'])) {
 }
 
 // Users
-$users = getSettingUsers($kinobi);
+$users = getSettingUsers($pdo);
 $web_users = array();
 $api_users = array();
 $api_tokens = array_map(function($el) { if (isset($el['token'])) { return $el['token']; } }, $users);
@@ -339,7 +339,7 @@ foreach ($users as $key => $value) {
 	}
 }
 if (sizeof($web_users) == 1 && isset($users[implode($web_users)]['expires'])) {
-	setSettingUser($kinobi, implode($web_users), "expires", null);
+	setSettingUser($pdo, implode($web_users), "expires", null);
 }
 
 // API Security

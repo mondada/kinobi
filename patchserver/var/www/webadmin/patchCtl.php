@@ -89,24 +89,24 @@ if (!($_SESSION['isAuthUser'])) {
 
 	// Web Admin Access
 	if (isset($_POST['allow_web'])) {
-		setSettingUser($kinobi, $_POST['allow_web'], "web", true);
+		setSettingUser($pdo, $_POST['allow_web'], "web", true);
 	}
 
 	if (isset($_POST['deny_web'])) {
-		setSettingUser($kinobi, $_POST['deny_web'], "web", null);
+		setSettingUser($pdo, $_POST['deny_web'], "web", null);
 	}
 
 	// API Read/Write Access
 	if (isset($_POST['allow_api'])) {
-		setSettingUser($kinobi, $_POST['allow_api'], "api", "0");
+		setSettingUser($pdo, $_POST['allow_api'], "api", "0");
 	}
 
 	if (isset($_POST['allow_api_rw'])) {
-		setSettingUser($kinobi, $_POST['allow_api_rw'], "api", "1");
+		setSettingUser($pdo, $_POST['allow_api_rw'], "api", "1");
 	}
 
 	if (isset($_POST['deny_api'])) {
-		setSettingUser($kinobi, $_POST['deny_api'], "api", null);
+		setSettingUser($pdo, $_POST['deny_api'], "api", null);
 	}
 
 	// API Authentication Type

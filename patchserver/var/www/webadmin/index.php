@@ -17,10 +17,14 @@ if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") {
 }
 
 session_start();
+// Settings
 if (file_exists("inc/config.php")) {
 	include "inc/config.php";
 }
 include "inc/patch/functions.php";
+
+// Database
+include "inc/patch/database.php";
 
 $isAuth = false;
 
@@ -36,7 +40,7 @@ if ((isset($_POST['username'])) && (isset($_POST['password']))) {
 	$password = hash("sha256", $_POST['password']);
 
 	if (($username != "") && ($password != "")) {
-		$users = getSettingUsers($kinobi);
+		$users = getSettingUsers($pdo);
 		$isAuth = (array_key_exists($username, $users) ? $users[$username]['password'] == $password : false);
 		if ($isAuth) {
 			$isAuth = (isset($users[$username]['web']) ? $users[$username]['web'] : false);
