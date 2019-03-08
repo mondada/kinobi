@@ -100,7 +100,7 @@ if (isset($_POST['dbconnect'])) {
 
 $db = $kinobi->getSetting("pdo");
 
-if (empty($pdo_error)) {
+if (!isset($pdo_error)) {
 	include "inc/patch/database.php";
 }
 
@@ -218,7 +218,10 @@ if (isset($_POST['restore'])) {
 			"DROP TABLE IF EXISTS ext_attrs;".PHP_EOL.
 			"DROP TABLE IF EXISTS patches;".PHP_EOL.
 			"DROP TABLE IF EXISTS requirements;".PHP_EOL.
-			"DROP TABLE IF EXISTS titles;";
+			"DROP TABLE IF EXISTS titles;".PHP_EOL.
+			"DROP TABLE IF EXISTS users;".PHP_EOL.
+			"DROP TABLE IF EXISTS subscription;".PHP_EOL.
+			"DROP TABLE IF EXISTS api;";
 		$pdo->exec($sql);
 	}
 	$sql = gzfile($backup['path']."/".$_POST['restore']);
@@ -230,6 +233,7 @@ if (isset($_POST['restore'])) {
 	}
 	if (empty($restore_error)) {
 		$restore_success = "Restored '".basename($_POST['restore'])."'.";
+		$restore_success .= ($netsus == 0 ? " Log out for changes to take effect." : "");
 	}
 }
 
@@ -412,10 +416,9 @@ if (empty($api_users)) {
 			<script type="text/javascript" src="scripts/toggle/bootstrap-toggle.min.js"></script>
 
 			<script type="text/javascript">
-				var scheduled = [<?php echo (sizeof($scheduled) > 0 ? "\"".implode('", "', $scheduled)."\"" : ""); ?>];
 				var allUsers = [<?php echo (sizeof($users) > 0 ? "\"".implode('", "', array_keys($users))."\"" : ""); ?>];
 				var apiUsers = [<?php echo (sizeof($api_users) > 0 ? "\"".implode('", "', $api_users)."\"" : ""); ?>];
-				var webUsers = [<?php echo (sizeof($web_users) > 0 ? "\"".implode('", "', $web_users)."\"" : ""); ?>];
+				var scheduled = [<?php echo (sizeof($scheduled) > 0 ? "\"".implode('", "', $scheduled)."\"" : ""); ?>];
 				var sqliteDBs = [<?php echo (sizeof($sqlite_dbs) > 0 ? "\"".implode('", "', $sqlite_dbs)."\"" : ""); ?>];
 			</script>
 
@@ -469,7 +472,7 @@ if (empty($api_users)) {
 						$('#patch').removeClass('hidden');
 						$('#backup').prop('disabled', false);
 						$('[name="schedule"]').prop('disabled', false);
-						if (scheduled.length == 0 && ($('#dsn_prefix').val() == 'sqlite' || $('#dsn_prefix').val() == 'mysql' && ($('#dsn_host').val() == 'localhost' || $('#dsn_host').val() == '127.0.0.1'))) {
+						if (scheduled.length == 0) {
 							showScheduleError();
 						}
 						$('#retention').prop('disabled', false);
@@ -640,21 +643,8 @@ if (empty($api_users)) {
 					user = element.value;
 					if (element.checked) {
 						ajaxPost('patchCtl.php', 'allow_web='+user);
-						if (webUsers.indexOf(user) == -1) {
-							webUsers.push(user);
-						}
 					} else {
 						ajaxPost('patchCtl.php', 'deny_web='+user);
-						if (webUsers.indexOf(user) >= 0) {
-							webUsers.splice(webUsers.indexOf(user), 1);
-						}
-					}
-					if (webUsers.length > 1) {
-						$('input[name="web_ui"]').prop('disabled', false);
-						$('button[name="del_user_prompt"]').prop('disabled', false);
-					} else {
-						$('input[name="web_ui"][value="' + webUsers[0] + '"]').prop('disabled', true);
-						$('button[name="del_user_prompt"][value="' + webUsers[0] + '"]').prop('disabled', true);
 					}
 				}
 
@@ -819,6 +809,9 @@ if (empty($api_users)) {
 							{
 								text: '<span class="glyphicon glyphicon-plus"></span> Add',
 								className: 'btn-primary btn-sm btn-table',
+<?php if (!empty($pdo_error)) { ?>
+								enabled: false,
+<?php } ?>
 								action: function ( e, dt, node, config ) {
 									$("#create_user-modal").modal();
 								}
@@ -861,6 +854,23 @@ if (empty($api_users)) {
 				});
 			</script>
 
+<?php if (isset($_POST['dbconnect']) && empty($pdo_error) && $netsus == 0) { ?>
+			<script>
+				$(window).load(function() {
+					$('#database_change-modal').modal('show');
+				});
+			</script>
+
+<?php } ?>
+
+<?php if (!empty($restore_success) && $netsus == 0) { ?>
+			<script>
+				$(window).load(function() {
+					$('#restore_complete-modal').modal('show');
+				});
+			</script>
+
+<?php } ?>
 			<nav id="nav-title" class="navbar navbar-default navbar-fixed-top">
 				<div style="padding: 19px 20px 1px;">
 <?php if ($netsus > 0) { ?>
@@ -966,7 +976,7 @@ if (!$cloud) { ?>
 										</td>
 										<td>
 											<div class="checkbox checkbox-primary checkbox-inline <?php echo ($netsus == 0 ? "" : "hidden"); ?>">
-												<input type="checkbox" class="styled" name="web_ui" id="web_ui" value="<?php echo $key; ?>" onChange="toggleWebAdmin(this);" <?php echo (isset($value['web']) ? ($value['web'] ? "checked" : "") : ""); ?> <?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>/>
+												<input type="checkbox" class="styled" name="web_ui" id="web_ui" value="<?php echo $key; ?>" onChange="toggleWebAdmin(this);" <?php echo (isset($value['web']) ? ($value['web'] ? "checked" : "") : ""); ?> <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>/>
 												<label/>
 											</div>
 										</td>
@@ -982,7 +992,7 @@ if (!$cloud) { ?>
 												<label/>
 											</div>
 										</td>
-										<td align="right"><button type="button" name="del_user_prompt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_user-modal" onClick="$('#delete_user-title').text('<?php echo $key; ?>'); $('#delete_user').val('<?php echo $key; ?>');" value="<?php echo $key; ?>" <?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>>Delete</button></td>
+										<td align="right"><button type="button" name="del_user_prompt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_user-modal" onClick="$('#delete_user-title').text('<?php echo $key; ?>'); $('#delete_user').val('<?php echo $key; ?>');" value="<?php echo $key; ?>" <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php }
 } ?>
@@ -1127,7 +1137,7 @@ if (!$cloud) { ?>
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h4 class="modal-title" id="modalLabel">Delete <span id="delete_user-title">User</span></h4>
+										<h3 class="modal-title" id="modalLabel">Delete <span id="delete_user-title">User</span></h3>
 									</div>
 									<div class="modal-body">
 										<div class="text-muted">This action is permanent and cannot be undone.</div>
@@ -1181,7 +1191,7 @@ if (!$cloud) { ?>
 									</select>
 								</div>
 
-								<div id="new_db_wrapper" class="form-group has-feedback" style="max-width: 449px;">
+								<div id="new_db_wrapper" class="form-group has-feedback hidden" style="max-width: 449px;">
 									<input type="text" name="new_dbfile" id="new_dbfile" class="form-control input-sm" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" disabled/>
 								</div>
 
@@ -1215,6 +1225,28 @@ if (!$cloud) { ?>
 
 							<button type="submit" name="dbconnect" id="dbconnect" class="btn btn-primary btn-sm" style="width: 75px;" disabled>Save</button>
 						</div>
+
+						<!-- Database Success Modal -->
+						<div class="modal fade" id="database_change-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h3 class="modal-title" id="modalLabel">Database Changed</h3>
+									</div>
+									<div class="modal-body">
+										<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
+											<div class="panel-body">
+												<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo (empty($pdo_error) ? "Connected to: ".($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS)) : ""); ?>. Log out for changes to take effect.</div>
+											</div>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<a href="logout.php" role="button" class="btn btn-primary btn-sm pull-right">Logout</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- /.modal -->
 
 					</div> <!-- /.tab-pane -->
 <?php } ?>
@@ -1350,13 +1382,13 @@ if (!$cloud) { ?>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($restore_success) ? "hidden" : ""); ?>">
+							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($restore_success) || $netsus == 0 ? "hidden" : ""); ?>">
 								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $restore_success; ?></div>
+									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $restore_success; ?> <a href="logout.php">Log Out</a> for changes to take effect.</div>
 								</div>
 							</div>
 
-							<h5><strong>Available Backups</strong> <small>Click the backup filename to download a backup archive.<?php if (!$cloud) { ?><br>Backup archives are saved in <a data-toggle="modal" href="#backup_path-modal"><span style="font-family:monospace;"><?php echo $backup['path']; ?></span></a> on this server.<?php } ?></small></h5>
+							<h5><strong>Available Backups</strong> <small>Click the backup filename to <?php echo ($cloud ? "restore" : "download or restore"); ?> a backup archive.<?php if (!$cloud) { ?><br>Backup archives are saved in <a data-toggle="modal" href="#backup_path-modal"><span style="font-family:monospace;"><?php echo $backup['path']; ?></span></a> on this server.<?php } ?></small></h5>
 							
 						</div>
 
@@ -1378,8 +1410,10 @@ if (!$cloud) { ?>
 											<div class="dropdown">
 												<a href="#" id="<?php echo $value['file']; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $value['file']; ?></a>
 												<ul class="dropdown-menu" aria-labelledby="<?php echo $value['file']; ?>">
-													<li class="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "disabled" : ""); ?>"><a data-toggle="modal" href="#restore-modal" onClick="$('#restore-title').text('<?php echo $value['file']; ?>'); $('#restore').val('<?php echo $value['file']; ?>');">Restore</a></li>
+<?php if (!$cloud) { ?>
 													<li><a href="patchCtl.php?download=<?php echo $value['file']; ?>">Download</a></li>
+<?php } ?>
+													<li class="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "disabled" : ""); ?>"><a data-toggle="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "" : "modal"); ?>" href="#restore-modal" onClick="$('#restore-title').text('<?php echo $value['file']; ?>'); $('#restore').val('<?php echo $value['file']; ?>');">Restore</a></li>
 												</ul>
 											</div>
 										</td>
@@ -1398,7 +1432,7 @@ if (!$cloud) { ?>
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h4 class="modal-title" id="modalLabel">Change Backup Path</h4>
+										<h3 class="modal-title" id="modalLabel">Change Backup Path</h3>
 									</div>
 									<div class="modal-body">
 
@@ -1422,7 +1456,7 @@ if (!$cloud) { ?>
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h4 class="modal-title" id="modalLabel">Upload Backup</h4>
+										<h3 class="modal-title" id="modalLabel">Upload Backup</h3>
 									</div>
 									<div class="modal-body">
 
@@ -1444,7 +1478,7 @@ if (!$cloud) { ?>
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h4 class="modal-title" id="modalLabel">Restore <span id="restore-title">Backup</span></h4>
+										<h3 class="modal-title" id="modalLabel">Restore <span id="restore-title">Backup</span></h3>
 									</div>
 									<div class="modal-body">
 										<div class="text-muted">Are you sure you want to restore this backup?</div>
@@ -1458,12 +1492,34 @@ if (!$cloud) { ?>
 						</div>
 						<!-- /.modal -->
 
+						<!-- Restore Success Modal -->
+						<div class="modal fade" id="restore_complete-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h3 class="modal-title" id="modalLabel">Restore Complete</h3>
+									</div>
+									<div class="modal-body">
+										<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
+											<div class="panel-body">
+												<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $restore_success; ?></div>
+											</div>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<a href="logout.php" role="button" class="btn btn-primary btn-sm pull-right">Logout</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- /.modal -->
+
 						<!-- Delete Backup Modal -->
 						<div class="modal fade" id="delete_backup-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h4 class="modal-title" id="modalLabel">Delete <span id="delete_backup-title">Backup</span></h4>
+										<h3 class="modal-title" id="modalLabel">Delete <span id="delete_backup-title">Backup</span></h3>
 									</div>
 									<div class="modal-body">
 										<div class="text-muted">This action is permanent and cannot be undone.</div>
@@ -1517,12 +1573,12 @@ if (!$cloud) { ?>
 
 							<h5 id="subs_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['url']; ?>"/>
+								<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['url']; ?>" <?php echo (empty($pdo_error) ? "" : "disabled") ?>/>
 							</div>
 
 							<h5 id="subs_token_label"><strong>Token</strong> <small>Auth token for the subscription server.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" name="subs_token" id="subs_token" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['token']; ?>"/>
+								<input type="text" name="subs_token" id="subs_token" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['token']; ?>" <?php echo (empty($pdo_error) ? "" : "disabled") ?>/>
 							</div>
 
 							<div class="text-left">
