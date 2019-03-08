@@ -116,9 +116,6 @@ if (is_null($kinobi->getSetting("uuid"))) {
 if (is_null($kinobi->getSetting("cloud"))) {
 	$kinobi->setSetting("cloud", false);
 }
-// if (is_null($kinobi->getSetting("users"))) {
-// 	$kinobi->setSetting("users", array("webadmin" => array("password" => hash("sha256", "webadmin"), "web" => true)));
-// }
 if (is_null($kinobi->getSetting("pdo"))) {
 	$kinobi->setSetting("pdo", array("dsn" => array("prefix" => "sqlite", "dbpath" => dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/db/patch_v1.sqlite")));
 }
@@ -141,9 +138,11 @@ function getSettingUsers($pdo)
 	// $users = $pdo->getSetting("users");
 
 	$users = array();
-	$stmt = $pdo->query("SELECT id, username, password, token, expires, web, api FROM users");
-	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$users[$row['username']] = $row;
+	if ($pdo) {
+		$stmt = $pdo->query("SELECT id, username, password, token, expires, web, api FROM users");
+		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			$users[$row['username']] = $row;
+		}
 	}
 
 	return $users;
@@ -163,8 +162,10 @@ function createUser($pdo, $user, $passwd)
 	// $users[$user]['password'] = $passwd;
 	// $pdo->setSetting("users", $users);
 
-	$stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-	$stmt->execute(array($user, $passwd));
+	if ($pdo) {
+		$stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+		$stmt->execute(array($user, $passwd));
+	}
 }
 
 /**
@@ -179,8 +180,10 @@ function deleteUser($pdo, $user)
 	// unset($users[$user]);
 	// $pdo->setSetting("users", $users);
 
-	$stmt = $pdo->prepare("DELETE FROM users WHERE username = ?");
-	$stmt->execute(array($user));
+	if ($pdo) {
+		$stmt = $pdo->prepare("DELETE FROM users WHERE username = ?");
+		$stmt->execute(array($user));
+	}
 }
 
 /**
@@ -197,8 +200,10 @@ function setSettingUser($pdo, $user, $key, $value)
 	// $users[$user][$key] = $value;
 	// $pdo->setSetting("users", $users);
 
-	$stmt = $pdo->prepare("UPDATE users SET ".$key." = ? WHERE username = ?");
-	$stmt->execute(array($value, $user));
+	if ($pdo) {
+		$stmt = $pdo->prepare("UPDATE users SET ".$key." = ? WHERE username = ?");
+		$stmt->execute(array($value, $user));
+	}
 }
 
 /**
@@ -210,9 +215,13 @@ function setSettingUser($pdo, $user, $key, $value)
  */
 function getSettingSubscription($pdo)
 {
+	$settings = false;
+
 	// $settings = $pdo->getSetting("subscription");
 
-	$settings = $pdo->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+	if ($pdo) {
+		$settings = $pdo->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+	}
 	if (!$settings) {
 		$settings = array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0);
 	}
@@ -230,9 +239,11 @@ function setSettingSubscription($pdo, $settings)
 {
 	// $pdo->setSetting("subscription", $settings);
 
-	$pdo->exec("DELETE FROM subscription");
-	$stmt = $pdo->prepare("INSERT INTO subscription (url, token, refresh, lastcheckin) VALUES (?, ?, ?, ?)");
-	$stmt->execute(array($settings['url'], $settings['token'], $settings['refresh'], $settings['lastcheckin']));
+	if ($pdo) {
+		$pdo->exec("DELETE FROM subscription");
+		$stmt = $pdo->prepare("INSERT INTO subscription (url, token, refresh, lastcheckin) VALUES (?, ?, ?, ?)");
+		$stmt->execute(array($settings['url'], $settings['token'], $settings['refresh'], $settings['lastcheckin']));
+	}
 }
 
 /**
@@ -244,9 +255,13 @@ function setSettingSubscription($pdo, $settings)
  */
 function getSettingApi($pdo)
 {
+	$settings = false;
+
 	// $settings = $pdo->getSetting("api");
 
-	$settings = $pdo->query("SELECT authtype, auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+	if ($pdo) {
+		$settings = $pdo->query("SELECT authtype, auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+	}
 	if (!$settings) {
 		$settings = array("authtype" => "basic", "auto" => true, "reqauth" => false);
 	}
@@ -264,9 +279,11 @@ function setSettingApi($pdo, $settings)
 {
 	// $pdo->setSetting("api", $settings);
 
-	$pdo->exec("DELETE FROM api");
-	$stmt = $pdo->prepare("INSERT INTO api (authtype, auto, reqauth) VALUES (?, ?, ?)");
-	$stmt->execute(array($settings['authtype'], (int)$settings['auto'], (int)$settings['reqauth']));
+	if ($pdo) {
+		$pdo->exec("DELETE FROM api");
+		$stmt = $pdo->prepare("INSERT INTO api (authtype, auto, reqauth) VALUES (?, ?, ?)");
+		$stmt->execute(array($settings['authtype'], (int)$settings['auto'], (int)$settings['reqauth']));
+	}
 }
 
 
