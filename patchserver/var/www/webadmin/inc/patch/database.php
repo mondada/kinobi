@@ -157,17 +157,17 @@ try {
 	$pdo->exec($sql);
 
 	$sql = "CREATE TABLE IF NOT EXISTS api (
-  authtype varchar(255) NOT NULL DEFAULT('basic'),
-  auto tinyint(1) NOT NULL DEFAULT(1),
-  reqauth tinyint(1) NOT NULL DEFAULT(0)
+  authtype varchar(255) NOT NULL DEFAULT 'basic',
+  auto tinyint(1) NOT NULL DEFAULT 1,
+  reqauth tinyint(1) NOT NULL DEFAULT 0
 )" . $engine . $charset;
 	$pdo->exec($sql);
 
 	$sql = "CREATE TABLE IF NOT EXISTS subscription (
   url varchar(255),
   token varchar(255),
-  refresh int(11) NOT NULL DEFAULT(3600),
-  lastcheckin bigint(32) NOT NULL DEFAULT(0)
+  refresh int(11) NOT NULL DEFAULT 3600,
+  lastcheckin bigint(32) NOT NULL DEFAULT 0
 )" . $engine . $charset;
 	$pdo->exec($sql);
 
