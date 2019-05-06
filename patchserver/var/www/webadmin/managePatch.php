@@ -242,6 +242,7 @@ if (!empty($patch_id)) {
 	if (sizeof($components) == 0) {
 		array_push($patch['error'], "components");
 	}
+	$new_component = $pdo->query('SELECT DISTINCT components.name FROM patches JOIN components ON patches.id = components.patch_id WHERE patches.title_id = '.$patch['title_id'].' LIMIT 1')->fetch(PDO::FETCH_COLUMN);
 
 	// Capabilities
 	$capabilities = array();
@@ -377,7 +378,7 @@ if (!empty($patch_id)) {
 					var comp_name = document.getElementById('comp_name[0]');
 					var comp_version = document.getElementById('comp_version[0]');
 					if (sizeOfComps == 0) {
-						comp_name.value = '<?php echo htmlentities($patch['name']); ?>';
+						comp_name.value = '<?php echo htmlentities($new_component); ?>';
 						comp_version.value = version.value;
 					} else {
 						comp_name.value = '';
