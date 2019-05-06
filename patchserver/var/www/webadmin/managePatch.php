@@ -243,6 +243,9 @@ if (!empty($patch_id)) {
 		array_push($patch['error'], "components");
 	}
 	$new_component = $pdo->query('SELECT DISTINCT components.name FROM patches JOIN components ON patches.id = components.patch_id WHERE patches.title_id = '.$patch['title_id'].' LIMIT 1')->fetch(PDO::FETCH_COLUMN);
+	if (empty($new_component)) {
+		$new_component = $patch['name'];
+	}
 
 	// Capabilities
 	$capabilities = array();
