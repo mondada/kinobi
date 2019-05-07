@@ -223,6 +223,16 @@ if (!empty($patch_id)) {
 
 	// Kill Applications
 	$kill_apps = $pdo->query('SELECT id, bundle_id, app_name FROM kill_apps WHERE patch_id = "'.$patch_id.'"')->fetchAll(PDO::FETCH_ASSOC);
+	$new_kill_apps = $pdo->query('SELECT DISTINCT bundle_id, app_name FROM patches JOIN kill_apps ON patches.id = kill_apps.patch_id WHERE patches.title_id = '.$patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
+	if (empty($new_kill_apps)) {
+		$new_kill_apps = array(array("bundle_id" => $patch['bundle_id'], "app_name" => $patch['app_name']));
+	}
+	foreach ($new_kill_apps as $key => $value) {
+		if (in_array($value, array_map(function($el){ return array("bundle_id" => $el['bundle_id'], "app_name" => $el['app_name']); }, $kill_apps))) {
+			unset($new_kill_apps[$key]);
+		}
+	}
+	$new_kill_apps = array_values($new_kill_apps);
 
 	// Components
 	$components = array();
@@ -242,10 +252,16 @@ if (!empty($patch_id)) {
 	if (sizeof($components) == 0) {
 		array_push($patch['error'], "components");
 	}
-	$new_component = $pdo->query('SELECT DISTINCT components.name FROM patches JOIN components ON patches.id = components.patch_id WHERE patches.title_id = '.$patch['title_id'].' LIMIT 1')->fetch(PDO::FETCH_COLUMN);
-	if (empty($new_component)) {
-		$new_component = $patch['name'];
+	$new_components = $pdo->query('SELECT DISTINCT name FROM patches JOIN components ON patches.id = components.patch_id WHERE patches.title_id = '.$patch['title_id'])->fetchAll(PDO::FETCH_COLUMN);
+	if (empty($new_components)) {
+		$new_components = array($patch['name']);
 	}
+	foreach ($new_components as $key => $value) {
+		if (in_array($value, array_map(function($el){ return $el['name']; }, $components))) {
+			unset($new_components[$key]);
+		}
+	}
+	$new_components = array_values($new_components);
 
 	// Capabilities
 	$capabilities = array();
@@ -329,7 +345,6 @@ if (!empty($patch_id)) {
 				var patchEnabled = <?php echo $patch['enabled']; ?>;
 				var extAttrKeys = [<?php echo (sizeof($ext_attrs) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['key_id']; }, $ext_attrs))."\"" : ""); ?>];
 				var sizeOfEas = <?php echo sizeof($ext_attrs); ?>;
-				var sizeOfComps = <?php echo sizeof($components); ?>;
 				var sizeOfCriteria = [];
 <?php foreach ($components as $component) { ?>
 					sizeOfCriteria[<?php echo $component['id']; ?>] = <?php echo sizeof($component['criteria']); ?>;
@@ -338,7 +353,6 @@ if (!empty($patch_id)) {
 				var criteriaError = <?php echo (in_array("criteria", $patch['error']) ? "1" : "0"); ?>;
 				var sizeOfCaps = <?php echo sizeof($capabilities); ?>;
 				var capabilitiesError = <?php echo (in_array("capabilities", $patch['error']) ? "1" : "0"); ?>;
-				var sizeOfKillApps = <?php echo sizeof($kill_apps); ?>;
 			</script>
 
 			<script type="text/javascript" src="scripts/patchValidation.js"></script>
@@ -380,13 +394,8 @@ if (!empty($patch_id)) {
 					var version = document.getElementById('version');
 					var comp_name = document.getElementById('comp_name[0]');
 					var comp_version = document.getElementById('comp_version[0]');
-					if (sizeOfComps == 0) {
-						comp_name.value = '<?php echo htmlentities($new_component); ?>';
-						comp_version.value = version.value;
-					} else {
-						comp_name.value = '';
-						comp_version.value = '';
-					}
+					comp_name.value = '<?php echo htmlentities(empty($new_components) ? "" : $new_components[0]); ?>';
+					comp_version.value = version.value;
 					validComponent('create_comp', 'comp_name[0]', 'comp_version[0]');
 				}
 				function newCriteriaModal(compId) {
@@ -433,10 +442,8 @@ if (!empty($patch_id)) {
 				function newKillAppModal() {
 					var kill_app_name = document.getElementById('kill_app_name[0]');
 					var kill_bundle_id = document.getElementById('kill_bundle_id[0]');
-					if (sizeOfKillApps == 0) {
-						kill_app_name.value = "<?php echo htmlentities($patch['app_name']); ?>";
-						kill_bundle_id.value = "<?php echo htmlentities($patch['bundle_id']); ?>";
-					}
+					kill_app_name.value = "<?php echo htmlentities(empty($new_kill_apps) ? "" : $new_kill_apps[0]['app_name']); ?>";
+					kill_bundle_id.value = "<?php echo htmlentities(empty($new_kill_apps) ? "" : $new_kill_apps[0]['bundle_id']); ?>";
 					validKillApp('create_kill_app', 'kill_app_name[0]', 'kill_bundle_id[0]');
 				}
 			</script>
