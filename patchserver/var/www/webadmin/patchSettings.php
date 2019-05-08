@@ -930,7 +930,7 @@ if (!$cloud) { ?>
 								</div>
 							</div>
 
-							<h5><strong>Users</strong> <small>Description.</small></h5>
+							<h5><strong>Users</strong> <small>Kinobi user accounts and privileges.</small></h5>
 
 							<table id="users" class="table table-hover" style="border-bottom: 1px solid #eee;">
 								<thead>
