@@ -451,7 +451,7 @@ if (empty($pdo_error)) {
 							<div class="modal-body">
 								<input type="hidden" name="setup_token" id="setup_token" value="<?php echo $setup_token; ?>"/>
 
-								<textarea class="form-control" rows="12" style="resize: none;" readonly><?php echo file_get_contents("../../kinobi/LICENSE"); ?></textarea>
+								<div class="well well-sm" style="max-height: 254px; overflow-y: scroll"><?php echo file_get_contents("../../kinobi/LICENSE"); ?></div>
 							</div>
 							<div class="modal-footer">
 								<button type="submit" name="eula_next" id="eula_next" class="btn btn-primary btn-sm pull-right" style="width: 60px;" value="next">Agree</button>

@@ -1,96 +1,261 @@
-Mondada Open Source
-License Version 1.0, 28 May 2018
-
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION OF MONDADA PTY LTD OPEN SOURCE SOFTWARE
-
-Please read this License carefully before downloading any software to which it relates. By downloading or using such software, you are agreeing to be bound by the terms of this License. If you do not or cannot agree to the terms of this License, please do not download or use the software.
-
-1.	Definitions
-
-	In this document:
-
-	"Contribution" means any work of authorship, including the original version of the Work and any modifications or additions to that Work or Derivative Works thereof, that is intentionally submitted to Licensor for inclusion in the Work by the copyright	owner or by an individual or Legal Entity authorized to submit on behalf of the copyright owner. For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to the Licensor or its representatives, including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, the Licensor for the purpose of discussing and improving the Work, but excluding communication that is conspicuously	marked or otherwise designated in writing by the copyright owner as "Not a Contribution."
-
-	"Contributor" means Licensor and any individual or Legal Entity	on behalf of whom a Contribution has been received by Licensor and subsequently incorporated within the Work.
-
-	"Derivative Works" means any work, whether in Source or Object form, that is based on (or derived from) the Work and for which the editorial revisions, annotations, elaborations, or other modifications represent, as a whole, an original work of authorship. For the purposes of this License, Derivative Works shall not include works that remain separable from, or merely link (or bind by name) to the interfaces of, the Work and Derivative Works thereof.
-
-	"Legal Entity" means the union of the acting entity and all other entities that control, are controlled by, or are under common control with that entity; where "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.
-
-	"License" means the terms and conditions for use, reproduction, and distribution as set out in this document.
-
-	"Licensor" means Mondada Pty Ltd, ACN (Australian Company Number) 139 833 597.
-
-	"Object" form means any form resulting from mechanical transformation or translation of a Source form, including but not limited to compiled object code, generated Documentation, and conversions to other media types.
-
-	"Source" form means the preferred form for making modifications, including but not limited to software source code, documentation source, and configuration files.
-
-	"Work" means the work of authorship, whether in Source or Object form, made available under the License, as indicated by a copyright notice that is included in or attached to the work.
-
-	"You" (or "Your") means an individual or Legal Entity exercising permissions granted by this License.
-
-2.	Grant of Copyright License
-
-	Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the Work and such Derivative Works in Source or Object form, provided You do not sell or charge any fee in connection with such use. If You wish to charge a fee in connection with the use of any Derivative Works, this may be permitted, the terms of which must be negotiated directly with Mondada.
-
-	In consideration of, and as a condition to, the licenses granted to You under this License, You hereby grant to any person or entity receiving or distributing the Work a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute any Derivative Works created by You in Source or Object form, provided they do not sell or charge any fee in connection with such use.
-
-3.	Grant of Patent License
-
-	Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, import, and otherwise transfer the Work (but not to offer to sell the Work), where such license applies only to those patent claims licensable by such Contributor that are necessarily infringed by their Contribution(s) alone or by combination of their Contribution(s) with the Work to which such Contribution(s) was submitted. If You institute patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Work or a Contribution incorporated within the Work constitutes direct or contributory patent infringement, then any patent licenses granted to You under this License for that Work shall terminate as of the date such litigation is filed.
-
-	In consideration of, and as a condition to, the licenses granted to You under this License, You hereby grant to any person or entity receiving or distributing the Work a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) license to make, have made, use, import, and otherwise transfer any Derivative Works created by You (but not to offer to sell the Work), where such license applies only to those patent claims licensable by such Contributor that are necessarily infringed by their Contribution(s) alone or by combination of their Contribution(s) with the Work to which such Contribution(s) was submitted.
-
-4.	Redistribution
-
-	You may reproduce and distribute copies of the Work or Derivative Works thereof in any medium, with or without modifications, and in Source or Object form, provided that You do not sell or charge any fee in connection with such reproduction or distribution, and provided You meet the following conditions:
-
-	(a) You must give any other recipients of the Work or Derivative Works a copy of this License; and
-
-	(b) You must cause any modified files to carry prominent notices stating that You changed the files; and
-
-	(c) You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works, and You must not offer or impose any terms that alter or restrict this License or the recipients' rights hereunder, except as expressly permitted otherwise; and
-
-	(d) If the Work includes a "NOTICE" text file as part of its distribution, then any Derivative Works that You distribute must include a readable copy of the attribution notices contained within such NOTICE file, excluding those notices that do not pertain to any part of the Derivative Works, in at least one of the following places:
-
-		•	within a NOTICE text file distributed as part of the Derivative Works;
-		•	within the Source form or documentation, if provided along with the Derivative Works; or
-		•	within a display generated by the Derivative Works, if and wherever such third-party notices normally appear.
-
-		The contents of the NOTICE file are for informational purposes only and do not modify the License. You may add Your own attribution notices within Derivative Works that You distribute, alongside or as an addendum to the NOTICE text from the Work, provided that such additional attribution notices cannot be construed as modifying the License.
-
-		You may add Your own copyright statement to Your modifications and may provide additional or different license terms and conditions for use, reproduction, or distribution of Your modifications, or for any such Derivative Works as a whole, provided Your use, reproduction, and distribution of the Work otherwise complies with the conditions stated in this License.
-
-		If You make external use of any Derivative Works created by You, You must make Source code of all such Derivative Works publicly available. Source Code of such Derivative Works must be released under the terms set out in this License for as long as you make external use of any Derivative Works or twelve (12) months from the date of initial external use, whichever is longer. You should preferably distribute the Source code electronically (e.g. downloadable from a web site).
-
-5.	Submission of Contributions
-
-	Unless You explicitly state otherwise, any Contribution intentionally submitted for inclusion in the Work by You to the Licensor shall be under the terms and conditions of this License, without any additional terms or conditions. Notwithstanding the above, nothing herein shall supersede or modify the terms of any separate license agreement you may have executed with Licensor regarding such Contributions.
-
-6.	Trademarks
-
-	This License does not grant permission to use the trade names, trademarks, service marks, or product names of the Licensor, except as required for reasonable and customary use in describing the origin of the Work and reproducing the content of the NOTICE file.
-
-7.	Disclaimer of Warranty
-
-	Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.
-
-	The Work may contain in whole or in part pre-release, untested, or not fully tested works. The Work may contain errors that could cause failures or loss of data, and may be incomplete or contain inaccuracies. You expressly acknowledge and agree that use of the Work, or any portion thereof, is at Your sole and entire risk.
-
-	LICENSOR AND EACH CONTRIBUTOR DOES NOT WARRANT AGAINST INTERFERENCE WITH YOUR ENJOYMENT OF THE WORK, THAT THE FUNCTIONS CONTAINED IN THE WORK WILL MEET YOUR REQUIREMENTS, THAT THE OPERATION OF THE WORK WILL BE UNINTERRUPTED OR ERROR-FREE, OR THAT DEFECTS IN THE WORK WILL BE CORRECTED. NO ORAL OR WRITTEN INFORMATION OR ADVICE GIVEN BY LICENSOR, AN LICENSOR AUTHORIZED REPRESENTATIVE OR ANY CONTRIBUTOR SHALL CREATE A WARRANTY.
-
-8.	Limitation of grants
-
-	Except as expressly stated in Clauses 2 and 3 above, no other copyright or patent rights, express or implied, are granted by Licensor. Software or other works falling outside the definition of the relevant Work may require additional licenses from Licensor which Licensor may grant in its sole discretion.
-
-9.	Limitation of Liability
-
-	In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as grossly negligent acts) or agreed to in writing, shall any Contributor be liable to You for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising as a result of this License or out of the use or inability to use the Work (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if such Contributor has been advised of the possibility of such damages. In no event shall Licensor’s total liability to You for all damages (other than as may be required by applicable law) under this License exceed the amount of fifty dollars ($50.00).
-
-10.	Accepting Warranty or Additional Liability
-
-	While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.
-
-11.	Versions of the License
-
-	Licensor may publish revised and/or new versions of this License from time to time. Each version will be given a distinguishing version number. If a Work was published under a particular version of this License, You may continue to use it under the terms of that version. You may also choose to use such Work under the terms of any subsequent version of this License published by Licensor. No one other than Licensor has the right to modify the terms applicable to Works which are subject to this License.
+   <table class="table">
+    <tr>
+     <td style="border: none;" colspan="2">Posted/Revised: 16/4/2019</td>
+    </tr>
+    <tr>
+     <td style="border: none;" colspan="2"><h4 align="center">SOFTWARE SERVICES AND LICENSE AGREEMENT - TRIAL VERSION ONLY</h4></td>
+    </tr>
+    <tr>
+     <td style="border: none;" colspan="2">Kinobi IP Pty Ltd ABN 45 139 833 588 ("<strong>Kinobi</strong>") provides certain Services (as defined herein) and licenses certain Software (as defined herein) subject to the terms and conditions set out in this Software Services and License Agreement ("<strong>Agreement</strong>"). As used in this Agreement, "Customer" refers to the entity receiving the Services or using the Software.</td>
+    </tr>
+    <tr>
+     <td style="border: none;" colspan="2">By receiving the Services or using the Software, the Customer agrees to be bound by the terms of this Agreement from the date that it begins receiving the Services or using the Software ("<strong>Effective Date</strong>").</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>1.</strong></td>
+     <td style="border: none;"><strong>DEFINITIONS</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;" colspan="2">The following capitalized terms have the following meanings when used in this Agreement.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.1.</td>
+     <td style="border: none;">"<strong>Customer Data</strong>" means data in electronic form input or collected through the Services by or from Customer, including without limitation by Users.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.2.</td>
+     <td style="border: none;">"<strong>Cloud Services</strong>" means those services provided to the Customer when the Customer orders "Cloud" on the Site, as described in the Documentation.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.3.</td>
+     <td style="border: none;">"<strong>Documentation</strong>" means, as applicable, the Cloud Services' or Self-Hosted Services' usage guides and policies, as updated from time to time, accessible via the Site.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.4.</td>
+     <td style="border: none;">"<strong>Services</strong>" means, as applicable, the Self-Hosted Services or the Cloud Services that are ordered by the Customer on the Site, and made available by Kinobi, as described in the Documentation.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.5.</td>
+     <td style="border: none;">"<strong>Self-Hosted Services</strong>" means those services provided to the Customer when the Customer orders "Self-Hosted" on the Site, as described in the Documentation.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.6.</td>
+     <td style="border: none;">"<strong>Software</strong>" means the most recent version of the open source patch management software licenced by Kinobi's affiliate, Mondada Pty Ltd, and known as Mondada Open Source, found at <a target="_blank" href="https://github.com/mondada/kinobi/blob/master/LICENSE">https://github.com/mondada/kinobi/blob/master/LICENSE</a> ("<strong>Mondada Open Source Licence</strong>")</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.7.</td>
+     <td style="border: none;">"<strong>Site</strong>" means any website operated by Kinobi, including <a target="_blank" href="https://kinobi.io/">https://kinobi.io/</a>.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.8.</td>
+     <td style="border: none;">"<strong>Third Party Services</strong>" means third party (including Jamf Software, LLC and its affiliates) products, applications, services, software, networks, systems, directories, websites, databases and information which a Service links to, or which the Customer may connect to or enable in conjunction with a Service.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.9.</td>
+     <td style="border: none;">"<strong>Term</strong>" is defined in Section 11.1 below.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">1.10.</td>
+     <td style="border: none;">"<strong>User</strong>" means any individual who uses the Services on Customer's behalf or through Customer's account or passwords, whether authorized or not.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>2.</strong></td>
+     <td style="border: none;"><strong>SERVICES AND SOFTWARE LICENCE</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">2.1.</td>
+     <td style="border: none;"><strong>Provision</strong> of Services. During the Term, and subject to the terms and conditions of this Agreement, Kinobi will (a) make the Services available to Customer pursuant to this Agreement and the applicable Documentation; (b) provide applicable standard customer support for the Services at no additional charge as detailed in the applicable Documentation; (c) use commercially reasonable efforts to make the Services available 24 hours a day, 7 days a week, except (i) during planned downtime for upgrades and maintenance to the Services (of which Kinobi will use commercially reasonable efforts to notify Customer in advance through the Site; and (ii) for any unavailability caused by circumstances beyond Kinobi's reasonable control, including, for example, an act of God, act of government, flood, fire, earthquake, civil unrest, act of terror, strike or other labor problem (other than one involving Kinobi's employees), Internet service provider failure or delay, Third Party Services, or acts undertaken by third parties, including without limitation, denial of service attack.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">2.2.</td>
+     <td style="border: none;"><strong>Services Revisions</strong>. Kinobi may revise Services features and functions or the Documentation at any time, including without limitation by removing such features and functions or reducing service levels. If any such revision to the Services materially reduces their features or functionality, Customer may within 30 days of notice of the revision terminate its subscription to the affected Services, without cause, or terminate this Agreement without cause if the affected Services are the only Services to which it has subscribed.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">2.3.</td>
+     <td style="border: none;"><strong>Software License</strong>. For the Self-Hosted Services only, Customer's use of the Software is subject to the Mondada Open Source Licence.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>3.</strong></td>
+     <td style="border: none;"><strong>PAYMENT</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">3.1.</td>
+     <td style="border: none;"><strong>Subscription Fees</strong>. Customer shall not be required to pay any subscription fees.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>4.</strong></td>
+     <td style="border: none;"><strong>CUSTOMER DATA & PRIVACY</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">4.1.</td>
+     <td style="border: none;"><strong>Use of Customer Data</strong>. Unless it receives Customer's prior written consent, Kinobi: (a) shall not access, process, or otherwise use Customer Data other than as necessary to facilitate the Services; and (b) shall not intentionally grant any third party access to Customer Data, including without limitation Kinobi's other customers, except subcontractors that are subject to a reasonable nondisclosure agreement. Notwithstanding the foregoing, Kinobi may disclose Customer Data as required by applicable law or by proper legal or governmental authority. Kinobi shall give Customer prompt notice of any such legal or governmental demand and reasonably cooperate with Customer in any effort to seek a protective order or otherwise to contest such required disclosure, at Customer's expense.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">4.2.</td>
+     <td style="border: none;"><strong>Risk of Exposure</strong>. Customer recognizes and agrees that hosting data online involves risks of unauthorized disclosure or exposure and that, in accessing and using the Services, Customer assumes such risks. Kinobi offers no representation, warranty, or guarantee that Customer Data will not be exposed or disclosed through errors or the actions of third parties.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">4.3.</td>
+     <td style="border: none;"><strong>Data Accuracy</strong>. Kinobi will have no responsibility or liability for the accuracy of data uploaded to the Services by Customer, including without limitation Customer Data and any other data uploaded by Users.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">4.4.</td>
+     <td style="border: none;"><strong>Data Deletion</strong>. Kinobi may permanently erase Customer Data if Customer's account is delinquent, suspended, or terminated for 30 days or more.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>5.</strong></td>
+     <td style="border: none;"><strong>CUSTOMER'S RESPONSIBILITIES & RESTRICTIONS</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">5.1.</td>
+     <td style="border: none;"><strong>Restrictions</strong>. Customer shall not: (a) use the Services for service bureau or time-sharing purposes or in any other way allow third parties to exploit the Services; (b) provide Services passwords or other log-in information to any third party; (c) share non-public Services features or content with any third party; (d) access the Services in order to build a competitive product or service, to build a product using similar ideas, features, functions or graphics of the Services, or to copy any ideas, features, functions or graphics of the Services; or (e) engage in web scraping or data scraping on or related to the Services, including without limitation collection of information through any software that simulates human activity or any bot or web crawler. If it suspects any breach of the requirements of this Section 5.1, including without limitation by Users, Kinobi may suspend Customer's access to the Services without advance notice, in addition to such other remedies as Kinobi may have.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">5.2.</td>
+     <td style="border: none;"><strong>Unauthorized Access</strong>. Customer shall take reasonable steps to prevent unauthorized access to the Services, including without limitation by protecting its passwords and other log-in information. Customer shall notify Kinobi immediately of any known or suspected unauthorized use of the Services or breach of its security and shall use best efforts to stop said breach.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">5.3.</td>
+     <td style="border: none;"><strong>Compliance with Laws</strong>. In its use of the Services, Customer shall comply with all applicable laws, including without limitation laws governing the protection of personally identifiable information and other laws applicable to the protection of Customer Data.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">5.4.</td>
+     <td style="border: none;"><strong>Users & Services Access</strong>. Customer is responsible and liable for: (a) Users' use of the Services, including without limitation unauthorized User conduct and any User conduct that would violate breach the Customer's obligations under this Agreement; and (b) any use of the Services through Customer's account, whether authorized or unauthorized.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>6.</strong></td>
+     <td style="border: none;"><strong>IP & FEEDBACK</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">6.1.</td>
+     <td style="border: none;"><strong>IP Rights to the Services</strong>. Except for the Software, Kinobi retains all right, title, and interest in and to the Services, including without limitation all software used to provide the Services and all graphics, user interfaces, logos, and trademarks reproduced through the Services. This Agreement does not grant Customer any intellectual property license or rights in or to the Services or any of its components. Customer recognizes that the Services and its components are protected by copyright and other laws.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">6.2.</td>
+     <td style="border: none;"><strong>Feedback</strong>. Kinobi has not agreed to and does not agree to treat as confidential any Feedback (as defined below) Customer or Users provide to Kinobi, and nothing in this Agreement or in the parties' dealings arising out of or related to this Agreement will restrict Kinobi's right to use, profit from, disclose, publish, keep secret, or otherwise exploit Feedback, without compensating or crediting Customer or the User in question. Notwithstanding the provisions of Article 7 below, Feedback will not be considered Confidential Information, provided that information Customer transmits with Feedback or related to Feedback may be considered Confidential Information. ("Feedback" refers to any suggestion or idea for improving or otherwise modifying any of Kinobi's products or services.)</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>7.</strong></td>
+     <td style="border: none;"><strong>CONFIDENTIAL INFORMATION</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">&nbsp;</td>
+     <td style="border: none;">"Confidential Information" refers to the following items Kinobi discloses to Customer: (a) any document Kinobi marks "Confidential"; (b) the Documentation, whether or not marked or designated confidential; and (c) any other nonpublic, sensitive information, including information Kinobi discloses orally, that Customer should reasonably consider a trade secret or otherwise confidential. Notwithstanding the foregoing, Confidential Information does not include information that: (i) is in Customer's possession at the time of disclosure; (ii) is independently developed by Customer without use of or reference to Confidential Information; (iii) becomes known publicly, before or after disclosure, other than as a result of Customer's improper action or inaction; or (iv) is approved for release in writing by Customer. Customer is on notice that the Confidential Information may include Kinobi's valuable trade secrets.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">7.1.</td>
+     <td style="border: none;"><strong>Nondisclosure</strong>. Customer shall protect Confidential Information with the same degree of care it uses to protect its own confidential information of similar nature and importance, but with no less than reasonable care. Customer shall promptly notify Kinobi of any misuse or misappropriation of Confidential Information that comes to Customer's attention. Notwithstanding the foregoing, Customer may disclose Confidential Information as required by applicable law or by proper legal or governmental authority. Customer shall give Kinobi prompt notice of any such legal or governmental demand and reasonably cooperate with Kinobi in any effort to seek a protective order or otherwise to contest such required disclosure, at Kinobi's expense.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">7.2.</td>
+     <td style="border: none;"><strong>Termination & Return</strong>. With respect to each item of Confidential Information, the obligations of Section 7.1 above (<em>Nondisclosure</em>) will terminate 5 years after the date of disclosure; provided that such obligations related to Confidential Information constituting Kinobi's trade secrets will continue so long as such information remains subject to trade secret protection pursuant to applicable law. Upon termination of this Agreement, Customer shall return all copies of Confidential Information to Kinobi or certify, in writing, the destruction thereof.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">7.3.</td>
+     <td style="border: none;"><strong>Retention of Rights</strong>. This Agreement does not transfer ownership of Confidential Information or grant a license thereto. Kinobi retains all right, title, and interest in and to all Confidential Information.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>8.</strong></td>
+     <td style="border: none;"><strong>REPRESENTATIONS & WARRANTIES</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">8.1.</td>
+     <td style="border: none;"><strong>From Kinobi</strong>. Kinobi represents and warrants that it is the owner of the Services and of each and every component thereof, or the recipient of a valid license thereto, and that it has and will maintain the full power and authority to grant the rights granted in this Agreement without the further consent of any third party. In the event of a breach of the warranty in this Section 8.1, Kinobi, at its own expense, shall promptly take the following actions: (a) secure for Customer the right to continue using the Services; (b) replace or modify the Services to make it noninfringing; or (c) terminate the infringing features of the Service and refund to Customer any prepaid fees for such features, in proportion to the portion of the Term left after such termination. In conjunction with Customer's right to terminate for breach where applicable, the preceding sentence states Kinobi's sole obligation and liability, and Customer's sole remedy, for breach of the warranty in this Section 8.1 and for potential or actual intellectual property infringement by the Services.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">8.2.</td>
+     <td style="border: none;"><strong>From Customer</strong>. Customer represents and warrants that: (a) it has validly entered into this Agreement and has the legal power to do so; (b) it has accurately identified itself and it has not provided any inaccurate information about itself to or through the Services; and (c) it is a corporation or entity authorized to do business pursuant to applicable law.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">8.3.</td>
+     <td style="border: none;"><strong>Warranty Disclaimers</strong>. Except to the extent set forth in Section 8.1 above, CUSTOMER ACCEPTS THE SERVICES "AS IS" AND AS AVAILABLE, WITH NO REPRESENTATION OR WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY IMPLIED WARRANTY ARISING FROM STATUTE, COURSE OF DEALING, COURSE OF PERFORMANCE, OR USAGE OF TRADE. WITHOUT LIMITING THE GENERALITY OF THE FOREGOING: (a) KINOBI HAS NO OBLIGATION TO INDEMNIFY OR DEFEND CUSTOMER OR USERS AGAINST CLAIMS RELATED TO INFRINGEMENT OF INTELLECTUAL PROPERTY; (b) KINOBI DOES NOT REPRESENT OR WARRANT THAT THE SERVICES WILL PERFORM WITHOUT INTERRUPTION OR ERROR; AND (c) KINOBI DOES NOT REPRESENT OR WARRANT THAT THE SERVICES ARE SECURE FROM HACKING OR OTHER UNAUTHORIZED INTRUSION OR THAT CUSTOMER DATA WILL REMAIN PRIVATE OR SECURE.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>9.</strong></td>
+     <td style="border: none;"><strong>INDEMNIFICATION</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">&nbsp;</td>
+     <td style="border: none;">Customer shall defend, indemnify, and hold harmless Kinobi and the Kinobi Associates (as defined below) against any "Indemnified Claim," meaning any third party claim, suit, or proceeding arising out of or related to Customer's alleged or actual use of, misuse of, or failure to use the Services or Third Party Services, including without limitation: (a) claims by providers of Third Party Services; (b) claims by Users or by Customer's employees, as well as by Customer's own customers; (c) claims related to unauthorized disclosure or exposure of personally identifiable information or other private information, including Customer Data; (d) claims related to infringement or violation of a copyright, trademark, trade secret, or privacy or confidentiality right by written material, images, logos or other content uploaded to the Services through Customer's account, including without limitation by Customer Data; and (d) claims that use of the Services through Customer's account harasses, defames, or defrauds a third party or violates applicable law. Indemnified Claims include, without limitation, claims arising out of or related to Kinobi's negligence. Customer's obligations set forth in this Article 9 include retention and payment of attorneys and payment of court costs, as well as settlement at Customer's expense and payment of judgments. Kinobi will have the right, not to be exercised unreasonably, to reject any settlement or compromise that requires that it admit wrongdoing or liability or subjects it to any ongoing affirmative obligations. (The "Kinobi Associates" are Kinobi's officers, directors, shareholders, parents, subsidiaries, agents, successors, and assigns.)</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>10.</strong></td>
+     <td style="border: none;"><strong>LIMITATION OF LIABILITY</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">10.1.</td>
+     <td style="border: none;"><strong>Cap</strong>. KINOBI'S CUMULATIVE LIABILTY FOR ALL CLAIMS ARISING OUT OF OR RELATED TO THIS AGREEMENT WILL NOT EXCEED THE SUBSCRIPTION FEES PAID BY CUSTOMER DURING THE TWELVE (12) MONTHS PRIOR TO THE FIRST EVENT OR OCCURRENCE GIVING RISE TO SUCH LIABILITY. CUSTOMER   ACKNOWLEDGES AND AGREES THAT THE ESSENTIAL PURPOSE OF THIS SECTION 10.1 IS TO ALLOCATE THE RISKS UNDER THIS AGREEMENT BETWEEN THE PARTIES AND LIMIT POTENTIAL LIABILITY GIVEN THE SUBSCRIPTION FEES, WHICH WOULD HAVE BEEN SUBSTANTIALLY HIGHER IF KINOBI WAS TO ASSUME ANY FURTHER LIABILITY OTHER THAN AS SET FORTH HEREIN. KINOBI HAS RELIED ON THESE LIMITATIONS IN DETERMINING WHETHER TO PROVIDE CUSTOMER WITH THE RIGHTS TO ACCESS AND USE THE SERVICES.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">10.2.</td>
+     <td style="border: none;"><strong>Exclusion of Consequential Damages</strong>. IN NO EVENT WILL KINOBI OR ITS AFFILIATES BE LIABLE FOR ANY LOST PROFITS, LOST SALES OR BUSINESS, LOST DATA, BUSINESS INTERRUPTION, LOSS OF GOODWILL, COSTS OF COVER OR REPLACEMENT, OR FOR ANY TYPE OF INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL OR PUNITIVE LOSS OR DAMAGES ARISING OUT OF OR RELATED TO THIS AGREEMENT.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">10.3.</td>
+     <td style="border: none;"><strong>Clarifications & Disclaimers</strong>. THE LIABILITIES LIMITED BY THIS ARTICLE 10 APPLY: (a) TO LIABILITY FOR NEGLIGENCE; (b) REGARDLESS OF THE FORM OF ACTION, WHETHER IN CONTRACT, TORT, STRICT PRODUCT LIABILITY, OR OTHERWISE; (c) EVEN IF KINOBI IS ADVISED IN ADVANCE OF THE POSSIBILITY OF THE DAMAGES IN QUESTION AND EVEN IF SUCH DAMAGES WERE FORESEEABLE; AND (d) EVEN IF CUSTOMER'S REMEDIES FAIL OF THEIR ESSENTIAL PURPOSE. If applicable law limits the application of the provisions of this Article 10, Kinobi's liability will be limited to the maximum extent permissible. For the avoidance of doubt, Kinobi's liability limits and other rights set forth in this Article 10 apply likewise to Kinobi's affiliates, suppliers, agents, directors, officers, employees, consultants, and other representatives.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>11.</strong></td>
+     <td style="border: none;"><strong>TERM & TERMINATION</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">11.1.</td>
+     <td style="border: none;"><strong>Term</strong>. The term of this Agreement (the "Term") will commence on the Effective Date and continue for 60 days.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">11.2.</td>
+     <td style="border: none;"><strong>Termination for Cause</strong>. Either party may terminate this Agreement for the other's material breach by written notice specifying in detail the nature of the breach, effective in 30 days unless the other party first cures such breach, or effective immediately if the breach is not subject to cure.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">11.3.</td>
+     <td style="border: none;"><strong>Effects of Termination</strong>. Upon termination of this Agreement, Customer shall cease all use of the Services and delete, destroy, or return all copies of the Documentation in its possession or control. The following provisions will survive termination or expiration of this Agreement: (a) any obligation of Customer to pay fees incurred before termination; (b) Articles and Sections 6 (<em>IP & Feedback</em>), 7 (<em>Confidential Information</em>), 8.3 (<em>Warranty Disclaimers</em>), 9 (<em>Indemnification</em>), and 10 (<em>Limitation of Liability</em>); and (c) any other provision of this Agreement that must survive to fulfill its essential purpose.</td>
+    </tr>
+    <tr>
+     <td style="border: none;"><strong>12.</strong></td>
+     <td style="border: none;"><strong>MISCELLANEOUS</strong></td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.1.</td>
+     <td style="border: none;"><strong>Independent Contractors</strong>. The parties are independent contractors and shall so represent themselves in all regards. Neither party is the agent of the other, and neither may make commitments on the other's behalf.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.2.</td>
+     <td style="border: none;"><strong>Notices</strong>. Kinobi may send notices pursuant to this Agreement to Customer's email contact points provided by Customer, and such notices will be deemed received 48 hours after they are sent. Customer may send notices pursuant to this Agreement to the contact email shown on the Site, and such notices will be deemed received 48 hours after they are sent.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.3.</td>
+     <td style="border: none;"><strong>Force Majeure</strong>. No delay, failure, or default, other than a failure to pay fees when due, will constitute a breach of this Agreement to the extent caused by acts of war, terrorism, hurricanes, earthquakes, other acts of God or of nature, strikes or other labor disputes, riots or other acts of civil disorder, embargoes, or other causes beyond the performing party's reasonable control.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.4.</td>
+     <td style="border: none;"><strong>Assignment & Successors</strong>. Customer may not assign this Agreement or any of its rights or obligations hereunder without Kinobi's express written consent. Except to the extent forbidden in this Section 12.4, this Agreement will be binding upon and inure to the benefit of the parties' respective successors and assigns.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.5.</td>
+     <td style="border: none;"><strong>Severability</strong>. To the extent permitted by applicable law, the parties hereby waive any provision of law that would render any clause of this Agreement invalid or otherwise unenforceable in any respect. If a provision of this Agreement is held to be invalid or otherwise unenforceable, such provision will be interpreted to fulfill its intended purpose to the maximum extent permitted by applicable law, and the remaining provisions of this Agreement will continue in full force and effect.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.6.</td>
+     <td style="border: none;"><strong>No Waiver</strong>. Neither party will be deemed to have waived any of its rights under this Agreement by lapse of time or by any statement or representation other than by an authorized representative in an explicit written waiver. No waiver of a breach of this Agreement will constitute a waiver of any other breach of this Agreement.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.7.</td>
+     <td style="border: none;"><strong>Choice of Law & Jurisdiction</strong>: This Agreement and all claims arising out of or related to this Agreement will be governed solely by the laws of the State of Victoria, Australia, including without limitation applicable federal law, without reference to: (a) any conflicts of law principle that would apply the substantive laws of another jurisdiction to the parties' rights or duties; (b) the 1980 United Nations Convention on Contracts for the International Sale of Goods; or (c) other international laws. The parties consent to the exclusive jurisdiction of the courts of the State of Victoria, Australia for the purpose of resolving any dispute relating to this Agreement.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.8.</td>
+     <td style="border: none;"><strong>Conflicts</strong>. In the event of any conflict between this Agreement and any Kinobi policy posted online, the terms of this Agreement will govern.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.9.</td>
+     <td style="border: none;"><strong>Technology Export</strong>. Customer shall not: (a) permit any third party to access or use the Services in violation of any U.S. law or regulation; or (b) export any software provided by Kinobi or otherwise remove it from the United States except in compliance with all applicable U.S. laws and regulations. Without limiting the generality of the foregoing, Customer shall not permit any third party to access or use the Services in, or export such software to, a country subject to a United States embargo.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.10.</td>
+     <td style="border: none;"><strong>Entire Agreement</strong>. This Agreement sets out the entire agreement of the parties and supersedes all prior or contemporaneous writings, negotiations, and discussions with respect to its subject matter. Neither party has relied upon any such prior or contemporaneous communications.</td>
+    </tr>
+    <tr>
+     <td style="border: none;">12.11.</td>
+     <td style="border: none;"><strong>Amendment</strong>. Kinobi may amend this Agreement from time to time by posting an amended version at the Site. Customer's continued use of the Service following any such an amendment will confirm Customer's consent thereto. This Agreement may not be amended in any other way except through a written agreement by authorized representatives of each party. Kinobi may similarly revise any Kinobi policy posted online, at any time by posting a new version of at the Site, and Customer's continued use of the Service following any such an amendment will confirm Customer's consent thereto.</td>
+    </tr>
+   </table>
