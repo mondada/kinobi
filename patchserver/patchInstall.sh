@@ -93,6 +93,9 @@ rm -f /var/www/html/index.html
 mkdir -p $installdir/kinobi/bin
 cp -R ./resources/Slim $installdir/kinobi/bin/Slim
 
+# Install License
+cp -R ./resources/LICENSE $installdir/kinobi/LICENSE
+
 # Install sqlite database
 if [ ! -f $installdir/kinobi/db/patch_v1.sqlite ]; then
 	mkdir -p $installdir/kinobi/db

@@ -28,6 +28,7 @@ cp -R includes/logger.sh temp/installer/utils/logger.sh
 cp -R patchserver/patchInstall.sh temp/installer/install-patch_v1.sh
 cp -R patchserver/var/Slim temp/installer/resources/Slim
 cp -R patchserver/var/appliance/db/patch_v1.sqlite temp/installer/resources/patch_v1.sqlite
+cp -R patchserver/var/appliance/LICENSE temp/installer/resources/LICENSE
 cp -R patchserver/var/www temp/installer/resources/html
 if [ -x "/usr/bin/xattr" ]; then find temp -exec xattr -c {} \; ;fi # Remove OS X extended attributes
 find temp -name .DS_Store -delete # Clean out .DS_Store files
