@@ -263,6 +263,16 @@ if (!empty($title_id)) {
 		}
 		array_push($patches, $patch);
 	}
+	$patch_versions = array_map(function($el){ return $el['version']; }, $patches);
+
+	// Current Version
+	if (count($patches) > 0) {
+		if (!in_array($sw_title['current'], $patch_versions, TRUE)) {
+			$stmt = $pdo->prepare('UPDATE titles SET current = ? WHERE id = ?');
+			$stmt->execute(array($patch_versions[0], $title_id));
+			$sw_title['current'] = $patch_versions[0];
+		}
+	}
 
 	// Enabled Pacthes
 	if (!in_array(1, array_map(function($el){ return $el['enabled']; }, $patches))) {
@@ -356,7 +366,7 @@ if (!empty($title_id)) {
 				var extAttrKeys = [<?php echo (sizeof($ext_attrs) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['key_id']; }, $ext_attrs))."\"" : ""); ?>];
 				var sizeOfEas = <?php echo sizeof($ext_attrs); ?>;
 				var sizeOfRqmts = <?php echo sizeof($requirements); ?>;
-				var patchVersions = [<?php echo (sizeof($patches) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['version']; }, $patches))."\"" : ""); ?>];
+				var patchVersions = [<?php echo (sizeof($patches) > 0 ? "\"".implode('", "', $patch_versions)."\"" : ""); ?>];
 				var enabledPatches = <?php echo array_sum(array_map(function($el){ return $el['enabled']; }, $patches)); ?>;
 			</script>
 
@@ -604,7 +614,15 @@ if (!empty($title_id)) {
 							</div>
 							<h5 id="current_label"><strong>Current Version</strong> <small>Used for reporting the latest version of the patch management software title to Jamf Pro.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
+<?php if (count($patches) == 0) { ?>
 								<input id="current" type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo htmlentities($sw_title['current']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
+<?php } else { ?>
+								<select id="current" class="form-control input-sm" style="max-width: 449px;" onFocus="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+<?php foreach($patches as $patch) { ?>
+									<option value="<?php echo htmlentities($patch['version']); ?>" <?php echo ($patch['version'] == $sw_title['current'] ? " selected" : "") ?>><?php echo htmlentities($patch['version']); ?></option>
+<?php } ?>
+								</select>
+<?php } ?>
 							</div>
 							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on this external source.<br><strong>Note:</strong> The <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
@@ -1002,7 +1020,6 @@ switch($requirement['name']) {
 							</div>
 
 							<div class="text-muted" style="font-size: 12px;">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</div>
-							<!-- <pre><?php // print_r($patch_versions); ?></pre> -->
 						</div>
 
 						<div style="padding: 8px 20px 1px; overflow-x: auto;">
