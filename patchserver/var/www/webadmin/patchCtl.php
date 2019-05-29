@@ -151,6 +151,16 @@ if (!($_SESSION['isAuthUser'])) {
 		$stmt->execute(array($title_enabled, $_GET['title_id']));
 	}
 
+	// Update Override
+	if ($pdo && isset($_GET['override']) && isset($_POST['current'])) {
+		$stmt = $pdo->prepare('DELETE FROM overrides WHERE name_id = ?');
+		$stmt->execute(array($_GET['override']));
+		if ("" !== $_POST['current']) {
+			$stmt = $pdo->prepare('INSERT INTO overrides (name_id, current) VALUES (?, ?)');
+			$stmt->execute(array($_GET['override'], $_POST['current']));
+		}
+	}
+
 	// Update Title Modified
 	if ($pdo && isset($_GET['title_id']) && isset($_POST['title_modified'])) {
 		$title_modified = time();

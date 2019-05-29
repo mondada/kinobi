@@ -145,6 +145,13 @@ try {
 )" . $engine . $charset;
 	$pdo->exec($sql);
 
+	$sql = "CREATE TABLE IF NOT EXISTS overrides (
+  id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
+  name_id varchar(255) NOT NULL,
+  current varchar(255) NOT NULL
+)" . $engine . $charset;
+	$pdo->exec($sql);
+
 	$sql = "CREATE TABLE IF NOT EXISTS users (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   username varchar(255) NOT NULL,

@@ -44,8 +44,11 @@ if ($pdo) {
 	if (isset($_POST['remove_title'])) {
 		$rem_title_id = $_POST['remove_title'];
 		$title_name = $_POST['remove_title_name'];
+		$title_name_id = $pdo->query('SELECT name_id FROM titles WHERE id = '.$rem_title_id)->fetch(PDO::FETCH_COLUMN);
+		$stmt = $pdo->prepare('DELETE FROM overrides WHERE name_id = ?');
+		$stmt->execute(array($title_name_id));
 		$stmt = $pdo->prepare("DELETE FROM titles WHERE id = ?");
-		$stmt->execute([$rem_title_id]);
+		$stmt->execute(array($rem_title_id));
 		if ($stmt->errorCode() == '00000') {
 			$success_msg = "Removed Software Title: ".$title_name.".";
 		} else {
@@ -114,6 +117,10 @@ if ($pdo) {
 		$sw_title['patches'] = $pdo->query('SELECT id FROM patches WHERE title_id = "'.$sw_title['id'].'" AND enabled = 1')->fetchAll(PDO::FETCH_COLUMN);
 		if (sizeof($sw_title['patches']) == 0) {
 			array_push($sw_title['error'], "patches");
+		}
+		$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$sw_title['name_id'].'"')->fetch(PDO::FETCH_COLUMN);
+		if (!empty($override)) {
+			$sw_title['current'] = $override;
 		}
 		if (sizeof($sw_title['error']) > 0 && $sw_title['enabled'] == "1") {
 			$sw_title['enabled'] == "0";

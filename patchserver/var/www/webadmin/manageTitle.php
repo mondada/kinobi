@@ -273,6 +273,16 @@ if (!empty($title_id)) {
 			$sw_title['current'] = $patch_versions[0];
 		}
 	}
+	$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$sw_title['name_id'].'"')->fetch(PDO::FETCH_COLUMN);
+	if (!empty($override)) {
+		if (in_array($sw_title['current'], $patch_versions, TRUE)) {
+			$sw_title['current'] = $override;
+		} else {
+			$stmt = $pdo->prepare('DELETE FROM overrides WHERE name_id = ?');
+			$stmt->execute(array($sw_title['name_id']));
+			$override = false;
+		}
+	}
 
 	// Enabled Pacthes
 	if (!in_array(1, array_map(function($el){ return $el['enabled']; }, $patches))) {
@@ -415,6 +425,28 @@ if (!empty($title_id)) {
 						ajaxPost('patchCtl.php?title_id=<?php echo $title_id; ?>', 'title_enabled=false');
 						showTitleDisabled();
 						titleEnabled = 0;
+					}
+				}
+				function updateCurrent() {
+					current = document.getElementById('current');
+					override = document.getElementById('override');
+					if (override.checked) {
+						ajaxPost('patchCtl.php?override=<?php echo $sw_title['name_id']; ?>', 'current='+current.value);
+						showSuccess(current, 10);
+					} else {
+						updateString(current, 'titles', 'current', <?php echo $title_id; ?>, 10);
+						updateTimestamp(<?php echo $title_id; ?>);
+					}
+				}
+				function toggleOverride() {
+					current = document.getElementById('current');
+					override = document.getElementById('override');
+					current.disabled = !override.checked;
+					if (override.checked) {
+						ajaxPost('patchCtl.php?override=<?php echo $sw_title['name_id']; ?>', 'current='+current.value);
+					} else {
+						current.value = '<?php echo $patch_versions[0]; ?>';
+						ajaxPost('patchCtl.php?override=<?php echo $sw_title['name_id']; ?>', 'current=');
 					}
 				}
 				function togglePatch(element) {
@@ -617,12 +649,16 @@ if (!empty($title_id)) {
 <?php if (count($patches) == 0) { ?>
 								<input id="current" type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo htmlentities($sw_title['current']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 <?php } else { ?>
-								<select id="current" class="form-control input-sm" style="max-width: 449px;" onFocus="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+								<select id="current" class="form-control input-sm" style="max-width: 449px;" onChange="updateCurrent();" <?php echo ($sw_title['source_id'] > 0 ? (empty($override) ? "disabled" : "") : ""); ?>>
 <?php foreach($patches as $patch) { ?>
-									<option value="<?php echo htmlentities($patch['version']); ?>" <?php echo ($patch['version'] == $sw_title['current'] ? " selected" : "") ?>><?php echo htmlentities($patch['version']); ?></option>
+									<option value="<?php echo htmlentities($patch['version']); ?>" <?php echo ($patch['version'] == $sw_title['current'] ? " selected" : ""); ?>><?php echo htmlentities($patch['version']); ?></option>
 <?php } ?>
 								</select>
 <?php } ?>
+							</div>
+							<div class="checkbox checkbox-primary <?php echo ($sw_title['source_id'] == 0 ? "hidden" : ""); ?>">
+								<input name="override" id="override" class="styled" type="checkbox" value="override" onChange="toggleOverride();" <?php echo (empty($override) ? "" : "checked") ?>>
+								<label><strong>Override Current Version</strong> <span style="font-size: 75%; color: #777;">Use selected version as the latest version within Jamf Pro.</span></label>
 							</div>
 							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on this external source.<br><strong>Note:</strong> The <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">

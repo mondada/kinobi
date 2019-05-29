@@ -351,6 +351,10 @@ function getSoftwareTitleSummary($pdo, $ids, $enabled = 1)
 		$stmt->execute(array($enabled, $name_id));
 		while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $sw_title['lastModified']);
+			$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$sw_title['id'].'"')->fetch(PDO::FETCH_COLUMN);
+			if (!empty($override)) {
+				$sw_title['currentVersion'] = $override;
+			}
 			array_push($summary, $sw_title);
 		}
 	}
@@ -376,6 +380,12 @@ function getSoftwareTitle($pdo, $id, $enabled = 1)
 	if ($title_id) {
 		$title = $pdo->query("SELECT name, publisher, app_name AS 'appName', bundle_id AS 'bundleId', modified AS 'lastModified', current AS 'currentVersion', name_id AS 'id' FROM titles WHERE id = ".$title_id)->fetch(PDO::FETCH_ASSOC);
 		$title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $title['lastModified']);
+
+		// overrides
+		$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$title['id'].'"')->fetch(PDO::FETCH_COLUMN);
+		if (!empty($override)) {
+			$title['currentVersion'] = $override;
+		}
 
 		// requirements
 		$title['requirements'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM requirements WHERE title_id = ".$title_id." ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
