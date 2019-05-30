@@ -109,7 +109,7 @@ fi
 #==== Initial Cleanup tasks ===============================#
 
 # Set SELinux policy
-if sestatus | grep -q enforcing ; then
+if sestatus 2>/dev/null | grep -q enforcing; then
   log "Setting SELINUX mode to permissive"
   sed -i "s/SELINUX=enforcing/SELINUX=permissive/" /etc/selinux/config
   setenforce permissive
