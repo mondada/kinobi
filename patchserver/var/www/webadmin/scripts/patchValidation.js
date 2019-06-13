@@ -87,7 +87,7 @@ function validString(element, labelId = false) {
 function updateString(element, table, field, row_id, offset = false) {
 	hideWarning(element);
 	if (/^.{1,255}$/.test(element.value)) {
-		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
+		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+encodeURIComponent(element.value));
 		showSuccess(element, offset);
 	}
 }
@@ -104,7 +104,7 @@ function validOrEmptyString(element, labelId = false) {
 function updateOrEmptyString(element, table, field, row_id, offset = false) {
 	hideWarning(element);
 	if (/^.{0,255}$/.test(element.value)) {
-		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
+		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+encodeURIComponent(element.value));
 		showSuccess(element, offset);
 	}
 }
@@ -138,7 +138,7 @@ function validVersion(element, labelId = false) {
 function updateVersion(element, table, field, row_id, offset = false) {
 	hideWarning(element);
 	if (patchVersions.indexOf(element.value) == -1 && /^.{1,255}$/.test(element.value)) {
-		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+element.value);
+		ajaxPost("patchCtl.php?table="+table+"&field="+field+"&id="+row_id, "value="+encodeURIComponent(element.value));
 		showSuccess(element, offset);
 	}
 }
