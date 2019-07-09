@@ -412,6 +412,11 @@ if (empty($pdo_error)) {
 						} else {
 							$('#subs_next').prop('disabled', true);
 						}
+						if (subs_url.value == "" && subs_token.value == "") {
+							$('#subs_next').html('Skip');
+						} else {
+							$('#subs_next').html('Next');
+						}
 					}
 
 					function validUser() {
@@ -439,6 +444,10 @@ if (empty($pdo_error)) {
 							$('#user_next').prop('disabled', true);
 						}
 					}
+
+					$(window).load(function() {
+						validSubscribe();
+					});
 				</script>
 
 				<!-- EULA Modal -->
@@ -480,7 +489,7 @@ if (empty($pdo_error)) {
 
 								<h5 style="margin-top: 0px" id="subs_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
 								<div class="form-group has-feedback">
-									<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo (isset($subs['url']) ? $subs['url'] : "https://patch.kinobi.io/subscription/"); ?>" <?php echo ($cloud ? "readonly" : ""); ?>/>
+									<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo (isset($subs['url']) ? $subs['url'] : ($cloud ? "https://patch.kinobi.io/subscription/" : "")); ?>" <?php echo ($cloud ? "readonly" : ""); ?>/>
 								</div>
 
 								<h5 id="subs_token_label"><strong>Token</strong> <small>Auth token for the subscription server.</small></h5>
@@ -533,9 +542,7 @@ if (empty($pdo_error)) {
 				<div class="modal" id="login-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
 					<div class="modal-dialog modal-sm" role="document">
 						<div class="modal-content">
-							<div class="modal-header" align="center">
-								<a target="_blank" href="https://kinobi.io/"><img src="images/kinobi-logo.svg" height="30"></a>
-							</div>
+							<div class="modal-header" align="center"><img src="images/kinobi-logo.svg" height="30"></div>
 							<div class="modal-body">
 <?php if (isset($loginerror)) { ?>
 								<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
