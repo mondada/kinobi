@@ -21,10 +21,10 @@ Supported operating systems:
 * Ubuntu LTS Server 14.04 or later (18.04 recommended)
 * Red Hat Enterprise Linux (RHEL) 6.4 or later
 * CentOS 6.4 or later
-System requirements:
+#### System requirements:
 * 20 GB of disk space available 
 * 1 GB of RAM
-Optional:
+#### Optional:
 * MySQL Community Server 5.6 or later, for MySQL database support
 
 ### NetSUS
