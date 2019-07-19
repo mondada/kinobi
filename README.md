@@ -12,7 +12,7 @@ The latest release of Kinobi is available as a **.run** package via the [Release
 
 ## Documentation
 
-For full documentation and installation guide, please see the [Kinobi Knowledge Base](https://docs.kinobi.io).
+For full documentation and installation guide, please see the [Kinobi Knowledge Base](http://docs.kinobi.io).
 
 ## Requirements
 ### Standalone
