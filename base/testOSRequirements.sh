@@ -41,7 +41,7 @@ case $NAME in
 ;;
 *)
 	release=$(rpm -q --queryformat '%{RELEASE}' rpm | cut -d '.' -f 2)
-	if [[ $release == "el6" ]] || [[ $release == "el7" ]] ; then
+	if [[ $release == "el6" ]] || [[ $release == "el7" ]] || [[ $release == "el8" ]] ; then
 		IFS='.'
 		VERSION_ARR=( $VERSION_ID )
 		unset IFS
