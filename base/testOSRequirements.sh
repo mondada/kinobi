@@ -19,7 +19,7 @@ case $NAME in
 		log "$PRETTY_NAME found"
 		exit 0
 	else
-		log "Error: $NAME version must be 14.04 or 16.04 (Detected $VERSION_ID)."
+		log "Error: $NAME version must be 14.04, 16.04 or 18.04 (Detected $VERSION_ID)."
 		exit 1
 	fi
 ;;
