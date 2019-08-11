@@ -785,6 +785,11 @@ if (empty($api_users)) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
+					var backups_length = localStorage.getItem('backups_length');
+					if (!backups_length) {
+						backups_length = 5;
+					}
+
 					$('#backups').DataTable( {
 						buttons: [
 							{
@@ -798,7 +803,7 @@ if (empty($api_users)) {
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 2, 'desc' ],
 						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": 5,
+						"pageLength": backups_length,
 						"columns": [
 							null,
 							null,
@@ -807,6 +812,17 @@ if (empty($api_users)) {
 							{ "orderable": false }
 						]
 					});
+
+					$('select[name=backups_length]').addClass('table-select');
+					$('select[name=backups_length]').change(function() {
+						localStorage.setItem('backups_length', $('select[name=backups_length]').val());
+					});
+
+					var users_length = localStorage.getItem('users_length');
+					if (!users_length) {
+						users_length = 5;
+					}
+
 					$('#users').DataTable( {
 						buttons: [
 							{
@@ -823,7 +839,7 @@ if (empty($api_users)) {
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 0, 'asc' ],
 						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": 5,
+						"pageLength": users_length,
 						"columns": [
 							null,
 							null,
@@ -835,7 +851,12 @@ if (empty($api_users)) {
 							{ "orderable": false }
 						]
 					});
-				} );
+
+					$('select[name=users_length]').addClass('table-select');
+					$('select[name=users_length]').change(function() {
+						localStorage.setItem('users_length', $('select[name=users_length]').val());
+					});
+				});
 			</script>
 
 			<script type="text/javascript">
@@ -1614,8 +1635,6 @@ if (!$cloud) { ?>
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('select[name=users_length]').addClass('table-select');
-					$('select[name=backups_length]').addClass('table-select');
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',

@@ -186,6 +186,11 @@ if ($pdo) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
+					var sw_titles_length = localStorage.getItem('sw_titles_length');
+					if (!sw_titles_length) {
+						sw_titles_length = 10;
+					}
+
 					$('#sw_titles').DataTable( {
 						buttons: [
 <?php if (isset($subs_resp['import']) || isset($subs_resp['upload'])) { ?>
@@ -224,6 +229,7 @@ if (isset($subs_resp['upload'])) { ?>
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 1, 'asc' ],
 						"lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+						"pageLength": sw_titles_length,
 						"columns": [
 							null,
 							null,
@@ -233,7 +239,12 @@ if (isset($subs_resp['upload'])) { ?>
 							{ "orderable": false }
 						]
 					});
-				} );
+
+					$('select[name=sw_titles_length]').addClass('table-select');
+					$('select[name=sw_titles_length]').change(function() {
+						localStorage.setItem('sw_titles_length', $('select[name=sw_titles_length]').val());
+					});
+				});
 			</script>
 
 			<script type="text/javascript">
@@ -443,8 +454,6 @@ if (isset($subs_resp['upload'])) { ?>
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('select[name=sw_titles_length]').addClass('table-select');
-					$('select[name=import_titles_length]').addClass('table-select');
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',

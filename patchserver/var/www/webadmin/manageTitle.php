@@ -530,6 +530,12 @@ if (!empty($title_id)) {
 							{ "orderable": false }
 						]
 					});
+
+					var patches_length = localStorage.getItem('patches_length');
+					if (!patches_length) {
+						patches_length = 10;
+					}
+
 					$('#patches').DataTable( {
 						buttons: [
 <?php if (isset($subs_resp['upload'])) { ?>
@@ -559,6 +565,7 @@ if (!empty($title_id)) {
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 1, 'asc' ],
 						"lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+						"pageLength": patches_length,
 						"columns": [
 							{ "orderable": false },
 							null,
@@ -570,11 +577,16 @@ if (!empty($title_id)) {
 							{ "orderable": false }
 						]
 					});
+
+					$('select[name=patches_length]').addClass('table-select');
+					$('select[name=patches_length]').change(function() {
+						localStorage.setItem('patches_length', $('select[name=patches_length]').val());
+					});
 <?php if ($sw_title['source_id'] > 0) { ?>
 					$('#ext_attrs').DataTable().buttons().disable();
 					$('#patches').DataTable().buttons().disable();
 <?php } ?>
-				} );
+				});
 			</script>
 <?php } ?>
 
@@ -1185,7 +1197,6 @@ switch($requirement['name']) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('select[name=patches_length]').addClass('table-select');
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',
