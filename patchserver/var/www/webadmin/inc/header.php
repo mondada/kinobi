@@ -50,7 +50,7 @@ $pageURI = $parts[count($parts) - 1];
 					<span class="icon-bar"></span>
 				</button>
 				<a class="navbar-brand" style="padding-top: 10px;" href="patchTitles.php"><img src="images/kinobi-logo-rev.svg" height="30"></a>
-				<div class="navbar-text">v1.2</div>
+				<div class="navbar-text">v1.2.1</div>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
