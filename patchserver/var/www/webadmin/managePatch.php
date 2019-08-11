@@ -304,6 +304,7 @@ if (!empty($patch_id)) {
 ?>
 			<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+			<link rel="stylesheet" href="theme/bootstrap-select.css" />
 
 			<style>
 				.btn-table {
@@ -339,6 +340,8 @@ if (!empty($patch_id)) {
 			<script type="text/javascript" src="scripts/bootstrap/transition.js"></script>
 			<script type="text/javascript" src="scripts/bootstrap/collapse.js"></script>
 			<script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+
+			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 <?php if (!empty($patch_id)) { ?>
 			<script type="text/javascript">
 				var patchVersions = [<?php echo (sizeof($patches) > 0 ? "\"".implode('", "', $patches)."\"" : ""); ?>];
@@ -538,7 +541,7 @@ if (!empty($patch_id)) {
 							</div>
 							<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">Yes</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">No</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-								<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+								<select class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'standalone', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 									<option value="1" <?php echo ($patch['standalone'] == "1" ? " selected" : "") ?> >Yes</option>
 									<option value="0" <?php echo ($patch['standalone'] == "0" ? " selected" : "") ?> >No</option>
 								</select>
@@ -549,7 +552,7 @@ if (!empty($patch_id)) {
 							</div>
 							<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">Yes</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">No</span> specifies that the computer will not be restarted.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
-									<select class="form-control input-sm" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+									<select class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onFocus="hideSuccess(this);" onChange="updateInteger(this, 'patches', 'reboot', <?php echo $patch_id; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 										<option value="0" <?php echo ($patch['reboot'] == "0" ? " selected" : "") ?> >No</option>
 										<option value="1" <?php echo ($patch['reboot'] == "1" ? " selected" : "") ?> >Yes</option>
 									</select>
@@ -634,7 +637,7 @@ if (!empty($patch_id)) {
 														<input type="hidden" value="<?php echo $criteria['is_and']; ?>" />
 <?php } else { ?>
 														<div class="has-feedback">
-															<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?> >
+															<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 																<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
 																<option value="0"<?php echo ($criteria['is_and'] == "0" ? " selected" : "") ?> >or</option>
 															</select>
@@ -643,7 +646,7 @@ if (!empty($patch_id)) {
 													</td>
 													<td>
 														<div class="has-feedback">
-															<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+															<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateCriteria(this, 'criteria_operator[<?php echo $criteria['id']; ?>]', 'criteria_type[<?php echo $criteria['id']; ?>]', 'criteria', <?php echo $criteria['id']; ?>, 10); $('.selectpicker').selectpicker('refresh'); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 																<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($criteria['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -674,7 +677,7 @@ if (!empty($patch_id)) {
 													</td>
 													<td colspan="2">
 														<div class="has-feedback">
-															<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+															<select id="criteria_operator[<?php echo $criteria['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="hideWarning(this);" onChange="updateString(this, 'criteria', 'operator', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 																<option value="is"<?php echo ($criteria['operator'] == "is" ? " selected" : "") ?> >is</option>
 																<option value="is not"<?php echo ($criteria['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php switch($criteria['name']) {
@@ -804,8 +807,7 @@ if (sizeof($components) == 0) { ?>
 										<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 										<div class="form-group">
 											<input type="hidden" name="new_criteria_order[<?php echo $component['id']; ?>]" id="new_criteria_order[<?php echo $component['id']; ?>]" value="<?php echo sizeof($component['criteria']); ?>" />
-											<select id="new_criteria_name[<?php echo $component['id']; ?>]" name="new_criteria_name[<?php echo $component['id']; ?>]" class="form-control input-sm" onChange="selectCriteria(this, 'new_criteria_type[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]'); validCriteria('create_criteria[<?php echo $component['id']; ?>]', 'new_criteria_order[<?php echo $component['id']; ?>]', 'new_criteria_name[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]', 'new_criteria_type[<?php echo $component['id']; ?>]');" >
-												<option value="" disabled selected>Select...</option>
+											<select id="new_criteria_name[<?php echo $component['id']; ?>]" name="new_criteria_name[<?php echo $component['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" title="Select..." onChange="selectCriteria(this, 'new_criteria_type[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]'); validCriteria('create_criteria[<?php echo $component['id']; ?>]', 'new_criteria_order[<?php echo $component['id']; ?>]', 'new_criteria_name[<?php echo $component['id']; ?>]', 'new_criteria_operator[<?php echo $component['id']; ?>]', 'new_criteria_type[<?php echo $component['id']; ?>]');" >
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 												<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -894,7 +896,7 @@ if (sizeof($components) == 0) { ?>
 											<input type="hidden" value="<?php echo $dependency['is_and']; ?>" />
 <?php } else { ?>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?> >
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($dependency['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($dependency['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
@@ -903,7 +905,7 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'dep_operator[<?php echo $dependency['id']; ?>]', 'dep_type[<?php echo $dependency['id']; ?>]', 'dependencies', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateCriteria(this, 'dep_operator[<?php echo $dependency['id']; ?>]', 'dep_type[<?php echo $dependency['id']; ?>]', 'dependencies', <?php echo $dependency['id']; ?>, 10); $('.selectpicker').selectpicker('refresh'); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($dependency['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -934,7 +936,7 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="dep_operator[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'dependencies', 'operator', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+												<select id="dep_operator[<?php echo $dependency['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="hideWarning(this);" onChange="updateString(this, 'dependencies', 'operator', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($dependency['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($dependency['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php switch($dependency['name']) {
@@ -994,8 +996,7 @@ if (sizeof($components) == 0) { ?>
 										<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 										<div class="form-group">
 											<input type="hidden" name="dep_order[0]" id="dep_order[0]" value="<?php echo sizeof($dependencies); ?>" />
-											<select id="dep_name[0]" name="dep_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'dep_type[0]', 'dep_operator[0]'); validCriteria('create_dep', 'dep_order[0]', 'dep_name[0]', 'dep_operator[0]', 'dep_type[0]');" >
-												<option value="" disabled selected>Select...</option>
+											<select id="dep_name[0]" name="dep_name[0]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" title="Select..." onChange="selectCriteria(this, 'dep_type[0]', 'dep_operator[0]'); validCriteria('create_dep', 'dep_order[0]', 'dep_name[0]', 'dep_operator[0]', 'dep_type[0]');" >
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 												<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -1088,7 +1089,7 @@ if (sizeof($components) == 0) { ?>
 											<input type="hidden" value="<?php echo $capability['is_and']; ?>" />
 <?php } else { ?>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?> >
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($capability['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($capability['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
@@ -1097,7 +1098,7 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'cap_operator[<?php echo $capability['id']; ?>]', 'cap_type[<?php echo $capability['id']; ?>]', 'capabilities', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateCriteria(this, 'cap_operator[<?php echo $capability['id']; ?>]', 'cap_type[<?php echo $capability['id']; ?>]', 'capabilities', <?php echo $capability['id']; ?>, 10); $('.selectpicker').selectpicker('refresh'); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($capability['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -1128,7 +1129,7 @@ if (sizeof($components) == 0) { ?>
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="cap_operator[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'capabilities', 'operator', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
+												<select id="cap_operator[<?php echo $capability['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="hideWarning(this);" onChange="updateString(this, 'capabilities', 'operator', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($capability['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($capability['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php switch($capability['name']) {
@@ -1188,8 +1189,7 @@ if (sizeof($components) == 0) { ?>
 										<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 										<div class="form-group">
 											<input type="hidden" name="cap_order[0]" id="cap_order[0]" value="<?php echo sizeof($capabilities); ?>" />
-											<select id="cap_name[0]" name="cap_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'cap_type[0]', 'cap_operator[0]'); validCriteria('create_cap', 'cap_order[0]', 'cap_name[0]', 'cap_operator[0]', 'cap_type[0]');" >
-												<option value="" disabled selected>Select...</option>
+											<select id="cap_name[0]" name="cap_name[0]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" title="Select..." onChange="selectCriteria(this, 'cap_type[0]', 'cap_operator[0]'); validCriteria('create_cap', 'cap_order[0]', 'cap_name[0]', 'cap_operator[0]', 'cap_type[0]');" >
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 												<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 <?php } ?>

@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.2.1
  *
  */
 
@@ -139,6 +139,7 @@ if ($pdo) {
 ?>
 			<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+			<link rel="stylesheet" href="theme/bootstrap-select.css" />
 
 			<style>
 				.btn-table {
@@ -174,6 +175,8 @@ if ($pdo) {
 			<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
+
+			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 			<script type="text/javascript">
 				var existingIds = [<?php echo (sizeof($sw_titles) > 0 ? "\"".implode('", "', array_map(function($el){ return $el['name_id']; }, $sw_titles))."\"" : ""); ?>];
@@ -437,6 +440,18 @@ if (isset($subs_resp['upload'])) { ?>
 				<!-- /.modal -->
 
 			</form> <!-- end form patchTitle -->
+
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('select[name=sw_titles_length]').addClass('table-select');
+					$('select[name=import_titles_length]').addClass('table-select');
+					$('.table-select').selectpicker({
+						style: 'btn-default btn-sm',
+						width: 'fit',
+						container: 'body'
+					});
+				});
+			</script>
 <?php } else { ?>
 			<div style="padding: 79px 20px 1px; background-color: #f9f9f9;">
 				<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">

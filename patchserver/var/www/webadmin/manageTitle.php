@@ -309,6 +309,7 @@ if (!empty($title_id)) {
 			<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 			<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+			<link rel="stylesheet" href="theme/bootstrap-select.css" />
 
 			<style>
 				.btn-table {
@@ -366,6 +367,8 @@ if (!empty($title_id)) {
 			<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
+
+			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 			<script type="text/javascript" src="scripts/ace/ace.js"></script>
 <?php if (!empty($title_id)) { ?>
@@ -649,7 +652,7 @@ if (!empty($title_id)) {
 <?php if (count($patches) == 0) { ?>
 								<input id="current" type="text" class="form-control input-sm" onFocus="validString(this, 'current_label');" onKeyUp="validString(this, 'current_label');" onChange="updateString(this, 'titles', 'current', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo htmlentities($sw_title['current']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 <?php } else { ?>
-								<select id="current" class="form-control input-sm" style="max-width: 449px;" onChange="updateCurrent();" <?php echo ($sw_title['source_id'] > 0 ? (empty($override) ? "disabled" : "") : ""); ?>>
+								<select id="current" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="updateCurrent();" <?php echo ($sw_title['source_id'] > 0 ? (empty($override) ? "disabled" : "") : ""); ?>>
 <?php foreach($patches as $patch) { ?>
 									<option value="<?php echo htmlentities($patch['version']); ?>" <?php echo ($patch['version'] == $sw_title['current'] ? " selected" : ""); ?>><?php echo htmlentities($patch['version']); ?></option>
 <?php } ?>
@@ -868,7 +871,7 @@ if (!empty($title_id)) {
 											<input type="hidden" value="<?php echo $requirement['is_and']; ?>" />
 <?php } else { ?>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?> >
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
@@ -877,7 +880,7 @@ if (!empty($title_id)) {
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); $('.selectpicker').selectpicker('refresh'); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($requirement['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -908,7 +911,7 @@ if (!empty($title_id)) {
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 158px;" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+												<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($requirement['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($requirement['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php
@@ -969,8 +972,7 @@ switch($requirement['name']) {
 										<h5><strong>Criteria</strong> <small>Any valid Jamf Pro smart group criteria.</small></h5>
 										<div class="form-group">
 											<input type="hidden" name="rqmt_order[0]" id="rqmt_order[0]" value="<?php echo sizeof($requirements); ?>" />
-											<select id="rqmt_name[0]" name="rqmt_name[0]" class="form-control input-sm" onChange="selectCriteria(this, 'rqmt_type[0]', 'rqmt_operator[0]'); validCriteria('create_rqmt', 'rqmt_order[0]', 'rqmt_name[0]', 'rqmt_operator[0]', 'rqmt_type[0]');" >
-												<option value="" disabled selected>Select...</option>
+											<select id="rqmt_name[0]" name="rqmt_name[0]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" title="Select..." onChange="selectCriteria(this, 'rqmt_type[0]', 'rqmt_operator[0]'); validCriteria('create_rqmt', 'rqmt_order[0]', 'rqmt_name[0]', 'rqmt_operator[0]', 'rqmt_type[0]');" >
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 												<option value="<?php echo $ext_attr['key_id']; ?>"><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -1129,7 +1131,7 @@ switch($requirement['name']) {
 										</div>
 
 										<h5><strong>Standalone</strong> <small><span style="font-family:monospace;">Yes</span> specifies a patch that can be installed by itself. <span style="font-family:monospace;">No</span> specifies a patch that must be installed incrementally.<br><strong>Note:</strong> Used for reporting purposes. It is not used by patch policy processes.</small></h5>
-										<select id="patch_standalone[0]" name="patch_standalone[0]" class="form-control input-sm">
+										<select id="patch_standalone[0]" name="patch_standalone[0]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body">
 											<option value="1">Yes</option>
 											<option value="0">No</option>
 										</select>
@@ -1140,7 +1142,7 @@ switch($requirement['name']) {
 										</div>
 
 										<h5><strong>Reboot</strong> <small><span style="font-family:monospace;">Yes</span> specifies that the computer must be restarted after the patch policy has completed successfully. <span style="font-family:monospace;">No</span> specifies that the computer will not be restarted.</small></h5>
-										<select id="patch_reboot[0]" name="patch_reboot[0]" class="form-control input-sm">
+										<select id="patch_reboot[0]" name="patch_reboot[0]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body">
 											<option value="0">No</option>
 											<option value="1">Yes</option>
 										</select>
@@ -1180,6 +1182,17 @@ switch($requirement['name']) {
 
 				</div> <!-- end .tab-content -->
 			</form><!-- end form patchDefinition -->
+
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('select[name=patches_length]').addClass('table-select');
+					$('.table-select').selectpicker({
+						style: 'btn-default btn-sm',
+						width: 'fit',
+						container: 'body'
+					});
+				});
+			</script>
 <?php } else { ?>
 			<div style="padding: 64px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
 				<div id="error-msg" style="margin-top: 16px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">

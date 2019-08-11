@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.2.1
  *
  */
 
@@ -225,6 +225,11 @@ if (empty($pdo_error)) {
 	$modal = "database";
 }
 ?>
+
+			<link rel="stylesheet" href="theme/bootstrap-select.css" />
+
+			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
+
 			<script type="text/javascript" src="scripts/patchValidation.js"></script>
 
 			<script>
@@ -331,7 +336,7 @@ if (empty($pdo_error)) {
 
 								<h5 style="margin-top: 0px"><strong>Database Type</strong> <small>Database connection type to use.</small></h5>
 								<div class="form-group" style="max-width: 449px;">
-									<select id="dsn_prefix" name="dsn_prefix" class="form-control input-sm" onChange="validConn(); toggleConnType();">
+									<select id="dsn_prefix" name="dsn_prefix" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="validConn(); toggleConnType();">
 										<option value="sqlite" <?php echo ($db['dsn']['prefix'] == "sqlite" ? "selected": ""); ?>>SQLite</option>
 										<option value="mysql" <?php echo ($db['dsn']['prefix'] == "mysql" ? "selected": ""); ?>>MySQL</option>
 									</select>
@@ -340,7 +345,7 @@ if (empty($pdo_error)) {
 								<div id="sqlite_db" class="<?php echo ($db['dsn']['prefix'] == "sqlite" ? "": "hidden"); ?>">
 									<h5 id="dsn_dbfile_label"><strong>Database</strong> <small>SQLite database file.</small></h5>
 									<div class="form-group" style="max-width: 449px;">
-										<select id="dsn_dbfile" name="dsn_dbfile" class="form-control input-sm" onFocus="validConn();" onChange="validConn();">
+										<select id="dsn_dbfile" name="dsn_dbfile" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="validConn();" onChange="validConn();">
 <?php foreach ($sqlite_dbs as $sqlite_db) { ?>
 											<option value="<?php echo $sqlite_db; ?>" <?php echo (basename($db['dsn']['dbpath']) == $sqlite_db ? "selected": ""); ?>><?php echo $sqlite_db; ?></option>
 <?php } ?>

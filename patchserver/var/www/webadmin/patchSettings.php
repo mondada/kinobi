@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.2.1
  *
  */
 
@@ -361,6 +361,7 @@ if (empty($api_users)) {
 			<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 			<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+			<link rel="stylesheet" href="theme/bootstrap-select.css" />
 			<link rel="stylesheet" href="theme/bootstrap-toggle.css">
 
 			<style>
@@ -412,6 +413,8 @@ if (empty($api_users)) {
 			<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
+
+			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 			<script type="text/javascript" src="scripts/toggle/bootstrap-toggle.min.js"></script>
 
@@ -1007,7 +1010,7 @@ if (!$cloud) { ?>
 						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
 							<h5><strong>API Authentication Type</strong> <small>Authentication type to use for API endpoints.</small></h5>
 							<div class="form-group" style="max-width: 449px;">
-								<select id="api_authtype" name="api_authtype" class="form-control input-sm" onChange="toggleAPIAuthType();" <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
+								<select id="api_authtype" name="api_authtype" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="toggleAPIAuthType();" <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
 									<option value="basic" <?php echo ($api['authtype'] == "basic" ? "selected" : ""); ?>>Basic</option>
 									<option value="token" <?php echo ($api['authtype'] == "token" ? "selected" : ""); ?> <?php echo (empty($api_tokens) ? "disabled" : ""); ?>>Token</option>
 								</select>
@@ -1174,7 +1177,7 @@ if (!$cloud) { ?>
 
 							<h5><strong>Database Type</strong> <small>Database connection type to use.</small></h5>
 							<div class="form-group" style="max-width: 449px;">
-								<select id="dsn_prefix" name="dsn_prefix" class="form-control input-sm" onChange="validConn(); toggleConnType();">
+								<select id="dsn_prefix" name="dsn_prefix" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="validConn(); toggleConnType();">
 									<option value="sqlite" <?php echo ($db['dsn']['prefix'] == "sqlite" ? "selected": ""); ?>>SQLite</option>
 									<option value="mysql" <?php echo ($db['dsn']['prefix'] == "mysql" ? "selected": ""); ?>>MySQL</option>
 								</select>
@@ -1183,7 +1186,7 @@ if (!$cloud) { ?>
 							<div id="sqlite_db" class="<?php echo ($db['dsn']['prefix'] == "sqlite" ? "": "hidden"); ?>">
 								<h5 id="dsn_dbfile_label"><strong>Database</strong> <small>SQLite database file.</small></h5>
 								<div class="form-group" style="max-width: 449px;">
-									<select id="dsn_dbfile" name="dsn_dbfile" class="form-control input-sm" onFocus="validConn();" onChange="validConn();">
+									<select id="dsn_dbfile" name="dsn_dbfile" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onFocus="validConn();" onChange="validConn();">
 <?php foreach ($sqlite_dbs as $sqlite_db) { ?>
 										<option value="<?php echo $sqlite_db; ?>" <?php echo (basename($db['dsn']['dbpath']) == $sqlite_db ? "selected": ""); ?>><?php echo $sqlite_db; ?></option>
 <?php } ?>
@@ -1331,7 +1334,7 @@ if (!$cloud) { ?>
 
 										<h5><strong>Backup Format</strong> <small>Select the format for the database backup.<br><strong>Note:</strong> The backup may only be restored to the corresponding database type.</small></h5>
 										<div class="form-group">
-											<select id="backup_type" name="backup_type" class="form-control input-sm">
+											<select id="backup_type" name="backup_type" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body">
 												<option value="sqlite" <?php echo ($db['dsn']['prefix'] == "sqlite" ? "selected": ""); ?>>SQLite</option>
 												<option value="mysql" <?php echo ($db['dsn']['prefix'] == "mysql" ? "selected": ""); ?>>MySQL</option>
 											</select>
@@ -1592,7 +1595,7 @@ if (!$cloud) { ?>
 						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
 							<h5><strong>Check-In Frequency</strong> <small>Frequency at which imported titles are refreshed.</small></h5>
 							<div class="form-group" style="max-width: 449px;">
-								<select id="subs_refresh" name="subs_refresh" class="form-control input-sm" onChange="subsRefresh(this);" <?php echo (empty($subs_resp) ? "disabled" : ""); ?>>
+								<select id="subs_refresh" name="subs_refresh" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="subsRefresh(this);" <?php echo (empty($subs_resp) ? "disabled" : ""); ?>>
 									<option value="300" <?php echo ($subs['refresh'] == "300" ? "selected" : ""); ?>>Every 5 minutes</option>
 									<option value="900" <?php echo ($subs['refresh'] == "900" ? "selected" : ""); ?>>Every 15 minutes</option>
 									<option value="1800" <?php echo ($subs['refresh'] == "1800" ? "selected" : ""); ?>>Every 30 minutes</option>
@@ -1608,4 +1611,16 @@ if (!$cloud) { ?>
 
 				</div> <!-- end .tab-content -->
 			</form> <!-- end Database form -->
+
+			<script type="text/javascript">
+				$(document).ready(function() {
+					$('select[name=users_length]').addClass('table-select');
+					$('select[name=backups_length]').addClass('table-select');
+					$('.table-select').selectpicker({
+						style: 'btn-default btn-sm',
+						width: 'fit',
+						container: 'body'
+					});
+				});
+			</script>
 <?php include "inc/footer.php"; ?>
