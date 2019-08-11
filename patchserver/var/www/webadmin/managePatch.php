@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.2.1
  *
  */
 
@@ -586,7 +586,7 @@ if (!empty($patch_id)) {
 											<thead>
 												<tr>
 													<th colspan="3">Name</th>
-													<th colspan="3">Version</th>
+													<th colspan="2">Version</th>
 													<th></th>
 												</tr>
 											</thead>
@@ -597,7 +597,7 @@ if (!empty($patch_id)) {
 															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'name', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($component['name']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
-													<td colspan="3">
+													<td colspan="2">
 														<div class="has-feedback">
 															<input type="text" class="form-control input-sm" onKeyUp="validString(this);" onChange="updateString(this, 'components', 'version', <?php echo $component['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo htmlentities($component['version']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
@@ -607,7 +607,7 @@ if (!empty($patch_id)) {
 											</tbody>
 											<thead style="background-color: #f9f9f9;">
 												<tr>
-													<td colspan="7">
+													<td colspan="6">
 <?php if (sizeof($component['criteria']) == 0) { ?>
 														<div class="panel panel-danger" style="margin-top: 8px; margin-bottom: 16px; border-color: #d43f3a;">
 															<div class="panel-body">
@@ -619,11 +619,10 @@ if (!empty($patch_id)) {
 													</td>
 												</tr>
 												<tr>
-													<th>Order</th>
+													<th>and/or</th>
 													<th>Criteria</th>
 													<th colspan="2">Operator</th>
 													<th>Value</th>
-													<th>and/or</th>
 													<th></th>
 												</tr>
 											</thead>
@@ -631,9 +630,16 @@ if (!empty($patch_id)) {
 <?php foreach ($component['criteria'] as $criteria) { ?>
 												<tr>
 													<td>
+<?php if ($criteria['sort_order'] == 0) { ?>
+														<input type="hidden" value="<?php echo $criteria['is_and']; ?>" />
+<?php } else { ?>
 														<div class="has-feedback">
-															<input type="text" size="3" name="criteria_order[<?php echo $criteria['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'criteria', 'sort_order', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $criteria['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
+															<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?> >
+																<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
+																<option value="0"<?php echo ($criteria['is_and'] == "0" ? " selected" : "") ?> >or</option>
+															</select>
 														</div>
+<?php } ?>
 													</td>
 													<td>
 														<div class="has-feedback">
@@ -706,14 +712,6 @@ if (!empty($patch_id)) {
 															<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'criteria', 'value', <?php echo $criteria['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo htmlentities($criteria['value']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 														</div>
 													</td>
-													<td>
-														<div class="has-feedback">
-															<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'criteria', 'is_and', <?php echo $criteria['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
-																<option value="1"<?php echo ($criteria['is_and'] == "1" ? " selected" : "") ?> >and</option>
-																<option value="0"<?php echo ($criteria['is_and'] == "0" ? " selected" : "") ?> >or</option>
-															</select>
-														</div>
-													</td>
 													<td align="right">
 														<input type="hidden" name="criteria_comp_id[<?php echo $criteria['id']; ?>]" value="<?php echo $component['id']; ?>"/>
 														<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_criteria-modal" onClick="$('#delete_criteria_comp_id').val('<?php echo $component['id']; ?>'); $('#delete_criteria_order').val('<?php echo $criteria['sort_order']; ?>'); $('#delete_criteria').val('<?php echo $criteria['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button>
@@ -721,7 +719,7 @@ if (!empty($patch_id)) {
 												</tr>
 <?php } ?>
 												<tr>
-													<td colspan="7" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_criteria-<?php echo $component['id']; ?>" onClick="newCriteriaModal('<?php echo $component['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+													<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_criteria-<?php echo $component['id']; ?>" onClick="newCriteriaModal('<?php echo $component['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 												</tr>
 											</tbody>
 <?php }
@@ -729,13 +727,13 @@ if (sizeof($components) == 0) { ?>
 											<thead>
 												<tr>
 													<th colspan="3">Name</th>
-													<th colspan="3">Version</th>
+													<th colspan="2">Version</th>
 													<th></th>
 												</tr>
 											</thead>
 											<tbody>
 												<tr style="border-bottom: 1px solid #eee;">
-													<td align="center" valign="top" colspan="7" class="dataTables_empty">No data available in table</td>
+													<td align="center" valign="top" colspan="6" class="dataTables_empty">No data available in table</td>
 												</tr>
 											</tbody>
 <?php } ?>
@@ -881,11 +879,10 @@ if (sizeof($components) == 0) { ?>
 							<table class="table">
 								<thead>
 									<tr>
-										<th>Order</th>
+										<th>and/or</th>
 										<th>Criteria</th>
 										<th>Operator</th>
 										<th>Value</th>
-										<th>and/or</th>
 										<th></th>
 									</tr>
 								</thead>
@@ -893,9 +890,16 @@ if (sizeof($components) == 0) { ?>
 <?php foreach ($dependencies as $dependency) { ?>
 									<tr>
 										<td>
+<?php if ($dependency['sort_order'] == 0) { ?>
+											<input type="hidden" value="<?php echo $dependency['is_and']; ?>" />
+<?php } else { ?>
 											<div class="has-feedback">
-												<input type="text" size="3" name="dep_order[<?php echo $dependency['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'dependencies', 'sort_order', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $dependency['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
+												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?> >
+													<option value="1"<?php echo ($dependency['is_and'] == "1" ? " selected" : "") ?>>and</option>
+													<option value="0"<?php echo ($dependency['is_and'] == "0" ? " selected" : "") ?>>or</option>
+												</select>
 											</div>
+<?php } ?>
 										</td>
 										<td>
 											<div class="has-feedback">
@@ -968,19 +972,11 @@ if (sizeof($components) == 0) { ?>
 												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'dependencies', 'value', <?php echo $dependency['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo htmlentities($dependency['value']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
-										<td>
-											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'dependencies', 'is_and', <?php echo $dependency['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
-													<option value="1"<?php echo ($dependency['is_and'] == "1" ? " selected" : "") ?>>and</option>
-													<option value="0"<?php echo ($dependency['is_and'] == "0" ? " selected" : "") ?>>or</option>
-												</select>
-											</div>
-										</td>
 										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_dep-modal" onClick="$('#delete_dep_order').val('<?php echo $dependency['sort_order']; ?>'); $('#delete_dep').val('<?php echo $dependency['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_dep-modal" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_dep-modal" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>
@@ -1077,11 +1073,10 @@ if (sizeof($components) == 0) { ?>
 							<table class="table">
 								<thead>
 									<tr>
-										<th>Order</th>
+										<th>and/or</th>
 										<th>Criteria</th>
 										<th>Operator</th>
 										<th>Value</th>
-										<th>and/or</th>
 										<th></th>
 									</tr>
 								</thead>
@@ -1089,9 +1084,16 @@ if (sizeof($components) == 0) { ?>
 <?php foreach ($capabilities as $capability) { ?>
 									<tr>
 										<td>
+<?php if ($capability['sort_order'] == 0) { ?>
+											<input type="hidden" value="<?php echo $capability['is_and']; ?>" />
+<?php } else { ?>
 											<div class="has-feedback">
-												<input type="text" size="3" name="cap_order[<?php echo $capability['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'capabilities', 'sort_order', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $capability['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
+												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?> >
+													<option value="1"<?php echo ($capability['is_and'] == "1" ? " selected" : "") ?>>and</option>
+													<option value="0"<?php echo ($capability['is_and'] == "0" ? " selected" : "") ?>>or</option>
+												</select>
 											</div>
+<?php } ?>
 										</td>
 										<td>
 											<div class="has-feedback">
@@ -1164,19 +1166,11 @@ if (sizeof($components) == 0) { ?>
 												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'capabilities', 'value', <?php echo $capability['id']; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="" value="<?php echo htmlentities($capability['value']); ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
-										<td>
-											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'capabilities', 'is_and', <?php echo $capability['id']; ?>, 10); updateTimestamp(<?php echo $patch['title_id']; ?>);" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>
-													<option value="1"<?php echo ($capability['is_and'] == "1" ? " selected" : "") ?>>and</option>
-													<option value="0"<?php echo ($capability['is_and'] == "0" ? " selected" : "") ?>>or</option>
-												</select>
-											</div>
-										</td>
 										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_cap-modal" onClick="$('#delete_cap_order').val('<?php echo $capability['sort_order']; ?>'); $('#delete_cap').val('<?php echo $capability['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_cap-modal" onClick="newCapModal();" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_cap-modal" onClick="newCapModal();" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>

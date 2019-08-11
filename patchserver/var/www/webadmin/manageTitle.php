@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.2.1
  *
  */
 
@@ -853,11 +853,10 @@ if (!empty($title_id)) {
 							<table class="table">
 								<thead>
 									<tr>
-										<th>Order</th>
+										<th>and/or</th>
 										<th>Criteria</th>
 										<th>Operator</th>
 										<th>Value</th>
-										<th>and/or</th>
 										<th></th>
 									</tr>
 								</thead>
@@ -865,9 +864,17 @@ if (!empty($title_id)) {
 <?php foreach ($requirements as $requirement) { ?>
 									<tr>
 										<td>
+<?php if ($requirement['sort_order'] == 0) { ?>
+											<input type="hidden" value="<?php echo $requirement['is_and']; ?>" />
+<?php } else { ?>
 											<div class="has-feedback">
-												<input type="text" size="3" name="rqmt_order[<?php echo $requirement['id']; ?>]" class="form-control input-sm" style="min-width: 62px;" onKeyUp="validInteger(this);" onChange="updateInteger(this, 'requirements', 'sort_order', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="[Required]" value="<?php echo $requirement['sort_order']; ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/></td>
+												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?> >
+													<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
+													<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
+												</select>
 											</div>
+<?php } ?>
+										</td>
 										<td>
 											<div class="has-feedback">
 												<select class="form-control input-sm" style="min-width: 186px;" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
@@ -940,19 +947,11 @@ switch($requirement['name']) {
 												<input type="text" class="form-control input-sm" style="min-width: 84px;" onKeyUp="validOrEmptyString(this);" onChange="updateOrEmptyString(this, 'requirements', 'value', <?php echo $requirement['id']; ?>); updateTimestamp(<?php echo $title_id; ?>);" placeholder="" value="<?php echo htmlentities($requirement['value']); ?>"  <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>
 											</div>
 										</td>
-										<td>
-											<div class="has-feedback">
-												<select class="form-control input-sm" style="min-width: 68px;" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
-													<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
-													<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
-												</select>
-											</div>
-										</td>
 										<td align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_rqmt-modal" onClick="$('#delete_rqmt_order').val('<?php echo $requirement['sort_order']; ?>'); $('#delete_rqmt').val('<?php echo $requirement['id']; ?>');" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>Delete</button></td>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_rqmt-modal" onClick="newRqmtModal();" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_rqmt-modal" onClick="newRqmtModal();" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>
