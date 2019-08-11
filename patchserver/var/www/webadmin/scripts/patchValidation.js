@@ -43,7 +43,8 @@ function showSuccess(element, offset = false) {
 	var span = document.createElement("span");
 	span.className = "glyphicon glyphicon-ok form-control-feedback text-success";
 	if (offset) {
-		span.style.right = offset + "px";
+		span.style.right = "18px";
+		span.style.top = "-2px";
 	}
 	element.parentElement.appendChild(span);
 }
@@ -61,7 +62,8 @@ function showWarning(element, offset = false) {
 	var span = document.createElement("span");
 	span.className = "glyphicon glyphicon-exclamation-sign form-control-feedback text-muted";
 	if (offset) {
-		span.style.right = offset + "px";
+		span.style.right = "18px";
+		span.style.top = "-2px";
 	}
 	element.parentElement.appendChild(span);
 }

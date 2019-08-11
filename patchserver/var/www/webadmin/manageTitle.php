@@ -435,9 +435,9 @@ if (!empty($title_id)) {
 					override = document.getElementById('override');
 					if (override.checked) {
 						ajaxPost('patchCtl.php?override=<?php echo $sw_title['name_id']; ?>', 'current='+current.value);
-						showSuccess(current, 10);
+						showSuccess(current, true);
 					} else {
-						updateString(current, 'titles', 'current', <?php echo $title_id; ?>, 10);
+						updateString(current, 'titles', 'current', <?php echo $title_id; ?>, true);
 						updateTimestamp(<?php echo $title_id; ?>);
 					}
 				}
@@ -871,7 +871,7 @@ if (!empty($title_id)) {
 											<input type="hidden" value="<?php echo $requirement['is_and']; ?>" />
 <?php } else { ?>
 											<div class="has-feedback">
-												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateInteger(this, 'requirements', 'is_and', <?php echo $requirement['id']; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 													<option value="1"<?php echo ($requirement['is_and'] == "1" ? " selected" : "") ?>>and</option>
 													<option value="0"<?php echo ($requirement['is_and'] == "0" ? " selected" : "") ?>>or</option>
 												</select>
@@ -880,7 +880,7 @@ if (!empty($title_id)) {
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, 10); $('.selectpicker').selectpicker('refresh'); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+												<select class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onChange="updateCriteria(this, 'rqmt_operator[<?php echo $requirement['id']; ?>]', 'rqmt_type[<?php echo $requirement['id']; ?>]', 'requirements', <?php echo $requirement['id']; ?>, true); $('.selectpicker').selectpicker('refresh'); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 <?php foreach ($ext_attrs as $ext_attr) { ?>
 													<option value="<?php echo $ext_attr['key_id']; ?>"<?php echo ($requirement['name'] == $ext_attr['key_id'] ? " selected" : "") ?> ><?php echo $ext_attr['name']; ?></option>
 <?php } ?>
@@ -911,7 +911,7 @@ if (!empty($title_id)) {
 										</td>
 										<td>
 											<div class="has-feedback">
-												<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, 10); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
+												<select id="rqmt_operator[<?php echo $requirement['id']; ?>]" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body" onFocus="hideWarning(this);" onChange="updateString(this, 'requirements', 'operator', <?php echo $requirement['id']; ?>, true); updateTimestamp(<?php echo $title_id; ?>);" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>>
 													<option value="is"<?php echo ($requirement['operator'] == "is" ? " selected" : "") ?> >is</option>
 													<option value="is not"<?php echo ($requirement['operator'] == "is not" ? " selected" : "") ?> >is not</option>
 <?php
