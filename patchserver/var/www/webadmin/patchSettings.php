@@ -785,11 +785,6 @@ if (empty($api_users)) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					var backups_length = localStorage.getItem('backups_length');
-					if (!backups_length) {
-						backups_length = 5;
-					}
-
 					$('#backups').DataTable( {
 						buttons: [
 							{
@@ -803,25 +798,17 @@ if (empty($api_users)) {
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 2, 'desc' ],
 						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": backups_length,
+						"pageLength": 5,
 						"columns": [
 							null,
 							null,
 							null,
 							null,
 							{ "orderable": false }
-						]
+						],
+						"stateSave": true
 					});
-
 					$('select[name=backups_length]').addClass('table-select');
-					$('select[name=backups_length]').change(function() {
-						localStorage.setItem('backups_length', $('select[name=backups_length]').val());
-					});
-
-					var users_length = localStorage.getItem('users_length');
-					if (!users_length) {
-						users_length = 5;
-					}
 
 					$('#users').DataTable( {
 						buttons: [
@@ -839,7 +826,7 @@ if (empty($api_users)) {
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 0, 'asc' ],
 						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": users_length,
+						"pageLength": 5,
 						"columns": [
 							null,
 							null,
@@ -849,13 +836,10 @@ if (empty($api_users)) {
 							{ "orderable": false },
 							{ "orderable": false },
 							{ "orderable": false }
-						]
+						],
+						"stateSave": true
 					});
-
 					$('select[name=users_length]').addClass('table-select');
-					$('select[name=users_length]').change(function() {
-						localStorage.setItem('users_length', $('select[name=users_length]').val());
-					});
 				});
 			</script>
 

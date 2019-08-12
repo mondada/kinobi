@@ -528,13 +528,9 @@ if (!empty($title_id)) {
 						"columns": [
 							null,
 							{ "orderable": false }
-						]
+						],
+						"stateSave": true
 					});
-
-					var patches_length = localStorage.getItem('patches_length');
-					if (!patches_length) {
-						patches_length = 10;
-					}
 
 					$('#patches').DataTable( {
 						buttons: [
@@ -565,7 +561,7 @@ if (!empty($title_id)) {
 						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
 						"order": [ 1, 'asc' ],
 						"lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
-						"pageLength": patches_length,
+						"pageLength": 10,
 						"columns": [
 							{ "orderable": false },
 							null,
@@ -575,13 +571,11 @@ if (!empty($title_id)) {
 							{ "orderable": false },
 							{ "orderable": false },
 							{ "orderable": false }
-						]
+						],
+						"stateSave": true
 					});
 
 					$('select[name=patches_length]').addClass('table-select');
-					$('select[name=patches_length]').change(function() {
-						localStorage.setItem('patches_length', $('select[name=patches_length]').val());
-					});
 <?php if ($sw_title['source_id'] > 0) { ?>
 					$('#ext_attrs').DataTable().buttons().disable();
 					$('#patches').DataTable().buttons().disable();
