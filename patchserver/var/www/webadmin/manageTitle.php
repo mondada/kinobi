@@ -676,7 +676,7 @@ if (!empty($title_id)) {
 <?php } ?>
 							</div>
 							<div class="checkbox checkbox-primary <?php echo ($sw_title['source_id'] == 0 ? "hidden" : ""); ?>">
-								<input name="override" id="override" class="styled" type="checkbox" value="override" onChange="toggleOverride();" <?php echo (empty($override) ? "" : "checked") ?>>
+								<input name="override" id="override" class="styled" type="checkbox" value="override" onChange="toggleOverride(); $('.selectpicker').selectpicker('refresh');" <?php echo (empty($override) ? "" : "checked") ?>>
 								<label><strong>Override Current Version</strong> <span style="font-size: 75%; color: #777;">Use selected version as the latest version within Jamf Pro.</span></label>
 							</div>
 							<h5 id="name_id_label"><strong>ID</strong> <small>Uniquely identifies this software title on this external source.<br><strong>Note:</strong> The <span style="font-family:monospace;">id</span> cannot include any special characters or spaces.</small></h5>
