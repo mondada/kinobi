@@ -582,6 +582,9 @@ if (!empty($title_id)) {
 							$('#patches').DataTable().search('').draw();
 						}
 					});
+					if ($(':input[type=search][aria-controls=patches]').val() !== '') {
+						$('#patches').DataTable().search('').draw();
+					}
 					$('select[name=patches_length]').addClass('table-select');
 <?php if ($sw_title['source_id'] > 0) { ?>
 					$('#ext_attrs').DataTable().buttons().disable();
@@ -1198,7 +1201,6 @@ switch($requirement['name']) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('.dataTable').DataTable().search('').draw();
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',

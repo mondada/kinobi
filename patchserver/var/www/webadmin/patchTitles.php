@@ -243,6 +243,9 @@ if (isset($subs_resp['upload'])) { ?>
 							$('#sw_titles').DataTable().search('').draw();
 						}
 					});
+					if ($(':input[type=search][aria-controls=sw_titles]').val() !== '') {
+						$('#sw_titles').DataTable().search('').draw();
+					}
 					$('select[name=sw_titles_length]').addClass('table-select');
 				});
 			</script>
@@ -454,7 +457,6 @@ if (isset($subs_resp['upload'])) { ?>
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('.dataTable').DataTable().search('').draw();
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',

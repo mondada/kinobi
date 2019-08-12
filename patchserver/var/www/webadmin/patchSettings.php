@@ -816,6 +816,9 @@ if (empty($api_users)) {
 							$('#backups').DataTable().search('').draw();
 						}
 					});
+					if ($(':input[type=search][aria-controls=backups]').val() !== '') {
+						$('#backups').DataTable().search('').draw();
+					}
 					$('select[name=backups_length]').addClass('table-select');
 
 					$('#users').DataTable( {
@@ -853,6 +856,9 @@ if (empty($api_users)) {
 							$('#users').DataTable().search('').draw();
 						}
 					});
+					if ($(':input[type=search][aria-controls=users]').val() !== '') {
+						$('#users').DataTable().search('').draw();
+					}
 					$('select[name=users_length]').addClass('table-select');
 				});
 			</script>
@@ -1633,7 +1639,6 @@ if (!$cloud) { ?>
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('.dataTable').DataTable().search('').draw();
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',
