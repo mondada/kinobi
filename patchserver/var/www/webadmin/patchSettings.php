@@ -414,6 +414,8 @@ if (empty($api_users)) {
 			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
 
+			<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
+
 			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 			<script type="text/javascript" src="scripts/toggle/bootstrap-toggle.min.js"></script>
@@ -808,6 +810,12 @@ if (empty($api_users)) {
 						],
 						"stateSave": true
 					});
+					$(':input[type=search][aria-controls=backups]').addClear({
+						symbolClass: "glyphicon glyphicon-remove",
+						onClear: function() {
+							$('#backups').DataTable().search('').draw();
+						}
+					});
 					$('select[name=backups_length]').addClass('table-select');
 
 					$('#users').DataTable( {
@@ -838,6 +846,12 @@ if (empty($api_users)) {
 							{ "orderable": false }
 						],
 						"stateSave": true
+					});
+					$(':input[type=search][aria-controls=users]').addClear({
+						symbolClass: "glyphicon glyphicon-remove",
+						onClear: function() {
+							$('#users').DataTable().search('').draw();
+						}
 					});
 					$('select[name=users_length]').addClass('table-select');
 				});

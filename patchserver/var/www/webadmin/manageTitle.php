@@ -368,6 +368,8 @@ if (!empty($title_id)) {
 			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
 
+			<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
+
 			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 			<script type="text/javascript" src="scripts/ace/ace.js"></script>
@@ -574,7 +576,12 @@ if (!empty($title_id)) {
 						],
 						"stateSave": true
 					});
-
+					$(':input[type=search][aria-controls=patches]').addClear({
+						symbolClass: "glyphicon glyphicon-remove",
+						onClear: function() {
+							$('#patches').DataTable().search('').draw();
+						}
+					});
 					$('select[name=patches_length]').addClass('table-select');
 <?php if ($sw_title['source_id'] > 0) { ?>
 					$('#ext_attrs').DataTable().buttons().disable();

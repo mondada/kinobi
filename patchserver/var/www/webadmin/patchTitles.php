@@ -176,6 +176,8 @@ if ($pdo) {
 			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
 
+			<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
+
 			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 			<script type="text/javascript">
@@ -234,6 +236,12 @@ if (isset($subs_resp['upload'])) { ?>
 							{ "orderable": false }
 						],
 						"stateSave": true
+					});
+					$(':input[type=search][aria-controls=sw_titles]').addClear({
+						symbolClass: "glyphicon glyphicon-remove",
+						onClear: function() {
+							$('#sw_titles').DataTable().search('').draw();
+						}
 					});
 					$('select[name=sw_titles_length]').addClass('table-select');
 				});
