@@ -1198,6 +1198,7 @@ switch($requirement['name']) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
+					$('.dataTable').DataTable().search('').draw();
 					$('.table-select').selectpicker({
 						style: 'btn-default btn-sm',
 						width: 'fit',
