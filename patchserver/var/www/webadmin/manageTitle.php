@@ -970,7 +970,7 @@ switch($requirement['name']) {
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_rqmt-modal" onClick="newRqmtModal();" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_rqmt-modal" onClick="newRqmtModal(); $('.selectpicker').selectpicker('refresh');" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>

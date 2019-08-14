@@ -722,7 +722,7 @@ if (!empty($patch_id)) {
 												</tr>
 <?php } ?>
 												<tr>
-													<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_criteria-<?php echo $component['id']; ?>" onClick="newCriteriaModal('<?php echo $component['id']; ?>');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+													<td colspan="6" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_criteria-<?php echo $component['id']; ?>" onClick="newCriteriaModal('<?php echo $component['id']; ?>'); $('.selectpicker').selectpicker('refresh');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 												</tr>
 											</tbody>
 <?php }
@@ -1171,7 +1171,7 @@ if (sizeof($components) == 0) { ?>
 									</tr>
 <?php } ?>
 									<tr>
-										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_cap-modal" onClick="newCapModal();" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
+										<td colspan="5" align="right"><button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#create_cap-modal" onClick="newCapModal(); $('.selectpicker').selectpicker('refresh');" <?php echo ($source_id > 0 ? "disabled" : ""); ?>><span class="glyphicon glyphicon-plus"></span> Add</button></td>
 									</tr>
 								</tbody>
 							</table>
