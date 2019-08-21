@@ -171,6 +171,7 @@ fi
 
 # Login Page
 if ! grep -q "NetSUS" $installdir/html/webadmin/index.php 2>/dev/null; then
+	cp -R ./resources/html/favicon.ico $installdir/html/ >> $logFile
 	cp -R ./resources/html/webadmin/index.php $installdir/html/webadmin/ >> $logFile
 fi
 
