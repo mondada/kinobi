@@ -220,6 +220,12 @@ if (!empty($patch_id)) {
 
 	// Patch Versions
 	$patches = $pdo->query('SELECT version FROM patches WHERE title_id = "'.$patch['title_id'].'" AND id <> "'.$patch_id.'" ORDER BY sort_order')->fetchAll(PDO::FETCH_COLUMN);
+	
+	// Previous Patch
+	$prev_id = $pdo->query('SELECT id FROM patches WHERE title_id = ' . $patch['title_id'] . ' AND sort_order = ' . (+$patch['sort_order'] - 1))->fetch(PDO::FETCH_COLUMN);
+	
+	// Next Patch
+	$next_id = $pdo->query('SELECT id FROM patches WHERE title_id = ' . $patch['title_id'] . ' AND sort_order = ' . (+$patch['sort_order'] + 1))->fetch(PDO::FETCH_COLUMN);
 
 	// Kill Applications
 	$kill_apps = $pdo->query('SELECT id, bundle_id, app_name FROM kill_apps WHERE patch_id = "'.$patch_id.'"')->fetchAll(PDO::FETCH_ASSOC);
@@ -489,7 +495,17 @@ if (!empty($patch_id)) {
 			<nav id="nav-title" class="navbar navbar-default navbar-fixed-top">
 				<div style="padding: 19px 20px 1px;">
 					<div class="description"><a href="patchTitles.php">Patch Definitions</a> <span class="glyphicon glyphicon-chevron-right"></span><?php if (!empty($patch_id)) { ?> <a href="manageTitle.php?id=<?php echo $patch['title_id']; ?>"><?php echo $patch['name']; ?></a> <span class="glyphicon glyphicon-chevron-right"></span><?php } ?></div>
-					<h2 id="heading"><?php echo (empty($patch_id) ? "Error" : $patch['version']); ?></h2>
+					<div class="row">
+						<div class="col-xs-9">
+							<h2 id="heading"><?php echo (empty($patch_id) ? "Error" : $patch['version']); ?></h2>
+						</div>
+						<div class="col-xs-3 text-right">
+							<div class="btn-group btn-group-sm" role="group">
+								<a href="<?php echo ($prev_id ? "managePatch.php?id=".$prev_id : "#"); ?>" class="btn btn-default <?php echo ($prev_id ? "" : "disabled"); ?>"><span class="glyphicon glyphicon-chevron-left"></span></a>
+								<a href="<?php echo ($next_id ? "managePatch.php?id=".$next_id : "#"); ?>" class="btn btn-default <?php echo ($next_id ? "" : "disabled"); ?>"><span class="glyphicon glyphicon-chevron-right"></span></a>
+							</div>
+						</div>
+					</div>
 				</div>
 <?php if (!empty($patch_id)) { ?>
 				<div style="padding: 16px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
