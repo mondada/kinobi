@@ -57,7 +57,14 @@ $pageURI = $parts[count($parts) - 1];
 					<li class="<?php echo ($pageURI == "patchSettings.php" ? "active" : ""); ?>"><a href="patchSettings.php">Settings</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="logout.php">Logout <?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : ""); ?></a></li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : ""); ?> <span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="#" onClick="$('#change_pass-modal').modal('show');">Change Password</a></li>
+							<li role="separator" class="divider"></li>
+							<li><a href="logout.php">Logout</a></li>
+						</ul>
+					</li>
 				</ul>
 			</div><!--/.nav-collapse -->
 		</div>
