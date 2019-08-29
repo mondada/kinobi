@@ -330,7 +330,7 @@ if (!empty($title_id)) {
 					min-height: 306px;
 				}
 				#tab-content {
-					margin-top: 252px;
+					margin-top: 119px;
 				}
 				#nav-title {
 					top: 51px;
@@ -343,12 +343,24 @@ if (!empty($title_id)) {
 					transition: all 0.5s ease;
 					z-index: 90;
 				}
+				.nav-tabs.nav-justified > li {
+					white-space: nowrap;
+					display: table-cell;
+					width: 1%;
+				}
+				.nav-tabs.nav-justified > li > a {
+					margin-bottom: 0;
+					border-bottom: 1px solid #ddd;
+					border-radius: 4px 4px 0 0;
+				}
+				.nav-tabs.nav-justified > .active > a,
+				.nav-tabs.nav-justified > .active > a:hover,
+				.nav-tabs.nav-justified > .active > a:focus {
+					border-bottom-color: #fff;
+				}
 				@media(min-width:768px) {
 					.checkbox-error {
 						padding-left: 16px;
-					}
-					#tab-content {
-						margin-top: 119px;
 					}
 <?php if ($netsus) { ?>
 					#nav-title {
@@ -620,10 +632,10 @@ if (!empty($title_id)) {
 <?php if (!empty($title_id)) { ?>
 				<div style="padding: 16px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
 					<ul class="nav nav-tabs nav-justified" id="top-tabs" style="margin-bottom: -1px;">
-						<li class="active"><a id="title-tab-link" class="tab-font" href="#title-tab" role="tab" data-toggle="tab"><span id="title-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Software Title</a></li>
+						<li class="active"><a id="title-tab-link" class="tab-font" href="#title-tab" role="tab" data-toggle="tab"><span id="title-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Software Title</a></li>
 						<li><a id="ea-tab-link" class="tab-font" href="#ea-tab" role="tab" data-toggle="tab"> Extension Attributes</a></li>
-						<li><a id="rqmts-tab-link" class="tab-font" href="#rqmts-tab" role="tab" data-toggle="tab"><span id="rqmts-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Requirements</a></li>
-						<li><a id="patches-tab-link" class="tab-font" href="#patches-tab" role="tab" data-toggle="tab"><span id="patches-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Patches</a></li>
+						<li><a id="rqmts-tab-link" class="tab-font" href="#rqmts-tab" role="tab" data-toggle="tab"><span id="rqmts-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Requirements</a></li>
+						<li><a id="patches-tab-link" class="tab-font" href="#patches-tab" role="tab" data-toggle="tab"><span id="patches-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Patches</a></li>
 					</ul>
 				</div>
 <?php } ?>
@@ -636,7 +648,7 @@ if (!empty($title_id)) {
 
 					<div class="tab-pane active fade in" id="title-tab">
 
-						<div style="padding: 16px 20px 1px;">
+						<div style="padding: 16px 20px 8px;">
 							<div id="title-disabled-msg" style="margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>This software title is disabled.<span id="enable_title"> <a href="" onClick="enableTitle();">Click here to enable it</a>.<span></div>
@@ -646,7 +658,7 @@ if (!empty($title_id)) {
 							<div class="text-muted" style="font-size: 12px;">The information in the Software Title also provides the information for the Software Title Summary object.</div>
 						</div>
 
-						<div style="padding: 8px 20px 1px;">
+						<div style="padding: 0px 20px;">
 							<h5 id="name_label"><strong>Name</strong> <small>Name of the patch management software title.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
 								<input type="text" class="form-control input-sm" onFocus="validString(this, 'name_label');" onKeyUp="validString(this, 'name_label');" onChange="updateString(this, 'titles', 'name', <?php echo $title_id; ?>); updateTimestamp(<?php echo $title_id; ?>); document.getElementById('heading').innerHTML = this.value;" placeholder="[Required]" value="<?php echo htmlentities($sw_title['name']); ?>" <?php echo ($sw_title['source_id'] > 0 ? "disabled" : ""); ?>/>

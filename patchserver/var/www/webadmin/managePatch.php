@@ -317,7 +317,7 @@ if (!empty($patch_id)) {
 					width: 75px;
 				}
 				#tab-content {
-					margin-top: 295px;
+					margin-top: 119px;
 				}
 				#nav-title {
 					top: 51px;
@@ -330,16 +330,28 @@ if (!empty($patch_id)) {
 					transition: all 0.5s ease;
 					z-index: 90;
 				}
-				@media(min-width:768px) {
-					#tab-content {
-						margin-top: 119px;
-					}
+				.nav-tabs.nav-justified > li {
+					white-space: nowrap;
+					display: table-cell;
+					width: 1%;
+				}
+				.nav-tabs.nav-justified > li > a {
+					margin-bottom: 0;
+					border-bottom: 1px solid #ddd;
+					border-radius: 4px 4px 0 0;
+				}
+				.nav-tabs.nav-justified > .active > a,
+				.nav-tabs.nav-justified > .active > a:hover,
+				.nav-tabs.nav-justified > .active > a:focus {
+					border-bottom-color: #fff;
+				}
 <?php if ($netsus) { ?>
+				@media(min-width:768px) {
 					#nav-title {
 						left: 220px;
 					}
-<?php } ?>
 				}
+<?php } ?>
 			</style>
 
 			<script type="text/javascript" src="scripts/moment/moment.min.js"></script>
@@ -510,10 +522,10 @@ if (!empty($patch_id)) {
 <?php if (!empty($patch_id)) { ?>
 				<div style="padding: 16px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
 					<ul class="nav nav-tabs nav-justified" id="top-tabs" style="margin-bottom: -1px;">
-						<li class="active"><a id="patch-tab-link" class="tab-font" href="#patch-tab" role="tab" data-toggle="tab"><span id="patch-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Patch</a></li>
-						<li><a id="components-tab-link" class="tab-font" href="#components-tab" role="tab" data-toggle="tab"><span id="components-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Components</a></li>
+						<li class="active"><a id="patch-tab-link" class="tab-font" href="#patch-tab" role="tab" data-toggle="tab"><span id="patch-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Patch</a></li>
+						<li><a id="components-tab-link" class="tab-font" href="#components-tab" role="tab" data-toggle="tab"><span id="components-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Components</a></li>
 						<li><a id="dependencies-tab-link" class="tab-font" href="#dependencies-tab" role="tab" data-toggle="tab">Dependencies</a></li>
-						<li><a id="capabilities-tab-link" class="tab-font" href="#capabilities-tab" role="tab" data-toggle="tab"><span id="capabilities-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Capabilities</a></li>
+						<li><a id="capabilities-tab-link" class="tab-font" href="#capabilities-tab" role="tab" data-toggle="tab"><span id="capabilities-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Capabilities</a></li>
 						<li><a id="killapps-tab-link" class="tab-font" href="#killapps-tab" role="tab" data-toggle="tab">Kill Applications</a></li>
 					</ul>
 				</div>
@@ -527,7 +539,7 @@ if (!empty($patch_id)) {
 
 					<div class="tab-pane active fade in" id="patch-tab">
 
-						<div style="padding: 16px 20px 1px;">
+						<div style="padding: 16px 20px 8px;">
 							<div id="patch-disabled-msg" style="margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>This patch is disabled.<span id="enable_patch"> <a href="" onClick="enablePatch();">Click here to enable it</a>.<span></div>
@@ -537,7 +549,7 @@ if (!empty($patch_id)) {
 							<div class="text-muted" style="font-size: 12px;">Software title version information; one patch is one software title version.</div>
 						</div>
 
-						<div style="padding: 8px 20px 1px;">
+						<div style="padding: 0px 20px;">
 							<h5 id="sort_order_label"><strong>Sort Order</strong></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
 								<input type="text" class="form-control input-sm" onFocus="validInteger(this, 'sort_order_label');" onKeyUp="validInteger(this, 'sort_order_label');" onChange="updateInteger(this, 'patches', 'sort_order', <?php echo $patch_id; ?>); updateTimestamp(<?php echo $patch['title_id']; ?>);" placeholder="[Required]" value="<?php echo $patch['sort_order']; ?>" <?php echo ($source_id > 0 ? "disabled" : ""); ?>/>

@@ -370,11 +370,9 @@ if (empty($api_users)) {
 				}
 				#tab-content {
 <?php if ($netsus > 4) { ?>
-					margin-top: 341px;
-<?php } elseif ($cloud) { ?>
-					margin-top: 252px;
+					margin-top: 165px;
 <?php } else { ?>
-					margin-top: 295px;
+					margin-top: 119px;
 <?php } ?>
 				}
 				#nav-title {
@@ -388,20 +386,28 @@ if (empty($api_users)) {
 					transition: all 0.5s ease;
 					z-index: 90;
 				}
+				.nav-tabs.nav-justified > li {
+					white-space: nowrap;
+					display: table-cell;
+					width: 1%;
+				}
+				.nav-tabs.nav-justified > li > a {
+					margin-bottom: 0;
+					border-bottom: 1px solid #ddd;
+					border-radius: 4px 4px 0 0;
+				}
+				.nav-tabs.nav-justified > .active > a,
+				.nav-tabs.nav-justified > .active > a:hover,
+				.nav-tabs.nav-justified > .active > a:focus {
+					border-bottom-color: #fff;
+				}
+<?php if ($netsus) { ?>
 				@media(min-width:768px) {
-<?php if ($netsus > 4) { ?>
-					#tab-content {
-						margin-top: 165px;
-					}
 					#nav-title {
 						left: 220px;
 					}
-<?php } else { ?>
-					#tab-content {
-						margin-top: 119px;
-					}
-<?php } ?>
 				}
+<?php } ?>
 			</style>
 
 			<script type="text/javascript" src="scripts/moment/moment.min.js"></script>
@@ -916,14 +922,14 @@ if (empty($api_users)) {
 					</div>
 					<ul class="nav nav-tabs nav-justified" id="top-tabs" style="margin-bottom: -1px;">
 <?php if (isset($subs_resp['endpoint']) || $netsus == 0) { ?>
-						<li><a class="tab-font" href="#users-tab" role="tab" data-toggle="tab">Authentication</a></li>
+						<li><a class="tab-font" href="#users-tab" role="tab" data-toggle="tab">Users</a></li>
 <?php }
 if (!$cloud) { ?>
-						<li><a class="tab-font" href="#database-tab" role="tab" data-toggle="tab" <?php echo (empty($pdo_error) ? "" : "style=\"color: #a94442;\"") ?>><span id="database-tab-icon" class="glyphicon glyphicon-exclamation-sign <?php echo (empty($pdo_error) ? "hidden" : "") ?>"></span> Database</a></li>
+						<li><a class="tab-font" href="#database-tab" role="tab" data-toggle="tab" <?php echo (empty($pdo_error) ? "" : "style=\"color: #a94442;\"") ?>><span id="database-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (empty($pdo_error) ? "hidden" : "") ?>"></span> Database</a></li>
 <?php } ?>
-						<li class="active"><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="schedule-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden"></span> Backup</a></li>
+						<li class="active"><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="schedule-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Backup</a></li>
 						<li><a class="tab-font" href="#restore-tab" role="tab" data-toggle="tab">Restore</a></li>
-						<li><a class="tab-font" href="#subscription-tab" role="tab" data-toggle="tab"><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "hidden" : "")) : "hidden"); ?>"></span> Subscription</a></li>
+						<li><a class="tab-font" href="#subscription-tab" role="tab" data-toggle="tab"><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "hidden" : "")) : "hidden"); ?>"></span> Subscription</a></li>
 					</ul>
 				</div>
 			</nav>
@@ -1143,15 +1149,15 @@ if (!$cloud) { ?>
 <?php if (!$cloud) { ?>
 					<div class="tab-pane fade in" id="database-tab">
 
-						<div style="padding: 9px 20px 16px;">
+						<div style="padding: 16px 20px 8px;">
 <?php if (empty($pdo_error)) { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
+							<div style="margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo "Connected to: ".($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS)); ?></div>
 								</div>
 							</div>
 <?php } else { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $pdo_error; ?></div>
 								</div>
@@ -1239,8 +1245,8 @@ if (!$cloud) { ?>
 
 					<div class="tab-pane active fade in" id="backup-tab">
 
-						<div style="padding: 9px 20px 16px;">
-							<div id="schedule-alert-msg" style="margin-top: 11px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
+						<div style="padding: 16px 20px 12px;">
+							<div id="schedule-alert-msg" style="margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>No backups scheduled.</div>
 								</div>
@@ -1280,7 +1286,7 @@ if (!$cloud) { ?>
 
 						<hr>
 
-						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
+						<div style="padding: 5px 20px 1px; background-color: #f9f9f9;">
 							<h5 id="retention_label"><strong>Backup Retention</strong> <small>Number of backup archives to be retained on the server.</small></h5>
 							<div class="form-group has-feedback" style="width: 105px;">
 								<input type="text" id="retention" class="form-control input-sm" onFocus="validRetention(this, 'retention_label');" onKeyUp="validRetention(this, 'retention_label');" onChange="updateRetention(this);" placeholder="[1 - 30]" value="<?php echo $backup['retention']; ?>" />
@@ -1289,7 +1295,7 @@ if (!$cloud) { ?>
 
 						<hr>
 
- 						<div style="padding: 9px 20px 16px;">
+ 						<div style="padding: 5px 20px 16px;">
 							<div style="margin-top: 7px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($backup_error) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $backup_error; ?></div>
@@ -1523,33 +1529,33 @@ if (!$cloud) { ?>
 
 					<div class="tab-pane fade in" id="subscription-tab">
 
-						<div style="padding: 9px 20px 16px;">
+						<div style="padding: 16px 20px 16px;">
 <?php if (empty($subs['url']) && empty($subs['token'])) { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px;" class="panel panel-primary">
+							<div style="margin-bottom: 16px;" class="panel panel-primary">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-info glyphicon glyphicon-info-sign" style="padding-right: 12px;"></span>Register for a <a target="_blank" href="https://kinobi.io/kinobi/">Kinobi subscription</a> to provide patch definitions.</div>
 								</div>
 							</div>
 <?php } elseif (!isset($subs_resp['expires'])) { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>Invalid token. Please ensure the Server URL and Token values are entered exactly as they were provided.</div>
 								</div>
 							</div>
 <?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60)) { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expires: <?php echo date('M j, Y', $subs_resp['expires']); ?>.</div>
 								</div>
 							</div>
 <?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp']) { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expires: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
 								</div>
 							</div>
 <?php } else { ?>
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expired: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
 								</div>
