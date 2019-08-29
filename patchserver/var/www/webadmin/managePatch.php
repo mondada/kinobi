@@ -627,7 +627,7 @@ if (!empty($patch_id)) {
 					<ul class="nav nav-tabs nav-justified" id="top-tabs" style="margin-bottom: -1px;">
 						<li class="active"><a id="patch-tab-link" class="tab-font" href="#patch-tab" role="tab" data-toggle="tab"><span id="patch-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Patch</a></li>
 						<li><a id="components-tab-link" class="tab-font" href="#components-tab" role="tab" data-toggle="tab"><span id="components-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Components</a></li>
-						<li><a id="dependencies-tab-link" class="tab-font" href="#dependencies-tab" role="tab" data-toggle="tab">Dependencies</a></li>
+						<!-- <li><a id="dependencies-tab-link" class="tab-font" href="#dependencies-tab" role="tab" data-toggle="tab">Dependencies</a></li> -->
 						<li><a id="capabilities-tab-link" class="tab-font" href="#capabilities-tab" role="tab" data-toggle="tab"><span id="capabilities-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Capabilities</a></li>
 						<li><a id="killapps-tab-link" class="tab-font" href="#killapps-tab" role="tab" data-toggle="tab">Kill Applications</a></li>
 					</ul>
@@ -979,6 +979,7 @@ if (!empty($patch_id)) {
 						<!-- /.modal -->
 					</div><!-- /.tab-pane -->
 
+<!-- 
 					<div class="tab-pane fade in" id="dependencies-tab">
 
 						<div style="padding: 16px 20px 4px;">
@@ -1094,7 +1095,7 @@ if (!empty($patch_id)) {
 							</tbody>
 						</table>
 
-						<!-- New Dependency Modal -->
+						<!~~ New Dependency Modal ~~>
 						<div class="modal fade" id="create_dep-modal" tabindex="-1" role="dialog">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
@@ -1144,9 +1145,9 @@ if (!empty($patch_id)) {
 								</div>
 							</div>
 						</div>
-						<!-- /.modal -->
+						<!~~ /.modal ~~>
 
-						<!-- Delete Dependency Modal -->
+						<!~~ Delete Dependency Modal ~~>
 						<div class="modal fade" id="delete_dep-modal" tabindex="-1" role="dialog">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
@@ -1164,9 +1165,10 @@ if (!empty($patch_id)) {
 								</div>
 							</div>
 						</div>
-						<!-- /.modal -->
+						<!~~ /.modal ~~>
 
-					</div> <!-- /.tab-pane -->
+					</div> <!~~ /.tab-pane ~~>
+ -->
 
 					<div class="tab-pane fade in" id="capabilities-tab">
 
