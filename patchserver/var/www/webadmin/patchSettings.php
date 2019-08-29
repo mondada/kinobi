@@ -386,6 +386,17 @@ if (empty($api_users)) {
 					transition: all 0.5s ease;
 					z-index: 90;
 				}
+				.navbar-fixed-bottom {
+					padding-top: 6px;
+					padding-left: 26px;
+					padding-right: 20px;
+					background: #fff;
+					-webkit-transition: all 0.5s ease;
+					-moz-transition: all 0.5s ease;
+					-o-transition: all 0.5s ease;
+					transition: all 0.5s ease;
+					z-index: 90;
+				}
 				.nav-tabs.nav-justified > li {
 					white-space: nowrap;
 					display: table-cell;
@@ -404,6 +415,9 @@ if (empty($api_users)) {
 <?php if ($netsus) { ?>
 				@media(min-width:768px) {
 					#nav-title {
+						left: 220px;
+					}
+					.navbar-fixed-bottom {
 						left: 220px;
 					}
 				}
@@ -783,40 +797,6 @@ if (empty($api_users)) {
 
 			<script type="text/javascript">
 				$(document).ready(function() {
-					$('#backups').DataTable( {
-						buttons: [
-							{
-								text: '<span class="glyphicon glyphicon-plus"></span> Upload',
-								className: 'btn-primary btn-sm btn-table',
-								action: function ( e, dt, node, config ) {
-									$("#uploadBackup").modal();
-								}
-							}
-						],
-						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
-						"order": [ 2, 'desc' ],
-						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": 5,
-						"columns": [
-							null,
-							null,
-							null,
-							null,
-							{ "orderable": false }
-						],
-						"stateSave": true
-					});
-					$(':input[type=search][aria-controls=backups]').addClear({
-						symbolClass: "glyphicon glyphicon-remove",
-						onClear: function() {
-							$('#backups').DataTable().search('').draw();
-						}
-					});
-					if ($(':input[type=search][aria-controls=backups]').val() !== '') {
-						$('#backups').DataTable().search('').draw();
-					}
-					$('select[name=backups_length]').addClass('table-select');
-
 					$('#users').DataTable( {
 						buttons: [
 							{
@@ -830,10 +810,23 @@ if (empty($api_users)) {
 								}
 							}
 						],
-						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
+						"dom": '<"row"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row"<"col-xs-12 table-responsive"t>>' + '<"row navbar-default navbar-fixed-bottom"<"col-xs-10"p><"col-xs-2"l>>',
+						"language": {
+							"emptyTable": "No Users",
+							"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
+							"infoEmpty": "0 - 0 of 0",
+							"lengthMenu": "Show: _MENU_",
+							"loadingRecords": "Please wait - loading...",
+							"search": " ",
+							"searchPlaceholder": "Filter Users",
+							"paginate": {
+								"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
+								"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
+							}
+						},
 						"order": [ 0, 'asc' ],
 						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": 5,
+						"pageLength": 10,
 						"columns": [
 							null,
 							null,
@@ -846,16 +839,85 @@ if (empty($api_users)) {
 						],
 						"stateSave": true
 					});
+
 					$(':input[type=search][aria-controls=users]').addClear({
 						symbolClass: "glyphicon glyphicon-remove",
 						onClear: function() {
 							$('#users').DataTable().search('').draw();
 						}
 					});
+
 					if ($(':input[type=search][aria-controls=users]').val() !== '') {
 						$('#users').DataTable().search('').draw();
 					}
+
 					$('select[name=users_length]').addClass('table-select');
+
+					$('#backups').DataTable( {
+						buttons: [
+							{
+								text: '<span class="glyphicon glyphicon-plus"></span> Upload',
+								className: 'btn-primary btn-sm btn-table',
+								action: function ( e, dt, node, config ) {
+									$("#uploadBackup").modal();
+								}
+							}
+						],
+						"dom": '<"row"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row"<"col-xs-12 table-responsive"t>>' + '<"row navbar-default navbar-fixed-bottom"<"col-xs-10"p><"col-xs-2"l>>',
+						"language": {
+							"emptyTable": "No Backups",
+							"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
+							"infoEmpty": "0 - 0 of 0",
+							"lengthMenu": "Show: _MENU_",
+							"loadingRecords": "Please wait - loading...",
+							"search": " ",
+							"searchPlaceholder": "Filter Backups",
+							"paginate": {
+								"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
+								"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
+							}
+						},
+						"order": [ 2, 'desc' ],
+						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
+						"pageLength": 10,
+						"columns": [
+							null,
+							null,
+							null,
+							null,
+							{ "orderable": false }
+						],
+						"stateSave": true
+					});
+
+					$(':input[type=search][aria-controls=backups]').addClear({
+						symbolClass: "glyphicon glyphicon-remove",
+						onClear: function() {
+							$('#backups').DataTable().search('').draw();
+						}
+					});
+
+					if ($(':input[type=search][aria-controls=backups]').val() !== '') {
+						$('#backups').DataTable().search('').draw();
+					}
+
+					$('select[name=backups_length]').addClass('table-select');
+
+					$('.dataTables_wrapper').removeClass('form-inline');
+					$('.dataTables_wrapper').css('padding', '0px 20px');
+
+					$('.dataTables_filter').addClass('pull-left');
+					$('.dataTables_filter').addClass('form-inline');
+
+					$('.dt-buttons').addClass('pull-right');
+					$('.dt-buttons').removeClass('dt-buttons');
+					$('.btn-primary').removeClass('btn-default');
+
+					$('.table-responsive').css('border', 0);
+
+					$('.dataTables_paginate').addClass('pull-left');
+
+					$('.dataTables_length').addClass('pull-right');
 				});
 			</script>
 
@@ -941,90 +1003,90 @@ if (!$cloud) { ?>
 <?php if (isset($subs_resp['endpoint']) || $netsus == 0) { ?>
 					<div class="tab-pane fade in" id="users-tab">
 
-						<div style="padding: 9px 20px 1px;">
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($api_error) ? "hidden" : ""); ?>">
+						<div style="padding: 16px 20px 8px;">
+							<div style="margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($api_error) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $api_error; ?></div>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($api_success) ? "hidden" : ""); ?>">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($api_success) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $api_success; ?></div>
 								</div>
 							</div>
 
 							<h5><strong>Users</strong> <small>Kinobi user accounts and privileges.</small></h5>
+						</div>
 
-							<table id="users" class="table table-hover" style="border-bottom: 1px solid #eee;">
-								<thead>
-									<tr>
-										<th>Username</th>
-										<th>Token</th>
-										<th><!-- Warning --></th>
-										<th>Expires</th>
-										<th><?php echo ($netsus > 0 ? "" : "Web Admin"); ?></th>
-										<th><?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "API Read" : "" : ""); ?></th>
-										<th><?php echo (isset($subs_resp['endpoint']) ? "API Write" : ""); ?></th>
-										<th><!-- Delete --></th>
-									</tr>
-								</thead>
-								<tbody>
+						<table id="users" class="table table-hover">
+							<thead>
+								<tr>
+									<th>Username</th>
+									<th>Token</th>
+									<th><!-- Warning --></th>
+									<th>Expires</th>
+									<th><?php echo ($netsus > 0 ? "" : "Web Admin"); ?></th>
+									<th><?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "API Read" : "" : ""); ?></th>
+									<th><?php echo (isset($subs_resp['endpoint']) ? "API Write" : ""); ?></th>
+									<th><!-- Delete --></th>
+								</tr>
+							</thead>
+							<tbody>
 <?php foreach ($users as $key => $value) {
 	if ($netsus == 0 || !isset($value['web'])) {?>
-									<tr>
-										<td>
-											<div class="dropdown">
-												<a href="#" id="user_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $key; ?></a>
-												<ul class="dropdown-menu" aria-labelledby="user_<?php echo $key; ?>">
-													<li><a data-toggle="modal" href="#reset_pass-modal" onClick="$('#reset_pass-title').text('<?php echo $key; ?>'); $('#save_pass').val('<?php echo $key; ?>');">Reset Password</a></li>
-												</ul>
-											</div>
-										</td>
-										<td>
-											<div class="dropdown">
-												<a href="#" id="token_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['token']) ? $value['token'] : "&lt;No Token&gt;"); ?></a>
-												<ul class="dropdown-menu" aria-labelledby="token_<?php echo $key; ?>">
-													<li><a href="#" onClick="generateToken('<?php echo $key; ?>');"><?php echo (isset($value['token']) ? "Re-" : ""); ?>Generate</a></li>
-												</ul>
-											</div>
-										</td>
-										<td><span class="<?php echo (isset($value['expires']) ? (time() > $value['expires'] ? "text-warning glyphicon glyphicon-exclamation-sign" : "") : ""); ?>"></span></td>
-										<td>
-											<div class="dropdown">
-												<a href="#" id="expiry_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['expires']) ? gmdate("Y-m-d\TH:i:s\Z", $value['expires']) : "&lt;Never&gt;"); ?></a>
-												<ul class="dropdown-menu" aria-labelledby="expiry_<?php echo $key; ?>">
-													<li class="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>"><a data-toggle="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "" : "modal") : "modal"); ?>" href="#reset_expiry-modal" onClick="$('#reset_expiry-title').text('<?php echo $key; ?>'); $('#reset_expires').val('<?php echo (empty($value['expires']) ? "" : gmdate("Y-m-d\TH:i:s\Z", $value['expires'])); ?>'); $('#reset_expiry').val('<?php echo $key; ?>');"><?php echo (isset($value['expires']) ? "Change" : "Set"); ?></a></li>
-												</ul>
-											</div>
-										</td>
-										<td>
-											<div class="checkbox checkbox-primary checkbox-inline <?php echo ($netsus == 0 ? "" : "hidden"); ?>">
-												<input type="checkbox" class="styled" name="web_ui" id="web_ui" value="<?php echo $key; ?>" onChange="toggleWebAdmin(this);" <?php echo (isset($value['web']) ? ($value['web'] ? "checked" : "") : ""); ?> <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>/>
-												<label/>
-											</div>
-										</td>
-										<td>
-											<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "" : "hidden" : "hidden"); ?>">
-												<input type="checkbox" class="styled" name="api_ro" id="api_ro" value="<?php echo $key; ?>" onChange="toggleAPIRead(this);" <?php echo (isset($value['api']) ? "checked" : ""); ?> <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "disabled" : "") : ""); ?>/>
-												<label/>
-											</div>
-										</td>
-										<td>
-											<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['endpoint']) ? "" : "hidden"); ?>">
-												<input type="checkbox" class="styled" name="api_rw" id="api_rw" value="<?php echo $key; ?>" onChange="toggleAPIWrite(this);" <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "checked" : "") : ""); ?>/>
-												<label/>
-											</div>
-										</td>
-										<td align="right"><button type="button" name="del_user_prompt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_user-modal" onClick="$('#delete_user-title').text('<?php echo $key; ?>'); $('#delete_user').val('<?php echo $key; ?>');" value="<?php echo $key; ?>" <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>>Delete</button></td>
-									</tr>
+								<tr>
+									<td>
+										<div class="dropdown">
+											<a href="#" id="user_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $key; ?></a>
+											<ul class="dropdown-menu" aria-labelledby="user_<?php echo $key; ?>">
+												<li><a data-toggle="modal" href="#reset_pass-modal" onClick="$('#reset_pass-title').text('<?php echo $key; ?>'); $('#save_pass').val('<?php echo $key; ?>');">Reset Password</a></li>
+											</ul>
+										</div>
+									</td>
+									<td>
+										<div class="dropdown">
+											<a href="#" id="token_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['token']) ? $value['token'] : "&lt;No Token&gt;"); ?></a>
+											<ul class="dropdown-menu" aria-labelledby="token_<?php echo $key; ?>">
+												<li><a href="#" onClick="generateToken('<?php echo $key; ?>');"><?php echo (isset($value['token']) ? "Re-" : ""); ?>Generate</a></li>
+											</ul>
+										</div>
+									</td>
+									<td><span class="<?php echo (isset($value['expires']) ? (time() > $value['expires'] ? "text-warning glyphicon glyphicon-exclamation-sign" : "") : ""); ?>"></span></td>
+									<td>
+										<div class="dropdown">
+											<a href="#" id="expiry_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['expires']) ? gmdate("Y-m-d\TH:i:s\Z", $value['expires']) : "&lt;Never&gt;"); ?></a>
+											<ul class="dropdown-menu" aria-labelledby="expiry_<?php echo $key; ?>">
+												<li class="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>"><a data-toggle="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "" : "modal") : "modal"); ?>" href="#reset_expiry-modal" onClick="$('#reset_expiry-title').text('<?php echo $key; ?>'); $('#reset_expires').val('<?php echo (empty($value['expires']) ? "" : gmdate("Y-m-d\TH:i:s\Z", $value['expires'])); ?>'); $('#reset_expiry').val('<?php echo $key; ?>');"><?php echo (isset($value['expires']) ? "Change" : "Set"); ?></a></li>
+											</ul>
+										</div>
+									</td>
+									<td>
+										<div class="checkbox checkbox-primary checkbox-inline <?php echo ($netsus == 0 ? "" : "hidden"); ?>">
+											<input type="checkbox" class="styled" name="web_ui" id="web_ui" value="<?php echo $key; ?>" onChange="toggleWebAdmin(this);" <?php echo (isset($value['web']) ? ($value['web'] ? "checked" : "") : ""); ?> <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>/>
+											<label/>
+										</div>
+									</td>
+									<td>
+										<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "" : "hidden" : "hidden"); ?>">
+											<input type="checkbox" class="styled" name="api_ro" id="api_ro" value="<?php echo $key; ?>" onChange="toggleAPIRead(this);" <?php echo (isset($value['api']) ? "checked" : ""); ?> <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "disabled" : "") : ""); ?>/>
+											<label/>
+										</div>
+									</td>
+									<td>
+										<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['endpoint']) ? "" : "hidden"); ?>">
+											<input type="checkbox" class="styled" name="api_rw" id="api_rw" value="<?php echo $key; ?>" onChange="toggleAPIWrite(this);" <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "checked" : "") : ""); ?>/>
+											<label/>
+										</div>
+									</td>
+									<td align="right"><button type="button" name="del_user_prompt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_user-modal" onClick="$('#delete_user-title').text('<?php echo $key; ?>'); $('#delete_user').val('<?php echo $key; ?>');" value="<?php echo $key; ?>" <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>>Delete</button></td>
+								</tr>
 <?php }
 } ?>
-								</tobdy>
-							</table>
+							</tobdy>
+						</table>
 
-							<input type="hidden" name="create_token" id="create_token">
-						</div>
+						<input type="hidden" name="create_token" id="create_token">
 
 						<hr>
 
@@ -1343,38 +1405,38 @@ if (!$cloud) { ?>
 
 					<div class="tab-pane fade in" id="restore-tab">
 
-						<div style="padding: 9px 20px 1px;">
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($upload_error) ? "hidden" : ""); ?>">
+						<div style="padding: 16px 20px 8px;">
+							<div style="margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($upload_error) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $upload_error; ?></div>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($upload_success) ? "hidden" : ""); ?>">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($upload_success) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $upload_success; ?></div>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($delete_error) ? "hidden" : ""); ?>">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($delete_error) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $delete_error; ?></div>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($delete_success) ? "hidden" : ""); ?>">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($delete_success) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $delete_success; ?></div>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($restore_error) ? "hidden" : ""); ?>">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($restore_error) ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $restore_error; ?></div>
 								</div>
 							</div>
 
-							<div style="margin-top: 11px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($restore_success) || $netsus == 0 ? "hidden" : ""); ?>">
+							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($restore_success) || $netsus == 0 ? "hidden" : ""); ?>">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $restore_success; ?> <a href="logout.php">Log Out</a> for changes to take effect.</div>
 								</div>
@@ -1384,40 +1446,38 @@ if (!$cloud) { ?>
 							
 						</div>
 
-						<div style="padding: 9px 20px 1px; overflow-x: auto;">
-							<table id="backups" class="table table-hover" style="border-bottom: 1px solid #eee;">
-								<thead>
-									<tr>
-										<th>Filename</th>
-										<th>Format</th>
-										<th>Date</th>
-										<th>Size</th>
-										<th></th>
-									</tr>
-								</thead>
-								<tbody>
+						<table id="backups" class="table table-hover">
+							<thead>
+								<tr>
+									<th>Filename</th>
+									<th>Format</th>
+									<th>Date</th>
+									<th>Size</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
 <?php foreach ($backups as $value) { ?>
-									<tr>
-										<td>
-											<div class="dropdown">
-												<a href="#" id="<?php echo $value['file']; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $value['file']; ?></a>
-												<ul class="dropdown-menu" aria-labelledby="<?php echo $value['file']; ?>">
+								<tr>
+									<td>
+										<div class="dropdown">
+											<a href="#" id="<?php echo $value['file']; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $value['file']; ?></a>
+											<ul class="dropdown-menu" aria-labelledby="<?php echo $value['file']; ?>">
 <?php if (!$cloud) { ?>
-													<li><a href="patchCtl.php?download=<?php echo $value['file']; ?>">Download</a></li>
+												<li><a href="patchCtl.php?download=<?php echo $value['file']; ?>">Download</a></li>
 <?php } ?>
-													<li class="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "disabled" : ""); ?>"><a data-toggle="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "" : "modal"); ?>" href="#restore-modal" onClick="$('#restore-title').text('<?php echo $value['file']; ?>'); $('#restore').val('<?php echo $value['file']; ?>');">Restore</a></li>
-												</ul>
-											</div>
-										</td>
-										<td><?php echo $value['type']; ?></td>
-										<td><?php echo gmdate("Y-m-d\TH:i:s\Z", $value['date']); ?></td>
-										<td><?php echo formatSize($value['size'], 0); ?></td>
-										<td align="right"><button type="button" name="deletepromt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_backup-modal" onClick="$('#delete_backup-title').text('<?php echo $value['file']; ?>'); $('#delete_backup').val('<?php echo $value['file']; ?>');">Delete</button></td>
-									</tr>
+												<li class="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "disabled" : ""); ?>"><a data-toggle="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "" : "modal"); ?>" href="#restore-modal" onClick="$('#restore-title').text('<?php echo $value['file']; ?>'); $('#restore').val('<?php echo $value['file']; ?>');">Restore</a></li>
+											</ul>
+										</div>
+									</td>
+									<td><?php echo $value['type']; ?></td>
+									<td><?php echo gmdate("Y-m-d\TH:i:s\Z", $value['date']); ?></td>
+									<td><?php echo formatSize($value['size'], 0); ?></td>
+									<td align="right"><button type="button" name="deletepromt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_backup-modal" onClick="$('#delete_backup-title').text('<?php echo $value['file']; ?>'); $('#delete_backup').val('<?php echo $value['file']; ?>');">Delete</button></td>
+								</tr>
 <?php } ?>
-								</tobdy>
-							</table>
-						</div>
+							</tobdy>
+						</table>
 
 						<!-- Backup Path Modal -->
 						<div class="modal fade" id="backup_path-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">

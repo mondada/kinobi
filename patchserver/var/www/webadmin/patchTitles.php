@@ -139,9 +139,13 @@ if ($pdo) {
 ?>
 			<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
 			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
+			<link rel="stylesheet" href="theme/buttons.bootstrap.css" />
 			<link rel="stylesheet" href="theme/bootstrap-select.css" />
 
 			<style>
+				body {
+					background-color: #f9f9f9;
+				}
 				.btn-table {
 					width: 75px;
 				}
@@ -159,12 +163,22 @@ if ($pdo) {
 					transition: all 0.5s ease;
 					z-index: 90;
 				}
+				.navbar-fixed-bottom {
+					padding-top: 6px;
+					padding-left: 26px;
+					padding-right: 20px;
+					-webkit-transition: all 0.5s ease;
+					-moz-transition: all 0.5s ease;
+					-o-transition: all 0.5s ease;
+					transition: all 0.5s ease;
+					z-index: 90;
+				}
 				@media(min-width:768px) {
-					.checkbox-error {
-						padding-left: 16px;
-					}
 <?php if ($netsus) { ?>
 					#nav-title {
+						left: 220px;
+					}
+					.navbar-fixed-bottom {
 						left: 220px;
 					}
 <?php } ?>
@@ -223,7 +237,20 @@ if (isset($subs_resp['upload'])) { ?>
 								}
 							}
 						],
-						"dom": "<'row'<'col-sm-4'f><'col-sm-4'i><'col-sm-4'<'dataTables_paginate'B>>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-5'l><'col-sm-7'p>>",
+						"dom": '<"row"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row"<"col-xs-12 table-responsive"t>>' + '<"row navbar-default navbar-fixed-bottom"<"col-xs-10"p><"col-xs-2"l>>',
+						"language": {
+							"emptyTable": "No Titles",
+							"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
+							"infoEmpty": "0 - 0 of 0",
+							"lengthMenu": "Show: _MENU_",
+							"loadingRecords": "Please wait - loading...",
+							"search": " ",
+							"searchPlaceholder": "Filter Titles",
+							"paginate": {
+								"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
+								"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
+							}
+						},
 						"order": [ 1, 'asc' ],
 						"lengthMenu": [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
 						"pageLength": 10,
@@ -237,6 +264,7 @@ if (isset($subs_resp['upload'])) { ?>
 						],
 						"stateSave": true
 					});
+
 					$(':input[type=search][aria-controls=sw_titles]').addClear({
 						symbolClass: "glyphicon glyphicon-remove",
 						onClear: function() {
@@ -247,6 +275,21 @@ if (isset($subs_resp['upload'])) { ?>
 						$('#sw_titles').DataTable().search('').draw();
 					}
 					$('select[name=sw_titles_length]').addClass('table-select');
+
+					$('.dataTables_wrapper').removeClass('form-inline');
+
+					$('.dataTables_filter').addClass('pull-left');
+					$('.dataTables_filter').addClass('form-inline');
+
+					$('.dt-buttons').addClass('pull-right');
+					$('.dt-buttons').removeClass('dt-buttons');
+					$('.btn-primary').removeClass('btn-default');
+
+					$('.table-responsive').css('border', 0);
+
+					$('.dataTables_paginate').addClass('pull-left');
+
+					$('.dataTables_length').addClass('pull-right');
 				});
 			</script>
 
@@ -320,7 +363,7 @@ if (isset($subs_resp['upload'])) { ?>
 						</div>
 					</div>
 
-					<table id="sw_titles" class="table table-hover" style="border-bottom: 1px solid #eee;">
+					<table id="sw_titles" class="table table-hover">
 						<thead>
 							<tr>
 								<th>Enable</th>
@@ -361,8 +404,6 @@ if (isset($subs_resp['upload'])) { ?>
 						</tobdy>
 					</table>
 				</div>
-
-				<hr>
 
 				<!-- New Title Modal -->
 				<div class="modal fade" id="create_title-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
