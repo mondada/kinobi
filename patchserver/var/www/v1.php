@@ -33,41 +33,37 @@ $api = getSettingApi($pdo);
 
 $app->authorzied = ($api['reqauth'] ? false : "0");
 
-if ($api['authtype'] == "token") {
-	if (isset($_SERVER['Authorization'])) {
-		$auth_header = trim($_SERVER['Authorization']);
-	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-		$auth_header = trim($_SERVER['HTTP_AUTHORIZATION']);
-	} elseif (function_exists("apache_request_headers")) {
-		$request_headers = apache_request_headers();
-		$request_headers = array_combine(array_map("ucwords", array_keys($request_headers)), array_values($request_headers));
+if (isset($_SERVER['Authorization'])) {
+	$auth_header = trim($_SERVER['Authorization']);
+} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+	$auth_header = trim($_SERVER['HTTP_AUTHORIZATION']);
+} elseif (function_exists("apache_request_headers")) {
+	$request_headers = apache_request_headers();
+	$request_headers = array_combine(array_map("ucwords", array_keys($request_headers)), array_values($request_headers));
 
-		if (isset($request_headers['Authorization'])) {
-			$auth_header = trim($request_headers['Authorization']);
-		}
-	}
-
-	if (isset($auth_header)) {
-		if (preg_match("/Bearer\s(\S+)/", $auth_header, $matches)) {
-			$api_token = $matches[1];
-		}
-	}
-
-	if (isset($api_token)) {
-		$users = getSettingUsers($pdo);
-
-		$api_tokens = array();
-		foreach ($users as $key => $value) {
-			if (isset($value['token']) && isset($value['api']) && (!isset($value['expires']) || $value['expires'] > time())) {
-				$api_tokens[$value['token']] = $value['api'];
-			}
-		}
-
-		$app->authorzied = (array_key_exists($api_token, $api_tokens) ? $api_tokens[$api_token] : $app->authorzied);
+	if (isset($request_headers['Authorization'])) {
+		$auth_header = trim($request_headers['Authorization']);
 	}
 }
 
-if ($api['authtype'] == "basic") {
+if (isset($auth_header)) {
+	if (preg_match("/Bearer\s(\S+)/", $auth_header, $matches)) {
+		$api_token = $matches[1];
+	}
+}
+
+if (isset($api_token)) {
+	$users = getSettingUsers($pdo);
+
+	$api_tokens = array();
+	foreach ($users as $key => $value) {
+		if (isset($value['token']) && isset($value['api']) && (!isset($value['expires']) || $value['expires'] > time())) {
+			$api_tokens[$value['token']] = $value['api'];
+		}
+	}
+
+	$app->authorzied = (array_key_exists($api_token, $api_tokens) ? $api_tokens[$api_token] : $app->authorzied);
+} else {
 	if (!isset($_SERVER['PHP_AUTH_USER'])) {
 		header("WWW-Authenticate: Basic realm=\"v1\"");
 	} else {

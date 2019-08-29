@@ -109,13 +109,6 @@ if (!($_SESSION['isAuthUser'])) {
 		setSettingUser($pdo, $_POST['deny_api'], "api", null);
 	}
 
-	// API Authentication Type
-	if (isset($_POST['api_authtype'])) {
-		$api = getSettingApi($pdo);
-		$api['authtype'] = $_POST['api_authtype'];
-		setSettingApi($pdo, $api);
-	}
-
 	// Require API Authentication
 	if (isset($_POST['api_reqauth'])) {
 		$api = getSettingApi($pdo);

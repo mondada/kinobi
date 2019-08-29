@@ -618,16 +618,6 @@ if (empty($api_users)) {
 					ajaxPost('patchCtl.php', 'subs_refresh='+element.value);
 				}
 
-				function toggleAPIAuthType() {
-					if ($('#api_authtype').val() == 'basic') {
-						ajaxPost('patchCtl.php', 'api_authtype=basic');
-					} else if ($('#api_authtype').val() == 'token') {
-						ajaxPost('patchCtl.php', 'api_authtype=token');
-					} else {
-						ajaxPost('patchCtl.php', 'api_authtype=none');
-					}
-				}
-
 				function toggleAPIAccess() {
 					if ($('#api_reqauth').prop('checked') == true) {
 						ajaxPost('patchCtl.php', 'api_reqauth=true');
@@ -1026,43 +1016,11 @@ if (!$cloud) { ?>
 } ?>
 								</tobdy>
 							</table>
+
 							<input type="hidden" name="create_token" id="create_token">
 						</div>
 
 						<hr>
-
-<?php if (isset($subs_resp['endpoint'])) { ?>
-						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
-							<h5><strong>API Authentication Type</strong> <small>Authentication type to use for API endpoints.</small></h5>
-							<div class="form-group" style="max-width: 449px;">
-								<select id="api_authtype" name="api_authtype" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="toggleAPIAuthType();" <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
-									<option value="basic" <?php echo ($api['authtype'] == "basic" ? "selected" : ""); ?>>Basic</option>
-									<option value="token" <?php echo ($api['authtype'] == "token" ? "selected" : ""); ?> <?php echo (empty($api_tokens) ? "disabled" : ""); ?>>Token</option>
-								</select>
-							</div>
-						</div>
-
-						<hr>
-
-						<div style="padding: 9px 20px 1px;">
-							<div class="checkbox checkbox-primary">
-								<input name="api_auto" id="api_auto" class="styled" type="checkbox" value="true" onChange="toggleAPIAuto();" <?php echo ($api['auto'] ? "checked" : ""); ?>>
-								<label><strong>API Auto-Enable</strong><br><span style="font-size: 75%; color: #777;">Automatically enable items imported via the API.</span></label>
-							</div>
-						</div>
-<?php if (isset($subs_resp['type']) && $subs_resp['type'] == "Server") { ?>
-						<hr>
-
-						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
-							<div class="checkbox checkbox-primary">
-								<input name="api_reqauth" id="api_reqauth" class="styled" type="checkbox" value="true" onChange="toggleAPIAccess();" <?php echo ($api['reqauth'] ? "checked" : ""); ?> <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
-								<label><strong>Require API Authentication</strong><br><span style="font-size: 75%; color: #777;">Require authentication for API endpoints.<br><strong>Note:</strong> Jamf Pro does not currently support authentication for reading from external patch sources.</span></label>
-							</div>
-						</div>
-
-						<hr>
-<?php }
-} ?>
 
 						<!-- Add User Modal -->
 						<div class="modal fade" id="create_user-modal" tabindex="-1" role="dialog">
@@ -1612,12 +1570,13 @@ if (!$cloud) { ?>
 							<div class="text-left">
 								<button type="submit" name="subscribe" id="subscribe" class="btn btn-primary btn-sm" style="width: 75px;" disabled>Apply</button>
 							</div>
+<?php } ?>
 						</div>
 
-<?php if (isset($subs_resp['type']) && $subs_resp['type'] == "Server") { ?>
+<?php if (isset($subs_resp['endpoint']) && $subs_resp['type'] !== "Server") { ?>
 						<hr>
 
-						<div style="padding: 9px 20px 1px; background-color: #f9f9f9;">
+						<div style="padding: 5px 20px 1px; background-color: #f9f9f9;">
 							<h5><strong>Check-In Frequency</strong> <small>Frequency at which imported titles are refreshed.</small></h5>
 							<div class="form-group" style="max-width: 449px;">
 								<select id="subs_refresh" name="subs_refresh" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="subsRefresh(this);" <?php echo (empty($subs_resp) ? "disabled" : ""); ?>>
@@ -1631,7 +1590,25 @@ if (!$cloud) { ?>
 
 						<hr>
 <?php }
-} ?>
+if (isset($subs_resp['type']) && $subs_resp['type'] == "Server") { ?>
+						<hr>
+
+						<div style="padding: 5px 20px 1px; <?php echo ($subs_resp['type'] == "Server" ? "background-color: #f9f9f9;" : ""); ?>">
+							<div class="checkbox checkbox-primary">
+								<input name="api_auto" id="api_auto" class="styled" type="checkbox" value="true" onChange="toggleAPIAuto();" <?php echo ($api['auto'] ? "checked" : ""); ?>>
+								<label><strong>API Auto-Enable</strong><br><span style="font-size: 75%; color: #777;">Automatically enable items imported via the API.</span></label>
+							</div>
+						</div>
+
+						<hr>
+
+						<div style="padding: 5px 20px 1px; <?php echo ($subs_resp['type'] == "Server" ? "" : "background-color: #f9f9f9;"); ?>">
+							<div class="checkbox checkbox-primary">
+								<input name="api_reqauth" id="api_reqauth" class="styled" type="checkbox" value="true" onChange="toggleAPIAccess();" <?php echo ($api['reqauth'] ? "checked" : ""); ?> <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
+								<label><strong>Require Endpoint Authentication</strong><br><span style="font-size: 75%; color: #777;">Require authentication for API endpoints.<br><strong>Note:</strong> Jamf Pro does not currently support authentication for reading from external patch sources.</span></label>
+							</div>
+						</div>
+<?php } ?>
 					</div> <!-- /.tab-pane -->
 
 				</div> <!-- end .tab-content -->
