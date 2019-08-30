@@ -412,10 +412,12 @@ if (!empty($title_id)) {
 
 			<script type="text/javascript">
 				function showTitleDisabled() {
+					$('#title-tab-link').css('color', '#8a6d3b');
 					$('#title-tab-icon').removeClass('hidden');
 					$('#title-disabled-msg').removeClass('hidden');
 				}
 				function hideTitleDisabled() {
+					$('#title-tab-link').removeAttr('style');
 					$('#title-tab-icon').addClass('hidden');
 					$('#title-disabled-msg').addClass('hidden');
 				}

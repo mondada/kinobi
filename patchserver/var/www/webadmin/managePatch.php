@@ -385,10 +385,12 @@ if (!empty($patch_id)) {
 
 			<script type="text/javascript">
 				function showPatchDisabled() {
+					$('#patch-tab-link').css('color', '#8a6d3b');
 					$('#patch-tab-icon').removeClass('hidden');
 					$('#patch-disabled-msg').removeClass('hidden');
 				}
 				function hidePatchDisabled() {
+					$('#patch-tab-link').removeAttr('style');
 					$('#patch-tab-icon').addClass('hidden');
 					$('#patch-disabled-msg').addClass('hidden');
 				}

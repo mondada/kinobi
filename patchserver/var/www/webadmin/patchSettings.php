@@ -460,9 +460,9 @@ if (empty($api_users)) {
 					scheduled.sort();
 					ajaxPost('patchCtl.php', 'schedule='+scheduled.join());
 					if (scheduled.length == 0 && ($('#dsn_prefix').val() == 'sqlite' || $('#dsn_prefix').val() == 'mysql' && ($('#dsn_host').val() == 'localhost' || $('#dsn_host').val() == '127.0.0.1'))) {
-						showScheduleError();
+						showScheduleWarning();
 					} else {
-						hideScheduleError();
+						hideScheduleWarning();
 					}
 				}
 
@@ -482,14 +482,16 @@ if (empty($api_users)) {
 					}
 				}
 
-				function showScheduleError() {
-					$('#schedule-tab-icon').removeClass('hidden');
-					$('#schedule-alert-msg').removeClass('hidden');
+				function showScheduleWarning() {
+					$('#backup-tab-link').css('color', '#8a6d3b');
+					$('#backup-tab-icon').removeClass('hidden');
+					$('#backup-alert-msg').removeClass('hidden');
 				}
 
-				function hideScheduleError() {
-					$('#schedule-tab-icon').addClass('hidden');
-					$('#schedule-alert-msg').addClass('hidden');
+				function hideScheduleWarning() {
+					$('#backup-tab-link').removeAttr('style');
+					$('#backup-tab-icon').addClass('hidden');
+					$('#backup-alert-msg').addClass('hidden');
 				}
 
 				function toggleService() {
@@ -498,7 +500,7 @@ if (empty($api_users)) {
 						$('#backup').prop('disabled', false);
 						$('[name="schedule"]').prop('disabled', false);
 						if (scheduled.length == 0) {
-							showScheduleError();
+							showScheduleWarning();
 						}
 						$('#retention').prop('disabled', false);
 						$('[name="restorepromt"]').prop('disabled', false);
@@ -506,7 +508,7 @@ if (empty($api_users)) {
 					} else {
 						$('#patch').addClass('hidden');
 						$('#backup').prop('disabled', true);
-						hideScheduleError();
+						hideScheduleWarning();
 						$('[name="schedule"]').prop('disabled', true);
 						$('[name="schedule"]').prop('checked', false);
 						scheduled = [];
@@ -632,6 +634,16 @@ if (empty($api_users)) {
 					} else {
 						$('#subscribe').prop('disabled', true);
 					}
+				}
+
+				function showSubsError() {
+					$('#subscription-tab-link').css('color', '#a94442');
+					$('#subscription-tab-icon').removeClass('hidden');
+				}
+
+				function showSubsWarning() {
+					$('#subscription-tab-link').css('color', '#8a6d3b');
+					$('#subscription-tab-icon').removeClass('hidden');
 				}
 
 				function subsRefresh(element) {
@@ -772,8 +784,27 @@ if (empty($api_users)) {
 			<script type="text/javascript">
 				$(document).ready(function() {
 					if (scheduled.length == 0 && ($('#dsn_prefix').val() == 'sqlite' || $('#dsn_prefix').val() == 'mysql' && ($('#dsn_host').val() == 'localhost' || $('#dsn_host').val() == '127.0.0.1'))) {
-						showScheduleError();
+						showScheduleWarning();
 					}
+				});
+			</script>
+
+			<script type="text/javascript">
+				$(document).ready(function() {
+<?php if (empty($subs['url']) && empty($subs['token'])) { ?>
+					$('#subs-info').removeClass('hidden');
+<?php } elseif (!isset($subs_resp['expires'])) { ?>
+					showSubsError();
+					$('#subs-invalid').removeClass('hidden');
+<?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60)) { ?>
+					$('#subs-active').removeClass('hidden');
+<?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp']) { ?>
+					showSubsWarning();
+					$('#subs-expiring').removeClass('hidden');
+<?php } else { ?>
+					showSubsError();
+					$('#subs-expired').removeClass('hidden');
+<?php } ?>
 				});
 			</script>
 
@@ -989,9 +1020,9 @@ if (empty($api_users)) {
 if (!$cloud) { ?>
 						<li><a class="tab-font" href="#database-tab" role="tab" data-toggle="tab" <?php echo (empty($pdo_error) ? "" : "style=\"color: #a94442;\"") ?>><span id="database-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (empty($pdo_error) ? "hidden" : "") ?>"></span> Database</a></li>
 <?php } ?>
-						<li class="active"><a class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="schedule-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Backup</a></li>
+						<li class="active"><a id="backup-tab-link" class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="backup-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Backup</a></li>
 						<li><a class="tab-font" href="#restore-tab" role="tab" data-toggle="tab">Restore</a></li>
-						<li><a class="tab-font" href="#subscription-tab" role="tab" data-toggle="tab"><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "hidden" : "")) : "hidden"); ?>"></span> Subscription</a></li>
+						<li><a id="subscription-tab-link" class="tab-font" href="#subscription-tab" <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "style=\"color: #8a6d3b;\"" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "" : "style=\"color: #8a6d3b;\"")) : ""); ?>z role="tab" data-toggle="tab"><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "hidden" : "")) : "hidden"); ?>"></span> Subscription</a></li>
 					</ul>
 				</div>
 			</nav>
@@ -1308,7 +1339,7 @@ if (!$cloud) { ?>
 					<div class="tab-pane active fade in" id="backup-tab">
 
 						<div style="padding: 16px 20px 12px;">
-							<div id="schedule-alert-msg" style="margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
+							<div id="backup-alert-msg" style="margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>No backups scheduled.</div>
 								</div>
@@ -1590,39 +1621,36 @@ if (!$cloud) { ?>
 					<div class="tab-pane fade in" id="subscription-tab">
 
 						<div style="padding: 16px 20px 16px;">
-<?php if (empty($subs['url']) && empty($subs['token'])) { ?>
-							<div style="margin-bottom: 16px;" class="panel panel-primary">
+							<div id="subs-info" style="margin-bottom: 16px;" class="panel panel-primary hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-info glyphicon glyphicon-info-sign" style="padding-right: 12px;"></span>Register for a <a target="_blank" href="https://kinobi.io/kinobi/">Kinobi subscription</a> to provide patch definitions.</div>
 								</div>
 							</div>
-<?php } elseif (!isset($subs_resp['expires'])) { ?>
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
+
+							<div id="subs-invalid" style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>Invalid token. Please ensure the Server URL and Token values are entered exactly as they were provided.</div>
 								</div>
 							</div>
-<?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60)) { ?>
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
+
+							<div id="subs-active" style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expires: <?php echo date('M j, Y', $subs_resp['expires']); ?>.</div>
 								</div>
 							</div>
-<?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp']) { ?>
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning">
+
+							<div id="subs-expiring" style="margin-top: 0px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expires: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
 								</div>
 							</div>
-<?php } else { ?>
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
+
+							<div id="subs-expired" style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger hidden">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expired: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
 								</div>
 							</div>
-<?php }
-if (!$cloud) { ?>
-
+<?php if (!$cloud) { ?>
 							<h5 id="subs_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
 							<div class="form-group has-feedback" style="max-width: 449px;">
 								<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['url']; ?>" <?php echo (empty($pdo_error) ? "" : "disabled") ?>/>
