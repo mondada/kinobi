@@ -1374,7 +1374,7 @@ if (!empty($patch_id)) {
 							<div class="text-muted" style="font-size: 12px;">Specifies processes that will be stopped before a patch policy runs.</div>
 						</div>
 
-						<table id="kill_apps" class="table table-hover">
+						<table id="kill_apps" class="table table-hover" style="border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
 									<th>Application Name</th>

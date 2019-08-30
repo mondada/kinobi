@@ -772,7 +772,7 @@ if (!empty($title_id)) {
 							<div class="text-muted" style="font-size: 12px;">Extension attributes that are required by Jamf Pro to use this software title. Terms must be accepted in Jamf Pro.<br><strong>Note:</strong> Extension Attributes should only be used when the version information is not available from inventory data.</div>
 						</div>
 
-						<table id="ext_attrs" class="table table-hover">
+						<table id="ext_attrs" class="table table-hover" style="border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -1154,7 +1154,7 @@ switch($requirement['name']) {
 							<div class="text-muted" style="font-size: 12px;">Software title version information; one patch is one software title version.<br><strong>Note:</strong> Must be listed in descending order with the newest version at the top of the list.</div>
 						</div>
 
-						<table id="patches" class="table table-hover">
+						<table id="patches" class="table table-hover" style="border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
 									<th>Enable</th>

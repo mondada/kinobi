@@ -1054,7 +1054,7 @@ if (!$cloud) { ?>
 							<h5><strong>Users</strong> <small>Kinobi user accounts and privileges.</small></h5>
 						</div>
 
-						<table id="users" class="table table-hover">
+						<table id="users" class="table table-hover" style="border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
 									<th>Username</th>
@@ -1122,8 +1122,6 @@ if (!$cloud) { ?>
 						</table>
 
 						<input type="hidden" name="create_token" id="create_token">
-
-						<hr>
 
 						<!-- Add User Modal -->
 						<div class="modal fade" id="create_user-modal" tabindex="-1" role="dialog">
@@ -1481,7 +1479,7 @@ if (!$cloud) { ?>
 							
 						</div>
 
-						<table id="backups" class="table table-hover">
+						<table id="backups" class="table table-hover" style="border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
 									<th>Filename</th>

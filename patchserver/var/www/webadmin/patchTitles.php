@@ -368,7 +368,7 @@ if (isset($subs_resp['upload'])) { ?>
 						</div>
 					</div>
 
-					<table id="sw_titles" class="table table-hover">
+					<table id="sw_titles" class="table table-hover" style="border-bottom: 1px solid #ddd;">
 						<thead>
 							<tr>
 								<th>Enable</th>
