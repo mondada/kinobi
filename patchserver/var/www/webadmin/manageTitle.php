@@ -362,7 +362,11 @@ if (!empty($title_id)) {
 					padding-top: 6px;
 					padding-left: 26px;
 					padding-right: 20px;
-					background: #fff;
+					background-color: rgba(255, 255, 255, 0);
+					background-image: -webkit-gradient(linear, 0% 0%, 0% 100%,color-stop(0, rgba(255, 255, 255, 0)),color-stop(0.3, rgb(255, 255, 255)),color-stop(1, rgb(255, 255, 255)));
+					background-image: -webkit-repeating-linear-gradient(top,rgba(255, 255, 255, 0) 0%,rgb(255, 255, 255) 30%,rgb(255, 255, 255) 100%);
+					background-image: repeating-linear-gradient(to bottom,rgba(255, 255, 255, 0) 0%,rgb(255, 255, 255) 30%,rgb(255, 255, 255) 100%);
+					background-image: -ms-repeating-linear-gradient(top,rgba(255, 255, 255, 0) 0%,rgb(255, 255, 255) 30%,rgb(255, 255, 255) 100%);
 					-webkit-transition: all 0.5s ease;
 					-moz-transition: all 0.5s ease;
 					-o-transition: all 0.5s ease;

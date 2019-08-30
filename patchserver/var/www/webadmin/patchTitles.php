@@ -167,22 +167,27 @@ if ($pdo) {
 					padding-top: 6px;
 					padding-left: 26px;
 					padding-right: 20px;
+					background-color: rgba(249, 249, 249, 0);
+					background-image: -webkit-gradient(linear, 0% 0%, 0% 100%,color-stop(0, rgba(249, 249, 249, 0)),color-stop(0.3, rgb(249, 249, 249)),color-stop(1, rgb(249, 249, 249)));
+					background-image: -webkit-repeating-linear-gradient(top,rgba(249, 249, 249, 0) 0%,rgb(249, 249, 249) 30%,rgb(249, 249, 249) 100%);
+					background-image: repeating-linear-gradient(to bottom,rgba(249, 249, 249, 0) 0%,rgb(249, 249, 249) 30%,rgb(249, 249, 249) 100%);
+					background-image: -ms-repeating-linear-gradient(top,rgba(249, 249, 249, 0) 0%,rgb(249, 249, 249) 30%,rgb(249, 249, 249) 100%);
 					-webkit-transition: all 0.5s ease;
 					-moz-transition: all 0.5s ease;
 					-o-transition: all 0.5s ease;
 					transition: all 0.5s ease;
 					z-index: 90;
 				}
-				@media(min-width:768px) {
 <?php if ($netsus) { ?>
+				@media(min-width:768px) {
 					#nav-title {
 						left: 220px;
 					}
 					.navbar-fixed-bottom {
 						left: 220px;
 					}
-<?php } ?>
 				}
+<?php } ?>
 			</style>
 
 			<script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
