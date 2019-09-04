@@ -42,8 +42,8 @@ $pageURI = $parts[count($parts) - 1];
 	<!-- Fixed Top Navbar -->
 	<nav class="navbar navbar-inverse navbar-fixed-top">
 		<div class="container-fluid">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#collapse-menu" aria-expanded="false" aria-controls="navbar">
+			<div class="navbar-header pull-left">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".collapse.navbar-collapse" aria-expanded="false" aria-controls="navbar">
 					<span class="sr-only">Toggle navigation</span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
@@ -51,13 +51,10 @@ $pageURI = $parts[count($parts) - 1];
 				</button>
 				<a class="navbar-brand" style="padding-top: 10px;" href="#" onClick="$('#about-modal').modal('show'); showAbout();"><img src="images/kinobi-logo-rev.svg" height="30"></a>
 			</div>
-			<div id="collapse-menu" class="collapse navbar-collapse">
-				<ul class="nav navbar-nav">
-					<li class="<?php echo ($pageURI == "patchTitles.php" ? "active" : ""); ?>"><a href="patchTitles.php">Patch Definitions</a></li>
-					<li class="<?php echo ($pageURI == "patchSettings.php" ? "active" : ""); ?>"><a href="patchSettings.php">Settings</a></li>
-				</ul>
-				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
+        
+			<div class="navbar-header pull-right">
+				<ul class="nav navbar-right">
+					<li class="dropdown pull-right">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : ""); ?> <span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<li><a href="#" onClick="$('#change_pass-modal').modal('show');">Change Password</a></li>
@@ -65,6 +62,13 @@ $pageURI = $parts[count($parts) - 1];
 							<li><a href="logout.php">Logout</a></li>
 						</ul>
 					</li>
+				</ul>
+			</div>
+
+			<div class="collapse navbar-collapse">
+				<ul class="nav navbar-nav">
+					<li class="<?php echo ($pageURI == "patchTitles.php" ? "active" : ""); ?>"><a href="patchTitles.php">Patch Definitions</a></li>
+					<li class="<?php echo ($pageURI == "patchSettings.php" ? "active" : ""); ?>"><a href="patchSettings.php">Settings</a></li>
 				</ul>
 			</div><!--/.nav-collapse -->
 		</div>

@@ -1,7 +1,6 @@
 /*----------------------------------------------
 Miscellaneous
 ------------------------------------------------*/
-
 body {
     overflow-x: hidden;
     font-family: 'Roboto', sans-serif;
@@ -12,9 +11,38 @@ h2 {
 }
 
 /*----------------------------------------------
+Fixed Top Navbar
+------------------------------------------------*/
+.navbar-toggle {
+	float: left;
+	margin-left: 10px;
+	margin-right: 0px;
+}
+.navbar-header.pull-right .dropdown > a {
+	padding-top: 15px;
+	padding-bottom: 15px;
+	line-height: 20px;
+	background-color: transparent;
+}
+.navbar-inverse .navbar-header.pull-right .dropdown > a {
+	color: #9d9d9d;
+}
+.navbar-inverse .navbar-header.pull-right .dropdown > a:hover,
+.navbar-inverse .navbar-header.pull-right .dropdown > a:focus {
+	color: #fff;
+}
+.navbar-inverse .navbar-header.pull-right .dropdown > a:focus {
+	background-color: #080808;
+}
+.navbar-header.pull-right .dropdown > ul {
+	margin-top: 0px;
+	border-top-right-radius: 0;
+	border-top-left-radius: 0;
+}
+
+/*----------------------------------------------
 Page Content Wrapper
 ------------------------------------------------*/
-
 #page-content-wrapper {
     position: absolute;
     padding: 20px 0px;
@@ -41,7 +69,6 @@ Page Title Navigation
 /*----------------------------------------------
 Text Styles
 ------------------------------------------------*/
-
 .description {
     font-size: 12px;
     padding: 1px 0 2px 0;
