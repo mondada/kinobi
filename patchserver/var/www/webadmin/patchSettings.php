@@ -835,7 +835,7 @@ if (empty($api_users)) {
 					$('#users').DataTable( {
 						buttons: [
 							{
-								text: '<span class="glyphicon glyphicon-plus"></span> Add',
+								text: '<span class="glyphicon glyphicon-plus"></span> New',
 								className: 'btn-primary btn-sm btn-table',
 <?php if (!empty($pdo_error)) { ?>
 								enabled: false,
@@ -1128,7 +1128,7 @@ if (!$cloud) { ?>
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h3 class="modal-title">Add User</h3>
+										<h3 class="modal-title">New User</h3>
 									</div>
 									<div class="modal-body">
 										<h5 id="add_user_label"><strong>User Name</strong> <small>Username for the account.</small></h5>
