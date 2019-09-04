@@ -25,7 +25,6 @@ $title = "Patch";
 include "inc/header.php";
 include "inc/patch/database.php";
 
-$patches_select = array();
 $error_msg = "";
 
 // Standalone
@@ -405,6 +404,7 @@ if (!empty($patch_id)) {
 					$('#components-tab-link').css('color', '#a94442');
 					$('#components-tab-icon').removeClass('hidden');
 					if (componentsError == 1) { $('#components-alert-msg').removeClass('hidden'); };
+					if (criteriaError == 1) { $('#criteria-alert-msg').removeClass('hidden'); };
 				}
 				function showCapabilitiesError() {
 					$('#capabilities-tab-link').css('color', '#a94442');
@@ -528,6 +528,7 @@ if (!empty($patch_id)) {
 						"searching": false
 					});
 
+/*
 					$('#dependencies').DataTable( {
 						"dom": '<"row"<"col-xs-12 table-responsive"t>>',
 						"info": false,
@@ -536,6 +537,7 @@ if (!empty($patch_id)) {
 						"paging": false,
 						"searching": false
 					});
+*/
 
 					$('#capabilities').DataTable( {
 						"dom": '<"row"<"col-xs-12 table-responsive"t>>',
@@ -581,11 +583,11 @@ if (!empty($patch_id)) {
 					
 					$('#criteria_wrapper').css({"background-color": "#f9f9f9", "border-bottom": "1px solid #ddd"});
 
-<?php if ($sw_title['source_id'] > 0) { ?>
+<?php if ($source_id > 0) { ?>
 					$('#components').DataTable().buttons().disable();
 					$('#kill_apps').DataTable().buttons().disable();
-<?php } ?>
-<?php if (sizeof($components) > 0) { ?>
+<?php }
+if (sizeof($components) > 0) { ?>
 					$('#components').DataTable().buttons().disable();
 <?php } ?>
 				});
@@ -706,7 +708,7 @@ if (!empty($patch_id)) {
 							<div class="text-muted" style="font-size: 12px;">Defines the elements that comprise this patch version.<br><strong>Note:</strong> Only one element is supported by Jamf Pro at this time.</div>
 						</div>
 
-						<table id="components" class="table table-hover">
+						<table id="components" class="table table-hover" <?php echo (sizeof($components) == 0 ? "style=\"border-bottom: 1px solid #ddd;\"" : ""); ?>>
 							<thead>
 								<tr>
 									<th>Name</th>
@@ -733,13 +735,12 @@ if (!empty($patch_id)) {
 						</table>
 
 						<div style="padding: 16px 20px 4px; background-color: #f9f9f9; border-top: 1px solid #ddd;">
-<?php if (sizeof($component['criteria']) == 0) { ?>
-							<div class="panel panel-danger" style="margin-bottom: 16px; border-color: #d43f3a;">
+							<div id="criteria-alert-msg" class="panel panel-danger hidden" style="margin-bottom: 16px; border-color: #d43f3a;">
 								<div class="panel-body">
 									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>At least one criteria is required for the component to be valid.</div>
 								</div>
 							</div>
-<?php } ?>
+
 							<h5><strong>Criteria</strong> <small>Criteria used to determine which computers in your environment have this patch version installed.<br>The following values are the same as a row in a smart computer group or advanced search.<br><strong>Note:</strong> Criteria must be ordered in the same way that smart group criteria is ordered.</small></h5>
 						</div>
 
