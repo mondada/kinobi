@@ -669,6 +669,9 @@ if (!empty($title_id)) {
 					$('#ext_attrs').DataTable().buttons().disable();
 					$('#patches').DataTable().buttons().disable();
 <?php } ?>
+<?php if (sizeof($ext_attrs) > 0) { ?>
+					$('#ext_attrs').DataTable().buttons().disable();
+<?php } ?>
 				});
 			</script>
 <?php } ?>
