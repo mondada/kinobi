@@ -290,8 +290,13 @@ $( document ).ready(function() {
 		"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
 		"order": [ 1, "asc" ],
 		"pageLength": 10,
-		"stateSave": false
+		"stateSave": true
 	});
+
+	if (state_clear) {
+		users.state.clear();
+		window.location.reload();
+	}
 
 	$( ":input[type=search][aria-controls=users]" ).addClear({
 		"symbolClass": "glyphicon glyphicon-remove",
@@ -680,7 +685,7 @@ $( document ).ready(function() {
 		"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
 		"order": [ 2, 'desc' ],
 		"pageLength": 10,
-		"stateSave": false
+		"stateSave": true
 	});
 
 	$( ":input[type=search][aria-controls=backups]" ).addClear({

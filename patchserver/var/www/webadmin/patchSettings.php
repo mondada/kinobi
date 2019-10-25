@@ -28,6 +28,7 @@ $backup_success = null;
 $restore_error = null;
 $restore_success = null;
 $pdo_error = null;
+$state_clear = false;
 
 $netsus = (isset($conf) ? (strpos(file_get_contents("inc/header.php"), "NetSUS 4") !== false ? 4 : 5) : 0);
 
@@ -267,6 +268,7 @@ if (isset($_POST['subscribe'])) {
 	if ($subs['url'] != $_POST['subs_url'] || $subs['token'] != $_POST['subs_token']) {
 		if ($subs_success) {
 			$kinobi->setSetting("eula_accepted", false);
+			$state_clear = true;
 		}
 	}
 	$subs['url'] = (empty($_POST['subs_url']) ? null : $_POST['subs_url']);
@@ -547,6 +549,7 @@ if (empty($api_users)) {
 					var subs_resp_json = <?php echo json_encode($subs_resp); ?>;
 					var subs_type = "<?php echo $subs_type; ?>";
 					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
+					var state_clear = <?php echo json_encode($state_clear); ?>;
 					var api_json = <?php echo json_encode($api); ?>;
 				</script>
 
