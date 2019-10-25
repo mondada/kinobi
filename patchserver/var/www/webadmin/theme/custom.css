@@ -9,6 +9,14 @@ h2 {
     margin-top: 0;
     color: #263238;
 }
+hr {
+	/* Deprecated */
+    margin: 0;
+}
+.tab-font {
+	/* Deprecated */
+    font-size: 12px;
+}
 
 /*----------------------------------------------
 Fixed Top Navbar
@@ -45,29 +53,17 @@ Page Content Wrapper
 ------------------------------------------------*/
 #page-content-wrapper {
     position: absolute;
-    padding: 20px 0px;
+    padding: 20px 0px 50px;
     margin-top: 50px;
     width: 100%;
-    padding-bottom: 50px;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
 /*----------------------------------------------
-Page Title Navigation
-------------------------------------------------*/
-#nav-title {
-	top: 51px;
-	height: 83px;
-	border-bottom: 1px solid #eee;
-	background: #fff;
-	-webkit-transition: all 0.5s ease;
-	-moz-transition: all 0.5s ease;
-	-o-transition: all 0.5s ease;
-	transition: all 0.5s ease;
-	z-index: 90;
-}
-
-/*----------------------------------------------
-Text Styles
+Text Styles (Deprecated)
 ------------------------------------------------*/
 .description {
     font-size: 12px;
@@ -76,14 +72,3 @@ Text Styles
     display: block;
     text-decoration: none;
 }
-hr {
-    margin: 0;
-}
-
-/*----------------------------------------------
-Buttons/Input
-------------------------------------------------*/
-.tab-font {
-    font-size: 12px;
-}
-

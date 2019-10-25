@@ -132,7 +132,7 @@ class Mysqldump
             'where' => '', /* Dump only rows selected by given WHERE condition */
             /* custom settings */
             'sqlite-dump' => false, // Create a sqlite .dump file
-            'mysql-engine' => "InnoDB", // 
+            'mysql-engine' => "InnoDB", //
             /* deprecated */
             'disable-foreign-keys-check' => true
         );
@@ -750,7 +750,7 @@ class Mysqldump
                         $this->typeAdapter->drop_table($tableName)
                     );
                 }
-                
+
                 $this->compressManager->write(
                     $this->typeAdapter->create_table($r)
                 );

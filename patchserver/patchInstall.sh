@@ -133,7 +133,18 @@ sed -i 's/^allow_url_include =.*/allow_url_include = On/' $php_ini
 mkdir -p $installdir/html/webadmin/fonts
 mkdir -p $installdir/html/webadmin/images
 mkdir -p $installdir/html/webadmin/inc/patch
-mkdir -p $installdir/html/webadmin/scripts
+mkdir -p $installdir/html/webadmin/scripts/ace
+mkdir -p $installdir/html/webadmin/scripts/bootstrap
+mkdir -p $installdir/html/webadmin/scripts/bootstrap-add-clear
+mkdir -p $installdir/html/webadmin/scripts/bootstrap-select
+mkdir -p $installdir/html/webadmin/scripts/bootstrap-session-timeout
+mkdir -p $installdir/html/webadmin/scripts/Buttons
+mkdir -p $installdir/html/webadmin/scripts/dataTables
+mkdir -p $installdir/html/webadmin/scripts/datetimepicker
+mkdir -p $installdir/html/webadmin/scripts/jquery
+mkdir -p $installdir/html/webadmin/scripts/kinobi
+mkdir -p $installdir/html/webadmin/scripts/moment
+mkdir -p $installdir/html/webadmin/scripts/toggle
 mkdir -p $installdir/html/webadmin/theme
 cp -R ./resources/html/index.php $installdir/html/ >> $logFile
 cp -R ./resources/html/v1.php $installdir/html/ >> $logFile
@@ -142,20 +153,45 @@ cp -R ./resources/html/webadmin/images/* $installdir/html/webadmin/images/ >> $l
 cp -R ./resources/html/webadmin/inc/auth.php $installdir/html/webadmin/inc/ >> $logFile
 cp -R ./resources/html/webadmin/inc/patch/* $installdir/html/webadmin/inc/patch/ >> $logFile
 cp -R ./resources/html/webadmin/logout.php $installdir/html/webadmin/ >> $logFile
+cp -R ./resources/html/webadmin/manageComponent.php $installdir/html/webadmin/ >> $logFile
 cp -R ./resources/html/webadmin/managePatch.php $installdir/html/webadmin/ >> $logFile
 cp -R ./resources/html/webadmin/manageTitle.php $installdir/html/webadmin/ >> $logFile
 cp -R ./resources/html/webadmin/patchCtl.php $installdir/html/webadmin/ >> $logFile
+cp -R ./resources/html/webadmin/patchDatabase.php $installdir/html/webadmin/ >> $logFile
 cp -R ./resources/html/webadmin/patchSettings.php $installdir/html/webadmin/ >> $logFile
+cp -R ./resources/html/webadmin/patchSetup.php $installdir/html/webadmin/ >> $logFile
 cp -R ./resources/html/webadmin/patchTitles.php $installdir/html/webadmin/ >> $logFile
 cp -R ./resources/html/webadmin/scripts/* $installdir/html/webadmin/scripts/ >> $logFile
-cp -R ./resources/html/webadmin/theme/* $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/ace/* $installdir/html/webadmin/scripts/ace/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/bootstrap/* $installdir/html/webadmin/scripts/bootstrap/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/bootstrap-add-clear/* $installdir/html/webadmin/scripts/bootstrap-add-clear/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/bootstrap-select/* $installdir/html/webadmin/scripts/bootstrap-select/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/bootstrap-session-timeout/* $installdir/html/webadmin/scripts/bootstrap-session-timeout/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/Buttons/* $installdir/html/webadmin/scripts/Buttons/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/datetimepicker/* $installdir/html/webadmin/scripts/datetimepicker/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/jquery/* $installdir/html/webadmin/scripts/jquery/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/kinobi/* $installdir/html/webadmin/scripts/kinobi/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/moment/* $installdir/html/webadmin/scripts/moment/ >> $logFile
+cp -R ./resources/html/webadmin/scripts/toggle/* $installdir/html/webadmin/scripts/toggle/ >> $logFile
+cp -R ./resources/html/webadmin/theme/awesome-bootstrap-checkbox.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/bootstrap-datetimepicker.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/bootstrap-select.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/bootstrap-select.css.map $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/bootstrap-toggle.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/bootstrap.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/bootstrap.css.map $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/buttons.bootstrap.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/kinobi.css $installdir/html/webadmin/theme/ >> $logFile
+cp -R ./resources/html/webadmin/theme/roboto.font.css $installdir/html/webadmin/theme/ >> $logFile
 
 # Remove Obsolete Files
 rm -f $installdir/html/webadmin/inc/dbConnect.php >> $logFile
 rm -f $installdir/html/webadmin/scripts/patchHelper.sh >> $logFile
+rm -f $installdir/html/webadmin/scripts/patchValidation.js >> $logFile
 
-# Install or update Includes
+# Install or Update conflicting files
 if [[ -e $installdir/html/webadmin/inc/config.php ]]; then
+	# Update Includes
 	sed -i '/patchTitles.php/d' $installdir/html/webadmin/inc/header.php
 	if [[ -f "$installdir/html/webadmin/fonts/netsus-icons.ttf" ]]; then
 		sed -i '/$pageURI == "sharing.php"/i\
@@ -165,14 +201,23 @@ if [[ -e $installdir/html/webadmin/inc/config.php ]]; then
 			<li class="<?php if ($pageURI == "patchTitles.php") { echo "active"; } ?>"><a href="patchTitles.php"><span class="glyphicon glyphicon-refresh marg-right"></span>Patch Definitions</a></li>' $installdir/html/webadmin/inc/header.php
 	fi
 else
+	# Install Includes
 	cp -R ./resources/html/webadmin/inc/footer.php $installdir/html/webadmin/inc/ >> $logFile
 	cp -R ./resources/html/webadmin/inc/header.php $installdir/html/webadmin/inc/ >> $logFile
-fi
-
-# Login Page
-if ! grep -q "NetSUS" $installdir/html/webadmin/index.php 2>/dev/null; then
+	# Install Login Page
 	cp -R ./resources/html/favicon.ico $installdir/html/ >> $logFile
 	cp -R ./resources/html/webadmin/index.php $installdir/html/webadmin/ >> $logFile
+	# Install Datatables
+	cp -R ./resources/html/webadmin/scripts/dataTables/* $installdir/html/webadmin/scripts/dataTables/ >> $logFile
+	cp -R ./resources/html/webadmin/theme/dataTables.bootstrap.css $installdir/html/webadmin/theme/ >> $logFile
+	# Install custom.css
+	cp -R ./resources/html/webadmin/theme/custom.css $installdir/html/webadmin/theme/ >> $logFile
+	# Remove Obsolete Files
+	rm -f $installdir/html/webadmin/images/progress.gif >> $logFile
+fi
+# Install Datatables css
+if [[ ! -e $installdir/html/webadmin/theme/dataTables.bootstrap.css ]]; then
+	cp -R ./resources/html/webadmin/theme/dataTables.bootstrap.css $installdir/html/webadmin/theme/ >> $logFile
 fi
 
 # Insert patch source in dashboard.php

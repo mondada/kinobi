@@ -7,22 +7,32 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.3
  *
  */
 
 session_start();
 
-if (!($_SESSION['isAuthUser'])) {
+include "inc/patch/functions.php";
 
-	echo "Not authorized - please log in";
+if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
+
+	if (!empty($_POST['setup_token']) && $_POST['setup_token'] == $kinobi->getSetting("setup_token")) {
+		$subs_resp = fetchJsonArray($_POST['subs_url'], $_POST['subs_token']);
+		if (isset($subs_resp['expires'])) {
+			echo "true";
+		} else {
+			echo "false";
+		}
+	} else {
+		echo "Unauthorized";
+	}
 
 } else {
 
 	if (file_exists("inc/config.php")) {
 		include "inc/config.php";
 	}
-	include "inc/patch/functions.php";
 	include "inc/patch/database.php";
 
 	if (isset($_POST['service']) && isset($conf)) {
@@ -38,6 +48,15 @@ if (!($_SESSION['isAuthUser'])) {
 			$conf->setSetting("showpatch", "true");
 		} else {
 			$conf->setSetting("showpatch", "false");
+		}
+	}
+
+	// Change Password
+	if ($pdo && isset($_SESSION['username']) && isset($_POST['current_passwd']) && isset($_POST['new_passwd'])) {
+		$current = $pdo->query('SELECT password FROM users WHERE username = "' . $_SESSION['username'] . '"')->fetch(PDO::FETCH_COLUMN);
+		if (hash("sha256", $_POST['current_passwd']) == $current) {
+			setSettingUser($pdo, $_SESSION['username'], "password", hash("sha256", $_POST['new_passwd']));
+			echo "true";
 		}
 	}
 
@@ -87,26 +106,13 @@ if (!($_SESSION['isAuthUser'])) {
 		$kinobi->setSetting("backup", $backup);
 	}
 
-	// Web Admin Access
-	if (isset($_POST['allow_web'])) {
-		setSettingUser($pdo, $_POST['allow_web'], "web", true);
-	}
-
-	if (isset($_POST['deny_web'])) {
-		setSettingUser($pdo, $_POST['deny_web'], "web", null);
-	}
-
-	// API Read/Write Access
-	if (isset($_POST['allow_api'])) {
-		setSettingUser($pdo, $_POST['allow_api'], "api", "0");
-	}
-
-	if (isset($_POST['allow_api_rw'])) {
-		setSettingUser($pdo, $_POST['allow_api_rw'], "api", "1");
-	}
-
-	if (isset($_POST['deny_api'])) {
-		setSettingUser($pdo, $_POST['deny_api'], "api", null);
+	// Enable / Disable User
+	if (isset($_POST['disable_user'])) {
+		if ($_POST['user_access'] == true) {
+			setSettingUser($pdo, $_POST['disable_user'], "disabled", null);
+		} else {
+			setSettingUser($pdo, $_POST['disable_user'], "disabled", 1);
+		}
 	}
 
 	// Require API Authentication
@@ -137,6 +143,15 @@ if (!($_SESSION['isAuthUser'])) {
 		setSettingSubscription($pdo, $subs);
 	}
 
+	// License Agreement
+	if (isset($_POST['eula_accepted'])) {
+		if ($_POST['eula_accepted'] == "true") {
+			$kinobi->setSetting("eula_accepted", true);
+		} else {
+			$kinobi->setSetting("eula_accepted", false);
+		}
+	}
+
 	// Enable / Disable Software Title
 	if ($pdo && isset($_GET['title_id']) && isset($_POST['title_enabled'])) {
 		$title_enabled = ($_POST['title_enabled'] === "true") ? "1" : "0";
@@ -151,6 +166,9 @@ if (!($_SESSION['isAuthUser'])) {
 		if ("" !== $_POST['current']) {
 			$stmt = $pdo->prepare('INSERT INTO overrides (name_id, current) VALUES (?, ?)');
 			$stmt->execute(array($_GET['override'], $_POST['current']));
+			if ($stmt->errorCode() == '00000') {
+				echo "true";
+			}
 		}
 	}
 
@@ -172,6 +190,9 @@ if (!($_SESSION['isAuthUser'])) {
 	if ($pdo && isset($_GET['table']) && isset($_GET['field']) && isset($_POST['value']) && isset($_GET['id'])) {
 		$stmt = $pdo->prepare('UPDATE '.$_GET['table'].' SET '.$_GET['field'].' = ? WHERE id = ?');
 		$stmt->execute(array($_POST['value'], $_GET['id']));
+		if ($stmt->errorCode() == '00000') {
+			echo "true";
+		}
 	}
 
 	// Update Patch Released
@@ -179,8 +200,10 @@ if (!($_SESSION['isAuthUser'])) {
 		$patch_released = date("U",strtotime($_POST['patch_released']));
 		$stmt = $pdo->prepare('UPDATE patches SET released = ? WHERE id = ?');
 		$stmt->execute(array($patch_released, $_GET['patch_id']));
+		if ($stmt->errorCode() == '00000') {
+			echo "true";
+		}
 	}
-
 }
 
 ?>

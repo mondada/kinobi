@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2.1
+ * @version     1.3
  *
  */
 
@@ -19,36 +19,20 @@ if (file_exists("inc/functions.php")) {
 	include "inc/functions.php";
 }
 include "inc/patch/functions.php";
+include "inc/header.php";
+
+$pdo_connection_status = null;
+$subs_resp = array();
+$backup_error = null;
+$backup_success = null;
+$restore_error = null;
+$restore_success = null;
+$pdo_error = null;
 
 $netsus = (isset($conf) ? (strpos(file_get_contents("inc/header.php"), "NetSUS 4") !== false ? 4 : 5) : 0);
 
-$title = ($netsus > 0 ? "Patch Definitions" : "");
-
-include "inc/header.php";
-
-$backup_error = "";
-$backup_success = "";
-$delete_error = "";
-$delete_success = "";
-$upload_error = "";
-$upload_success = "";
-$restore_error = "";
-$restore_success = "";
-$api_error = "";
-$api_success = "";
-
-function formatSize($size, $precision = 1) {
-	$base = log($size, 1024);
-	$suffixes = array('B', 'kB', 'MB', 'GB', 'TB');
-	if ($size == 0) {
-		return "0 B";
-	} else {
-		return round(pow(1024, $base - floor($base)), $precision) .' '. $suffixes[floor($base)];
-	}
-}
-
 // Service & Dashboard
-$service = (isset($conf) ? $conf->getSetting("patch") == "enabled" : true);
+$service = (isset($conf) && $netsus > 4 ? $conf->getSetting("patch") == "enabled" : true);
 $dashboard = (isset($conf) ? $conf->getSetting("showpatch") != "false" : true);
 
 // Cloud Configuration
@@ -64,22 +48,34 @@ if (!empty($retention)) {
 }
 
 // Configure Database Connection
-if (isset($_POST['dbconnect'])) {
+if (isset($_POST['dsn_save'])) {
 	if ($_POST['dsn_prefix'] == "sqlite") {
-		$dbpath = dirname($_POST['dsn_dbpath']);
-		if (!is_dir($dbpath) && !@mkdir($dbpath, 0755, true)) {
+		$dsn_parent_dir = dirname($_POST['dsn_dbpath']);
+		if (!is_dir($dsn_parent_dir) && !@mkdir($dsn_parent_dir, 0755, true)) {
 			$e = error_get_last();
-			$pdo_error = str_replace("mkdir()", $dbpath, $e['message']);
-		} elseif (!is_writable($dbpath)) {
-			$pdo_error = $_POST['dsn_dbpath'].": Permission denied";
-		} elseif (is_file($_POST['dsn_dbpath'])) {
-			if (!is_readable($_POST['dsn_dbpath']) || is_dir($_POST['dsn_dbpath'])) {
-				$pdo_error = "SQLSTATE[HY000] [14] unable to open database file";
-			} elseif (!is_writable($_POST['dsn_dbpath'])) {
-				$pdo_error = "SQLSTATE[HY000]: General error: 8 attempt to write a readonly database";
-			}
+			$pdo_error = str_replace("mkdir()", $dsn_parent_dir, $e['message']);
+		} elseif (!is_writable($dsn_parent_dir)) {
+			$pdo_error = $_POST['dsn_dbpath'] . ": Permission denied";
+		} elseif (!is_readable($_POST['dsn_dbpath']) || is_dir($_POST['dsn_dbpath'])) {
+			$pdo_error = "SQLSTATE[HY000] [14] unable to open database file";
+		} elseif (!is_writable($_POST['dsn_dbpath'])) {
+			$pdo_error = "SQLSTATE[HY000]: General error: 8 attempt to write a readonly database";
 		}
 	}
+
+	if ($_POST['dsn_prefix'] == "mysql") {
+		$dsn = $_POST['dsn_prefix'] . ":host=" . $_POST['dsn_host'] . ";port=" . $_POST['dsn_port'] . ";dbname=" . $_POST['dsn_dbname'];
+		$username = $_POST['dsn_dbuser'];
+		$passwd = $_POST['dsn_dbpass'];
+
+		try {
+			$pdo = new PDO($dsn, $username, $passwd);
+			$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		} catch (PDOException $e) {
+			$pdo_error = $e->getMessage();
+		}
+	}
+
 	if (empty($pdo_error)) {
 		$kinobi->setSetting(
 			"pdo",
@@ -91,17 +87,36 @@ if (isset($_POST['dbconnect'])) {
 					"port" => $_POST['dsn_port'],
 					"dbname" => $_POST['dsn_dbname']
 				),
-				"username" => $_POST['dbuser'],
-				"passwd" => openssl_encrypt($_POST['dbpass'], "AES-128-CTR", $kinobi->getSetting("uuid"), 0, substr(md5($_POST['dbuser']), 0, 16))
+				"username" => $_POST['dsn_dbuser'],
+				"passwd" => openssl_encrypt($_POST['dsn_dbpass'], "AES-128-CTR", $kinobi->getSetting("uuid"), 0, substr(md5($_POST['dsn_dbuser']), 0, 16))
 			)
 		);
+	} else {
+		$db = array(
+			"dsn" => array(
+				"prefix" => $_POST['dsn_prefix'],
+				"dbpath" => $_POST['dsn_dbpath'],
+				"host" => $_POST['dsn_host'],
+				"port" => $_POST['dsn_port'],
+				"dbname" => $_POST['dsn_dbname']
+			),
+			"username" => $_POST['dsn_dbuser']
+		);
+
+		$pdo = false;
 	}
 }
 
-$db = $kinobi->getSetting("pdo");
-
-if (!isset($pdo_error)) {
+if (!isset($db)) {
 	include "inc/patch/database.php";
+	unset($db['passwd']);
+}
+
+if (empty($pdo_error)) {
+	$pdo_connection_status = "Connected to: " . ($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS));
+	if (isset($_POST['dsn_save']) && $netsus == 0) {
+		$pdo_connection_status .= '. <a href="logout.php">Log Out</a> for changes to take effect.';
+	}
 }
 
 // Save Backup Path
@@ -166,30 +181,31 @@ if (isset($_POST['backup'])) {
 		}
 	}
 	$dump->start($backup['path']."/".$dbname."-".$timestamp.".sql.gz");
+	$backup_success = "Backup Completed Successfully.";
 }
 
 // Delete backup
-if (isset($_POST['delete_backup'])) {
-	if (unlink($backup['path']."/".$_POST['delete_backup'])) {
-		$delete_success = "File deleted successfully.";
+if (isset($_POST['del_backup'])) {
+	if (unlink($backup['path']."/".$_POST['del_backup'])) {
+		$restore_success = "Backup deleted successfully.";
 	} else {
-		$delete_error = "Falied to delete file.";
+		$restore_error = "Falied to delete backup.";
 	}
 }
 
 // Upload backup
-if (isset($_POST['upload']) && isset($_FILES['upload_file']['name'])) {
-	if ($_FILES['upload_file']['error'] > 0) {
-		$upload_error = $_FILES['upload_file']['error'].".";
-	} elseif ($_FILES['upload_file']['type'] != "application/x-gzip") {
-		$upload_error = "Invalid file type '".$_FILES['upload_file']['type']."'.";
+if (isset($_POST['upload_backup']) && isset($_FILES['backup_file']['name'])) {
+	if ($_FILES['backup_file']['error'] > 0) {
+		$restore_error = $_FILES['backup_file']['error'].".";
+	} elseif ($_FILES['backup_file']['type'] != "application/x-gzip") {
+		$restore_error = "Invalid file type '".$_FILES['backup_file']['type']."'.";
 	} else {
 		// To Do: Add string replace to remove spaces in filename
-		$filename = basename($_FILES['upload_file']['name']);
-		if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $backup['path']."/".$filename)) {
-			$upload_success = "File uploaded successfully.";
+		$filename = basename($_FILES['backup_file']['name']);
+		if (move_uploaded_file($_FILES['backup_file']['tmp_name'], $backup['path']."/".$filename)) {
+			$restore_success = "File uploaded successfully.";
 		} else {
-			$upload_error = "Failed to move file to ".$backup['path'].".";
+			$restore_error = "Failed to move file to ".$backup['path'].".";
 		}
 	}
 }
@@ -208,7 +224,7 @@ foreach (array_values($backup_files) as $key => $value) {
 }
 
 // Restore
-if (isset($_POST['restore'])) {
+if (isset($_POST['restore_backup'])) {
 	if ($db['dsn']['prefix'] == "sqlite") {
 		$sql = "DROP TABLE IF EXISTS criteria;".PHP_EOL.
 			"DROP TABLE IF EXISTS dependencies;".PHP_EOL.
@@ -221,10 +237,11 @@ if (isset($_POST['restore'])) {
 			"DROP TABLE IF EXISTS titles;".PHP_EOL.
 			"DROP TABLE IF EXISTS users;".PHP_EOL.
 			"DROP TABLE IF EXISTS subscription;".PHP_EOL.
-			"DROP TABLE IF EXISTS api;";
+			"DROP TABLE IF EXISTS api;".PHP_EOL.
+			"DROP TABLE IF EXISTS overrides;";
 		$pdo->exec($sql);
 	}
-	$sql = gzfile($backup['path']."/".$_POST['restore']);
+	$sql = gzfile($backup['path']."/".$_POST['restore_backup']);
 	$sql = implode($sql);
 	try {
 		$pdo->exec($sql);
@@ -232,14 +249,26 @@ if (isset($_POST['restore'])) {
 		$restore_error = $e->getMessage();
 	}
 	if (empty($restore_error)) {
-		$restore_success = "Restored '".basename($_POST['restore'])."'.";
-		$restore_success .= ($netsus == 0 ? " Log out for changes to take effect." : "");
+		$restore_success = "Restored " . $_POST['restore_backup'] . ".";
+		$restore_success .= ($netsus == 0 ? ' <a href="logout.php">Log Out</a> for changes to take effect.' : '');
+		include "inc/patch/database.php";
 	}
 }
 
 // Subscription
 if (isset($_POST['subscribe'])) {
 	$subs = getSettingSubscription($pdo);
+	if (!empty($_POST['subs_url']) && !empty($_POST['subs_token'])) {
+		$subs_test = fetchJsonArray($_POST['subs_url'], $_POST['subs_token']);
+		$subs_success = isset($subs_test['type']);
+	} else {
+		$subs_success = true;
+	}
+	if ($subs['url'] != $_POST['subs_url'] || $subs['token'] != $_POST['subs_token']) {
+		if ($subs_success) {
+			$kinobi->setSetting("eula_accepted", false);
+		}
+	}
 	$subs['url'] = (empty($_POST['subs_url']) ? null : $_POST['subs_url']);
 	$subs['token'] = (empty($_POST['subs_token']) ? null : $_POST['subs_token']);
 	setSettingSubscription($pdo, $subs);
@@ -247,39 +276,81 @@ if (isset($_POST['subscribe'])) {
 
 // Create User
 if (isset($_POST['create_user'])) {
-	createUser($pdo, $_POST['add_user'], hash("sha256", $_POST['add_pass']));
-	if (isset($_POST['add_token'])) {
-		setSettingUser($pdo, $_POST['add_user'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
+	createUser($pdo, $_POST['user_username'], hash("sha256", $_POST['user_password']));
+	if ($_POST['user_privileges'] == 1) {
+		setSettingUser($pdo, $_POST['user_username'], "web", true);
+		setSettingUser($pdo, $_POST['user_username'], "api", 1);
 	}
-	if (empty($_POST['add_expires'])) {
-		setSettingUser($pdo, $_POST['add_user'], "expires", null);
+	if ($_POST['user_privileges'] == 0) {
+		setSettingUser($pdo, $_POST['user_username'], "api", 0);
+	}
+	if ($_POST['user_access'] == 0) {
+		setSettingUser($pdo, $_POST['user_username'], "disabled", 1);
+	}
+	if (isset($_POST['user_change'])) {
+		setSettingUser($pdo, $_POST['save_user'], "reset", 1);
+	}
+	if (empty($_POST['user_expires'])) {
+		setSettingUser($pdo, $_POST['user_username'], "expires", null);
 	} else {
-		setSettingUser($pdo, $_POST['add_user'], "expires", (int)date("U",strtotime($_POST['add_expires'])));
+		setSettingUser($pdo, $_POST['user_username'], "expires", (int)date("U",strtotime($_POST['user_expires'])));
+	}
+	if (isset($_POST['user_token'])) {
+		setSettingUser($pdo, $_POST['user_username'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
+	}
+}
+
+// Save User
+if (isset($_POST['save_user'])) {
+	if (!empty($_POST['user_password'])) {
+		setSettingUser($pdo, $_POST['save_user'], "password", hash("sha256", $_POST['user_password']));
+	}
+	if (isset($_POST['user_privileges'])) {
+		if ($_POST['user_privileges'] === "1") {
+			setSettingUser($pdo, $_POST['save_user'], "web", true);
+			setSettingUser($pdo, $_POST['save_user'], "api", 1);
+		}
+		if ($_POST['user_privileges'] === "0") {
+			setSettingUser($pdo, $_POST['save_user'], "web", null);
+			setSettingUser($pdo, $_POST['save_user'], "api", 0);
+		}
+		if ($_POST['user_privileges'] === "none") {
+			setSettingUser($pdo, $_POST['save_user'], "web", null);
+			setSettingUser($pdo, $_POST['save_user'], "api", null);
+		}
+	}
+	if (isset($_POST['user_access'])) {
+		if ($_POST['user_access'] === "1") {
+			setSettingUser($pdo, $_POST['save_user'], "disabled", null);
+		}
+		if ($_POST['user_access'] === "0") {
+			setSettingUser($pdo, $_POST['save_user'], "disabled", 1);
+		}
+	}
+	if (isset($_POST['user_change'])) {
+		setSettingUser($pdo, $_POST['save_user'], "reset", 1);
+	} else {
+		setSettingUser($pdo, $_POST['save_user'], "reset", null);
+	}
+	if (empty($_POST['user_expires'])) {
+		setSettingUser($pdo, $_POST['save_user'], "expires", null);
+	} else {
+		setSettingUser($pdo, $_POST['save_user'], "expires", (int)date("U",strtotime($_POST['user_expires'])));
+	}
+	if (isset($_POST['user_token'])) {
+		setSettingUser($pdo, $_POST['save_user'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
+	}
+	if ($_POST['user_username'] != $_POST['save_user']) {
+		renameUser($pdo, $_POST['save_user'], $_POST['user_username']);
+	}
+	if ($_POST['save_user'] == $_SESSION['username']) {
+		$_SESSION['username'] = $_POST['user_username'];
 	}
 }
 
 // Delete  User
-if (isset($_POST['delete_user'])) {
-	deleteUser($pdo, $_POST['delete_user']);
-}
-
-// Reset Password
-if (isset($_POST['save_pass'])) {
-	setSettingUser($pdo, $_POST['save_pass'], "password", hash("sha256", $_POST['reset_pass']));
-}
-
-// Create Token
-if (isset($_POST['create_token']) && !empty($_POST['create_token'])) {
-	setSettingUser($pdo, $_POST['create_token'], "token", bin2hex(openssl_random_pseudo_bytes(16)));
-}
-
-// Reset Expiry
-if (isset($_POST['reset_expiry'])) {
-	if (empty($_POST['reset_expires'])) {
-		setSettingUser($pdo, $_POST['reset_expiry'], "expires", null);
-	} else {
-		setSettingUser($pdo, $_POST['reset_expiry'], "expires", (int)date("U",strtotime($_POST['reset_expires'])));
-	}
+if (isset($_POST['del_user'])) {
+	deleteUser($pdo, $_POST['del_user']);
 }
 
 // ####################################################################
@@ -287,6 +358,7 @@ if (isset($_POST['reset_expiry'])) {
 // ####################################################################
 
 // SQLite Databases
+unset($db['passwd']);
 $sqlite_dir = dirname($_SERVER['DOCUMENT_ROOT']) . "/kinobi/db/";
 $sqlite_dbs = array();
 foreach (glob($sqlite_dir . "*") as $sqlite_db) {
@@ -318,7 +390,7 @@ foreach ($crontab as $entry) {
 	}
 }
 if (isset($schedule_str)) {
-	$scheduled = explode(",", $schedule_str);
+	$scheduled = array_map("intval", explode(",", $schedule_str));
 } else {
 	$scheduled = array();
 }
@@ -327,13 +399,28 @@ if (isset($schedule_str)) {
 $subs = getSettingSubscription($pdo);
 if (!empty($subs['url']) && !empty($subs['token'])) {
 	$subs_resp = fetchJsonArray($subs['url'], $subs['token']);
+	$subs_resp['endpoint'] = isset($subs_resp['endpoint']);
+	$subs_resp['expires'] = (isset($subs_resp['expires']) ? (int)$subs_resp['expires'] : 0);
+	unset($subs_resp['auth']);
+	unset($subs_resp['source']);
+	unset($subs_resp['functions']);
+	unset($subs_resp['upload']);
+	unset($subs_resp['import']);
 }
+if (isset($subs_resp['renew'])) {
+	if ($cloud) {
+		$subs_resp['renew'] = $subs_resp['renew'] . "?register=cloud";
+	} else {
+		$subs_resp['renew'] = $subs_resp['renew'] . "?register=self";
+	}
+}
+$subs_type = (isset($subs_resp['type']) ? $subs_resp['type'] : null);
+$eula_accepted = $kinobi->getSetting("eula_accepted");
 
 // Users
-$users = getSettingUsers($pdo);
+$users = getSettingUsers($pdo, true);
 $web_users = array();
 $api_users = array();
-$api_tokens = array_map(function($el) { if (isset($el['token'])) { return $el['token']; } }, $users);
 foreach ($users as $key => $value) {
 	if (isset($value['web']) && $value['web']) {
 		array_push($web_users, $key);
@@ -348,1138 +435,478 @@ if (sizeof($web_users) == 1 && isset($users[implode($web_users)]['expires'])) {
 
 // API Security
 $api = getSettingApi($pdo);
-if (empty($api_tokens) && $api['authtype'] == "token") {
-	$api['authtype'] = "basic";
-	setSettingApi($pdo, $api);
-}
 if (empty($api_users)) {
 	$api['reqauth'] = false;
 	setSettingApi($pdo, $api);
 }
 ?>
+				<!-- Awesome Bootstrap Checkbox -->
+				<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css" type="text/css"/>
 
-			<link rel="stylesheet" href="theme/awesome-bootstrap-checkbox.css"/>
-			<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
-			<link rel="stylesheet" href="theme/dataTables.bootstrap.css" />
-			<link rel="stylesheet" href="theme/bootstrap-select.css" />
-			<link rel="stylesheet" href="theme/bootstrap-toggle.css">
+				<!-- DateTime Picker -->
+				<link rel="stylesheet" href="theme/bootstrap-datetimepicker.css" />
 
-			<style>
-				.btn-table {
-					width: 75px;
-				}
-				#tab-content {
-<?php if ($netsus > 4) { ?>
-					margin-top: 165px;
-<?php } else { ?>
-					margin-top: 119px;
-<?php } ?>
-				}
-				#nav-title {
-					top: 51px;
-					height: 83px;
-					border-bottom: 1px solid #eee;
-					background: #fff;
-					-webkit-transition: all 0.5s ease;
-					-moz-transition: all 0.5s ease;
-					-o-transition: all 0.5s ease;
-					transition: all 0.5s ease;
-					z-index: 90;
-				}
-				.navbar-fixed-bottom {
-					padding-top: 6px;
-					padding-left: 26px;
-					padding-right: 20px;
-					background-color: rgba(255, 255, 255, 0);
-					background-image: -webkit-gradient(linear, 0% 0%, 0% 100%,color-stop(0, rgba(255, 255, 255, 0)),color-stop(0.3, rgb(255, 255, 255)),color-stop(1, rgb(255, 255, 255)));
-					background-image: -webkit-repeating-linear-gradient(top,rgba(255, 255, 255, 0) 0%,rgb(255, 255, 255) 30%,rgb(255, 255, 255) 100%);
-					background-image: repeating-linear-gradient(to bottom,rgba(255, 255, 255, 0) 0%,rgb(255, 255, 255) 30%,rgb(255, 255, 255) 100%);
-					background-image: -ms-repeating-linear-gradient(top,rgba(255, 255, 255, 0) 0%,rgb(255, 255, 255) 30%,rgb(255, 255, 255) 100%);
-					-webkit-transition: all 0.5s ease;
-					-moz-transition: all 0.5s ease;
-					-o-transition: all 0.5s ease;
-					transition: all 0.5s ease;
-					z-index: 90;
-				}
-				.nav-tabs.nav-justified > li {
-					white-space: nowrap;
-					display: table-cell;
-					width: 1%;
-				}
-				.nav-tabs.nav-justified > li > a {
-					margin-bottom: 0;
-					border-bottom: 1px solid #ddd;
-					border-radius: 4px 4px 0 0;
-				}
-				.nav-tabs.nav-justified > .active > a,
-				.nav-tabs.nav-justified > .active > a:hover,
-				.nav-tabs.nav-justified > .active > a:focus {
-					border-bottom-color: #fff;
-				}
+				<!-- DataTables -->
+				<link rel="stylesheet" href="theme/dataTables.bootstrap.css" type="text/css"/>
+				<link rel="stylesheet" href="theme/buttons.bootstrap.css" type="text/css"/>
+
+				<!-- bootstrap-select -->
+				<link rel="stylesheet" href="theme/bootstrap-select.css" type="text/css"/>
+
+				<!-- Bootstrap Toggle -->
+				<link rel="stylesheet" href="theme/bootstrap-toggle.css" type="text/css"/>
+
+				<!-- Custom styles for this project -->
+				<link rel="stylesheet" href="theme/kinobi.css" type="text/css">
+
+				<!-- Custom styles for this page -->
+				<style>
+					#dashboard-spacer label,
+					#dashboard-spacer label small {
+						color: transparent;
+					}
+					#dashboard-spacer label::before {
+						border-color: transparent;
+					}
 <?php if ($netsus) { ?>
-				@media(min-width:768px) {
-					#nav-title {
-						left: 220px;
+					.form-inline {
+						width: auto;
 					}
-					.navbar-fixed-bottom {
-						left: 220px;
-					}
-				}
+					@media(min-width:768px) {
+						#page-title-wrapper {
+							left: 220px;
+						}
+						#wrapper.toggled #page-title-wrapper {
+							margin-left: 0;
+							margin-right: 0;
+						}
+						.dataTables-footer {
+							left: 220px;
+						}
+<?php if ($netsus == 4) { ?>
+						#page-content-wrapper {
+							padding-left: 220px;
+						}
 <?php } ?>
-			</style>
-
-			<script type="text/javascript" src="scripts/moment/moment.min.js"></script>
-			<script type="text/javascript" src="scripts/bootstrap/transition.js"></script>
-			<script type="text/javascript" src="scripts/bootstrap/collapse.js"></script>
-			<script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
-
-			<script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
-			<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
-			<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
-			<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
-
-			<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
-
-			<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
-
-			<script type="text/javascript" src="scripts/toggle/bootstrap-toggle.min.js"></script>
-
-			<script type="text/javascript">
-				var allUsers = [<?php echo (sizeof($users) > 0 ? "\"".implode('", "', array_keys($users))."\"" : ""); ?>];
-				var apiUsers = [<?php echo (sizeof($api_users) > 0 ? "\"".implode('", "', $api_users)."\"" : ""); ?>];
-				var scheduled = [<?php echo (sizeof($scheduled) > 0 ? "\"".implode('", "', $scheduled)."\"" : ""); ?>];
-				var sqliteDBs = [<?php echo (sizeof($sqlite_dbs) > 0 ? "\"".implode('", "', $sqlite_dbs)."\"" : ""); ?>];
-			</script>
-
-			<script type="text/javascript" src="scripts/patchValidation.js"></script>
-
-			<script type="text/javascript">
-				function updateSchedule(element) {
-					if (scheduled.indexOf(element.value) >= 0) {
-						scheduled.splice(scheduled.indexOf(element.value), 1);
 					}
-					if (element.checked) {
-						scheduled.push(element.value);
-					}
-					scheduled.sort();
-					ajaxPost('patchCtl.php', 'schedule='+scheduled.join());
-					if (scheduled.length == 0 && ($('#dsn_prefix').val() == 'sqlite' || $('#dsn_prefix').val() == 'mysql' && ($('#dsn_host').val() == 'localhost' || $('#dsn_host').val() == '127.0.0.1'))) {
-						showScheduleWarning();
-					} else {
-						hideScheduleWarning();
-					}
-				}
-
-				function validRetention(element, labelId = false) {
-					hideSuccess(element);
-					if (element.value == parseInt(element.value) && element.value > 0  && element.value < 31) {
-						hideError(element, labelId);
-					} else {
-						showError(element, labelId);
-					}
-				}
-
-				function updateRetention(element, offset = false) {
-					if (element.value == parseInt(element.value) && element.value > 0  && element.value < 31) {
-						ajaxPost("patchCtl.php", "retention="+element.value);
-						showSuccess(element, offset);
-					}
-				}
-
-				function showScheduleWarning() {
-					$('#backup-tab-link').css('color', '#8a6d3b');
-					$('#backup-tab-icon').removeClass('hidden');
-					$('#backup-alert-msg').removeClass('hidden');
-				}
-
-				function hideScheduleWarning() {
-					$('#backup-tab-link').removeAttr('style');
-					$('#backup-tab-icon').addClass('hidden');
-					$('#backup-alert-msg').addClass('hidden');
-				}
-
-				function toggleService() {
-					if ($('#patchenabled').prop('checked')) {
-						$('#patch').removeClass('hidden');
-						$('#backup').prop('disabled', false);
-						$('[name="schedule"]').prop('disabled', false);
-						if (scheduled.length == 0) {
-							showScheduleWarning();
-						}
-						$('#retention').prop('disabled', false);
-						$('[name="restorepromt"]').prop('disabled', false);
-						ajaxPost('patchCtl.php', 'service=enable');
-					} else {
-						$('#patch').addClass('hidden');
-						$('#backup').prop('disabled', true);
-						hideScheduleWarning();
-						$('[name="schedule"]').prop('disabled', true);
-						$('[name="schedule"]').prop('checked', false);
-						scheduled = [];
-						ajaxPost('patchCtl.php', 'schedule=');
-						$('#retention').prop('disabled', true);
-						$('[name="restorepromt"]').prop('disabled', true);
-						ajaxPost('patchCtl.php', 'service=disable');
-					}
-				}
-
-				function toggleDashboard() {
-					if ($('#dashboard').prop('checked')) {
-						ajaxPost('patchCtl.php', 'dashboard=true');
-					} else {
-						ajaxPost('patchCtl.php', 'dashboard=false');
-					}
-				}
-
-				function toggleConnType() {
-					var dsn_prefix = document.getElementById('dsn_prefix');
-					if (dsn_prefix.value == 'sqlite') {
-						$('#mysql_db').addClass('hidden');
-						$('#sqlite_db').removeClass('hidden');
-					} else {
-						$('#sqlite_db').addClass('hidden');
-						$('#mysql_db').removeClass('hidden');
-					}
-				}
-
-				function validConn() {
-					var dsn_prefix = document.getElementById('dsn_prefix');
-					var dsn_dbpath = document.getElementById('dsn_dbpath');
-					var dsn_dbfile = document.getElementById('dsn_dbfile');
-					var new_dbfile = document.getElementById('new_dbfile');
-					var dsn_host = document.getElementById('dsn_host');
-					var dsn_port = document.getElementById('dsn_port');
-					var dsn_dbname = document.getElementById('dsn_dbname');
-					var dbuser = document.getElementById('dbuser');
-					var dbpass = document.getElementById('dbpass');
-					if ("" == dsn_dbfile.value) {
-						$('#new_db_wrapper').removeClass('hidden');
-						$('#new_dbfile').prop('disabled', false);
-						dsn_dbpath.value = '<?php echo $sqlite_dir; ?>' + new_dbfile.value;
-					} else {
-						$('#new_db_wrapper').addClass('hidden');
-						$('#new_dbfile').prop('disabled', true);
-						dsn_dbpath.value = '<?php echo $sqlite_dir; ?>' + dsn_dbfile.value;
-						new_dbfile.value = '';
-					}
-					if (/^[A-Za-z0-9._-]{1,64}$/.test(new_dbfile.value) && sqliteDBs.indexOf(new_dbfile.value) == -1 || /^[A-Za-z0-9._-]{1,64}$/.test(dsn_dbfile.value)) {
-						hideError(new_dbfile, 'dsn_dbfile_label');
-					} else {
-						showError(new_dbfile, 'dsn_dbfile_label');
-					}
-					if (/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(dsn_host.value)) {
-						if (dsn_port.value == parseInt(dsn_port.value) && dsn_port.value >= 0 && dsn_port.value <= 65535) {
-							hideError(dsn_host, 'dsn_host_label');
-						} else {
-							hideError(dsn_host);
-						}
-					} else {
-						showError(dsn_host, 'dsn_host_label');
-					}
-					if (dsn_port.value == parseInt(dsn_port.value) && dsn_port.value >= 0 && dsn_port.value <= 65535) {
-						if (/^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(dsn_host.value)) {
-							hideError(dsn_port, 'dsn_host_label');
-						} else {
-							hideError(dsn_port);
-						}
-					} else {
-						showError(dsn_port, 'dsn_host_label');
-					}
-					if (/^[A-Za-z0-9_]{1,64}$/.test(dsn_dbname.value)) {
-						hideError(dsn_dbname, 'dsn_dbname_label');
-					} else {
-						showError(dsn_dbname, 'dsn_dbname_label');
-					}
-					if (/^[A-Za-z0-9._]{1,16}$/.test(dbuser.value)) {
-						hideError(dbuser, 'dbuser_label');
-					} else {
-						showError(dbuser, 'dbuser_label');
-					}
-					if (/^.{1,64}$/.test(dbpass.value)) {
-						hideError(dbpass, 'dbpass_label');
-					} else {
-						showError(dbpass, 'dbpass_label');
-					}
-					if (dsn_prefix.value == "sqlite" && (/^[A-Za-z0-9._-]{1,64}$/.test(new_dbfile.value) && sqliteDBs.indexOf(new_dbfile.value) == -1 || /^[A-Za-z0-9._-]{1,64}$/.test(dsn_dbfile.value)) || dsn_prefix.value == "mysql" && /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(dsn_host.value) && dsn_port.value == parseInt(dsn_port.value) && dsn_port.value >= 0 && dsn_port.value <= 65535 && /^[A-Za-z0-9_]{1,64}$/.test(dsn_dbname.value) && /^[A-Za-z0-9._]{1,16}$/.test(dbuser.value) && /^.{1,64}$/.test(dbpass.value)) {
-						$('#dbconnect').prop('disabled', false);
-					} else {
-						$('#dbconnect').prop('disabled', true);
-					}
-				}
-
-				function validPath(element, buttonId, labelId = false) {
-					hideSuccess(element);
-					if (/^(\/)[^\0:]*$/.test(element.value)) {
-						hideError(element, labelId);
-						$('#'+buttonId).prop('disabled', false);
-					} else {
-						showError(element, labelId);
-						$('#'+buttonId).prop('disabled', true);
-					}
-				}
-
-				function validSubscribe() {
-					var subs_url = document.getElementById('subs_url');
-					var subs_token = document.getElementById('subs_token');
-					if (/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/.test(subs_url.value)) {
-						hideError(subs_url, 'subs_url_label');
-					} else {
-						showError(subs_url, 'subs_url_label');
-					}
-					if (/^.{1,255}$/.test(subs_token.value)) {
-						hideError(subs_token, 'subs_token_label');
-					} else {
-						showError(subs_token, 'subs_token_label');
-					}
-					if (/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/.test(subs_url.value) && /^.{1,255}$/.test(subs_token.value) || subs_url.value == "" && subs_token.value == "") {
-						hideError(subs_url, 'subs_url_label');
-						hideError(subs_token, 'subs_token_label');
-						$('#subscribe').prop('disabled', false);
-					} else {
-						$('#subscribe').prop('disabled', true);
-					}
-				}
-
-				function showSubsError() {
-					$('#subscription-tab-link').css('color', '#a94442');
-					$('#subscription-tab-icon').removeClass('hidden');
-				}
-
-				function showSubsWarning() {
-					$('#subscription-tab-link').css('color', '#8a6d3b');
-					$('#subscription-tab-icon').removeClass('hidden');
-				}
-
-				function subsRefresh(element) {
-					ajaxPost('patchCtl.php', 'subs_refresh='+element.value);
-				}
-
-				function toggleAPIAccess() {
-					if ($('#api_reqauth').prop('checked') == true) {
-						ajaxPost('patchCtl.php', 'api_reqauth=true');
-					} else {
-						ajaxPost('patchCtl.php', 'api_reqauth=false');
-					}
-				}
-
-				function toggleAPIAuto() {
-					if ($('#api_auto').prop('checked') == true) {
-						ajaxPost('patchCtl.php', 'api_auto=true');
-					} else {
-						ajaxPost('patchCtl.php', 'api_auto=false');
-					}
-				}
-
-				function toggleWebAdmin(element) {
-					user = element.value;
-					if (element.checked) {
-						ajaxPost('patchCtl.php', 'allow_web='+user);
-					} else {
-						ajaxPost('patchCtl.php', 'deny_web='+user);
-					}
-				}
-
-				function toggleAPIRead(element) {
-					user = element.value;
-					if (element.checked) {
-						ajaxPost('patchCtl.php', 'allow_api='+user);
-						if (apiUsers.indexOf(user) == -1) {
-							apiUsers.push(user);
-						}
-					} else {
-						ajaxPost('patchCtl.php', 'deny_api='+user);
-						if (apiUsers.indexOf(user) >= 0) {
-							apiUsers.splice(apiUsers.indexOf(user), 1);
-						}
-					}
-					if (apiUsers.length == 0) {
-						$('#api_access').val('writeonly');
-						$('#api_access').prop('disabled', true);
-						ajaxPost('patchCtl.php', 'api_access=writeonly');
-					} else {
-						$('#api_access').prop('disabled', false);
-					}
-				}
-
-				function toggleAPIWrite(element) {
-					user = element.value;
-					if (element.checked) {
-						ajaxPost('patchCtl.php', 'allow_api_rw='+user);
-						$('input[name="api_ro"][value="' + user + '"]').prop('disabled', true);
-						$('input[name="api_ro"][value="' + user + '"]').prop('checked', true);
-						if (apiUsers.indexOf(user) == -1) {
-							apiUsers.push(user);
-						}
-					} else {
-						ajaxPost('patchCtl.php', 'allow_api='+user);
-						$('input[name="api_ro"][value="' + user + '"]').prop('disabled', false);
-					}
-				}
-
-				function validUser() {
-					var add_user = document.getElementById('add_user');
-					var add_pass = document.getElementById('add_pass');
-					var add_verify = document.getElementById('add_verify');
-					var add_expires = document.getElementById('add_expires');
-					if (/^([A-Za-z0-9 ._-]){1,64}$/.test(add_user.value) && allUsers.indexOf(add_user.value) == -1) {
-						hideError(add_user, 'add_user_label');
-					} else {
-						showError(add_user, 'add_user_label');
-					}
-					if (/^.{1,128}$/.test(add_pass.value)) {
-						hideError(add_pass, 'add_pass_label');
-					} else {
-						showError(add_pass, 'add_pass_label');
-					}
-					if (/^.{1,128}$/.test(add_verify.value) && add_verify.value == add_pass.value) {
-						hideError(add_verify, 'add_verify_label');
-					} else {
-						showError(add_verify, 'add_verify_label');
-					}
-					if (/^$/.test(add_expires.value) || /^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(add_expires.value)) {
-						hideError(add_expires, 'add_expires_label');
-					} else {
-						showError(add_expires, 'add_expires_label');
-					}
-					if (/^([A-Za-z0-9 ._-]){1,64}$/.test(add_user.value) && allUsers.indexOf(add_user.value) == -1 && /^.{1,128}$/.test(add_verify.value) && add_verify.value == add_pass.value && (/^$/.test(add_expires.value) || /^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(add_expires.value))) {
-						$('#create_user').prop('disabled', false);
-					} else {
-						$('#create_user').prop('disabled', true);
-					}
-				}
-
-				function validPass() {
-					var reset_pass = document.getElementById('reset_pass');
-					var reset_verify = document.getElementById('reset_verify');
-					if (/^.{1,128}$/.test(reset_pass.value)) {
-						hideError(reset_pass, 'reset_pass_label');
-					} else {
-						showError(reset_pass, 'reset_pass_label');
-					}
-					if (/^.{1,128}$/.test(reset_verify.value) && reset_verify.value == reset_pass.value) {
-						hideError(reset_verify, 'reset_verify_label');
-					} else {
-						showError(reset_verify, 'reset_verify_label');
-					}
-					if (/^.{1,128}$/.test(reset_verify.value) && reset_verify.value == reset_pass.value) {
-						$('#save_pass').prop('disabled', false);
-					} else {
-						$('#save_pass').prop('disabled', true);
-					}
-				}
-
-				function validExpiry() {
-					var reset_expires = document.getElementById('reset_expires');
-					if (/^$/.test(reset_expires.value) || /^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(reset_expires.value)) {
-						hideError(reset_expires, 'reset_expires_label');
-						$('#reset_expiry').prop('disabled', false);
-					} else {
-						showError(reset_expires, 'reset_expires_label');
-						$('#reset_expiry').prop('disabled', true);
-					}
-				}
-
-				function generateToken(user_id) {
-					$('#create_token').val(user_id);
-					$('#Settings').submit();
-				}
-			</script>
-
-			<script type="text/javascript">
-				$(document).ready(function() {
-					if (scheduled.length == 0 && ($('#dsn_prefix').val() == 'sqlite' || $('#dsn_prefix').val() == 'mysql' && ($('#dsn_host').val() == 'localhost' || $('#dsn_host').val() == '127.0.0.1'))) {
-						showScheduleWarning();
-					}
-				});
-			</script>
-
-			<script type="text/javascript">
-				$(document).ready(function() {
-<?php if (empty($subs['url']) && empty($subs['token'])) { ?>
-					$('#subs-info').removeClass('hidden');
-<?php } elseif (!isset($subs_resp['expires'])) { ?>
-					showSubsError();
-					$('#subs-invalid').removeClass('hidden');
-<?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60)) { ?>
-					$('#subs-active').removeClass('hidden');
-<?php } elseif ($subs_resp['expires'] > $subs_resp['timestamp']) { ?>
-					showSubsWarning();
-					$('#subs-expiring').removeClass('hidden');
-<?php } else { ?>
-					showSubsError();
-					$('#subs-expired').removeClass('hidden');
 <?php } ?>
-				});
-			</script>
+				</style>
 
-			<script type="text/javascript">
-				$(function () {
-					$('#add_expires_datepicker').datetimepicker({
-						format: 'YYYY-MM-DDTHH:mm:ss\\Z',
-						minDate: moment().add(1, 'days')
-					});
-				});
-			</script>
+				<!-- Moment.js -->
+				<script type="text/javascript" src="scripts/moment/moment.min.js"></script>
 
-			<script type="text/javascript">
-				$(function () {
-					$('#reset_expires_datepicker').datetimepicker({
-						format: 'YYYY-MM-DDTHH:mm:ss\\Z',
-						minDate: moment().add(1, 'days')
-					});
-				});
-			</script>
+				<!-- Bootstrap Transitions -->
+				<script type="text/javascript" src="scripts/bootstrap/transition.js"></script>
 
-			<script type="text/javascript">
-				$(document).ready(function() {
-					$('#users').DataTable( {
-						buttons: [
-							{
-								text: '<span class="glyphicon glyphicon-plus"></span> New',
-								className: 'btn-primary btn-sm btn-table',
-<?php if (!empty($pdo_error)) { ?>
-								enabled: false,
-<?php } ?>
-								action: function ( e, dt, node, config ) {
-									$("#create_user-modal").modal();
-								}
-							}
-						],
-						"dom": '<"row"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row"<"col-xs-12 table-responsive"t>>' + '<"row navbar-default navbar-fixed-bottom"<"col-xs-10"p><"col-xs-2"l>>',
-						"language": {
-							"emptyTable": "No Users",
-							"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
-							"infoEmpty": "0 - 0 of 0",
-							"lengthMenu": "Show: _MENU_",
-							"loadingRecords": "Please wait - loading...",
-							"search": " ",
-							"searchPlaceholder": "Filter Users",
-							"paginate": {
-								"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
-								"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
-							}
-						},
-						"order": [ 0, 'asc' ],
-						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": 10,
-						"columns": [
-							null,
-							null,
-							{ "orderable": false },
-							null,
-							{ "orderable": false },
-							{ "orderable": false },
-							{ "orderable": false },
-							{ "orderable": false }
-						],
-						"stateSave": true
-					});
+				<!-- Bootstrap Collapse -->
+				<script type="text/javascript" src="scripts/bootstrap/collapse.js"></script>
 
-					$(':input[type=search][aria-controls=users]').addClear({
-						symbolClass: "glyphicon glyphicon-remove",
-						onClear: function() {
-							$('#users').DataTable().search('').draw();
-						}
-					});
+				<!-- DateTime Picker -->
+				<script type="text/javascript" src="scripts/datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
-					if ($(':input[type=search][aria-controls=users]').val() !== '') {
-						$('#users').DataTable().search('').draw();
-					}
+				<!-- DataTables -->
+				<script type="text/javascript" src="scripts/dataTables/jquery.dataTables.min.js"></script>
+				<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
+				<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
+				<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
 
-					$('select[name=users_length]').addClass('table-select');
+				<!-- Bootstrap Add Clear -->
+				<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
 
-					$('#backups').DataTable( {
-						buttons: [
-							{
-								text: '<span class="glyphicon glyphicon-plus"></span> Upload',
-								className: 'btn-primary btn-sm btn-table',
-								action: function ( e, dt, node, config ) {
-									$("#uploadBackup").modal();
-								}
-							}
-						],
-						"dom": '<"row"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row"<"col-xs-12 table-responsive"t>>' + '<"row navbar-default navbar-fixed-bottom"<"col-xs-10"p><"col-xs-2"l>>',
-						"language": {
-							"emptyTable": "No Backups",
-							"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
-							"infoEmpty": "0 - 0 of 0",
-							"lengthMenu": "Show: _MENU_",
-							"loadingRecords": "Please wait - loading...",
-							"search": " ",
-							"searchPlaceholder": "Filter Backups",
-							"paginate": {
-								"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
-								"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
-							}
-						},
-						"order": [ 2, 'desc' ],
-						"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
-						"pageLength": 10,
-						"columns": [
-							null,
-							null,
-							null,
-							null,
-							{ "orderable": false }
-						],
-						"stateSave": true
-					});
+				<!-- bootstrap-select -->
+				<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
-					$(':input[type=search][aria-controls=backups]').addClear({
-						symbolClass: "glyphicon glyphicon-remove",
-						onClear: function() {
-							$('#backups').DataTable().search('').draw();
-						}
-					});
+				<!-- Bootstrap Toggle -->
+				<script type="text/javascript" src="scripts/toggle/bootstrap-toggle.min.js"></script>
 
-					if ($(':input[type=search][aria-controls=backups]').val() !== '') {
-						$('#backups').DataTable().search('').draw();
-					}
+				<script type="text/javascript">
+					var current_user = "<?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : ""); ?>";
+					var netsus = <?php echo $netsus; ?>;
+					var service = <?php echo json_encode($service); ?>;
+					var dashboard = <?php echo json_encode($dashboard); ?>;
+					var cloud = <?php echo json_encode($cloud); ?>;
 
-					$('select[name=backups_length]').addClass('table-select');
+					var users_json = <?php echo json_encode(array_values($users)); ?>;
 
-					$('.dataTables_wrapper').removeClass('form-inline');
-					$('.dataTables_wrapper').css('padding', '0px 20px');
+					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
+					var pdo_connection_status = '<?php echo $pdo_connection_status; ?>';;
+					var db_json = <?php echo json_encode($db); ?>;
+					var sqlite_dir = '<?php echo $sqlite_dir; ?>';
+					var sqlite_dbs_json = <?php echo json_encode($sqlite_dbs); ?>;
 
-					$('.dataTables_filter').addClass('pull-left');
-					$('.dataTables_filter').addClass('form-inline');
+					var scheduled_json = <?php echo json_encode($scheduled); ?>;
+					var backup_json = <?php echo json_encode($backup); ?>;
+					var backup_error = '<?php echo htmlentities($backup_error); ?>';
+					var backup_success = '<?php echo $backup_success; ?>';
 
-					$('.dt-buttons').addClass('pull-right');
-					$('.dt-buttons').removeClass('dt-buttons');
-					$('.btn-primary').removeClass('btn-default');
+					var backups_json = <?php echo json_encode($backups); ?>;
+					var restore_error = '<?php echo htmlentities($restore_error); ?>';
+					var restore_success = '<?php echo $restore_success; ?>';
 
-					$('.table-responsive').css('border', 0);
+					var subs_json = <?php echo json_encode($subs); ?>;
+					var subs_resp_json = <?php echo json_encode($subs_resp); ?>;
+					var subs_type = "<?php echo $subs_type; ?>";
+					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
+					var api_json = <?php echo json_encode($api); ?>;
+				</script>
 
-					$('.dataTables_paginate').addClass('pull-left');
+				<script type="text/javascript" src="scripts/kinobi/patchSettings.js"></script>
 
-					$('.dataTables_length').addClass('pull-right');
-				});
-			</script>
+				<div id="page-title-wrapper">
+					<div id="page-title">
+						<ol class="breadcrumb">
+							<li class="active">&nbsp;</li>
+						</ol>
 
-			<script type="text/javascript">
-				// function to save the current tab on refresh
-				$(document).ready(function(){
-					$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-						localStorage.setItem('activePatchTab', $(e.target).attr('href'));
-					});
-					var activePatchTab = localStorage.getItem('activePatchTab');
-					if(activePatchTab){
-						$('#top-tabs a[href="' + activePatchTab + '"]').tab('show');
-					}
-				});
-			</script>
-
-			<script type="text/javascript">
-				$(document).ready(function(){
-					toggleService();
-				});
-			</script>
-
-<?php if (isset($_POST['dbconnect']) && empty($pdo_error) && $netsus == 0) { ?>
-			<script>
-				$(window).load(function() {
-					$('#database_change-modal').modal('show');
-				});
-			</script>
-
-<?php } ?>
-
-<?php if (!empty($restore_success) && $netsus == 0) { ?>
-			<script>
-				$(window).load(function() {
-					$('#restore_complete-modal').modal('show');
-				});
-			</script>
-
-<?php } ?>
-			<nav id="nav-title" class="navbar navbar-default navbar-fixed-top">
-				<div style="padding: 19px 20px 1px;">
-<?php if ($netsus > 0) { ?>
-					<div class="description"><a href="settings.php">Settings</a> <span class="glyphicon glyphicon-chevron-right"></span> <span class="text-muted">Services</span> <span class="glyphicon glyphicon-chevron-right"></span></div>
-					<div class="row">
-						<div class="col-xs-10">
-							<h2>Patch Definitions</h2>
-						</div>
-<?php } else { ?>
-					<div class="description">&nbsp;</div>
-					<div class="row">
-						<div class="col-xs-10">
-							<h2>Settings</h2>
-						</div>
-<?php } ?>
-						<div class="col-xs-2 text-right <?php echo ($netsus > 0 ? "" : "hidden"); ?>">
-							<input type="checkbox" id="patchenabled" data-toggle="toggle" data-size="small" onChange="toggleService();" <?php echo ($service ? "checked" : ""); ?>>
+						<div class="row">
+							<div class="col-xs-9">
+								<h2 id="heading">Settings</h2>
+							</div>
+							<div class="col-xs-3 text-right hidden">
+								<input id="service-status" type="checkbox" data-toggle="toggle" data-size="small">
+							</div>
 						</div>
 					</div>
-				</div>
-				<div style="padding: <?php echo ($netsus > 4 ? "" : "1"); ?>6px 20px 0px; background-color: #f9f9f9; border-bottom: 1px solid #ddd;">
-					<div class="checkbox checkbox-primary <?php echo ($netsus > 4 ? "" : "hidden"); ?>">
-						<input name="dashboard" id="dashboard" class="styled" type="checkbox" value="true" onChange="toggleDashboard();" <?php echo ($dashboard ? "checked" : ""); ?>>
-						<label><strong>Show in Dashboard</strong><br><span style="font-size: 75%; color: #777;">Display service status in the NetSUS dashboard.</span></label>
+
+					<div class="alert-wrapper">
+						<div id="dashboard-wrapper" class="checkbox checkbox-primary hidden">
+							<input id="dashboard-display" class="styled" type="checkbox">
+							<label><strong>Show in Dashboard</strong> <small>Display service status in the NetSUS dashboard.</small></label>
+						</div>
 					</div>
-					<ul class="nav nav-tabs nav-justified" id="top-tabs" style="margin-bottom: -1px;">
-<?php if (isset($subs_resp['endpoint']) || $netsus == 0) { ?>
-						<li><a class="tab-font" href="#users-tab" role="tab" data-toggle="tab">Users</a></li>
-<?php }
-if (!$cloud) { ?>
-						<li><a class="tab-font" href="#database-tab" role="tab" data-toggle="tab" <?php echo (empty($pdo_error) ? "" : "style=\"color: #a94442;\"") ?>><span id="database-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (empty($pdo_error) ? "hidden" : "") ?>"></span> Database</a></li>
-<?php } ?>
-						<li class="active"><a id="backup-tab-link" class="tab-font" href="#backup-tab" role="tab" data-toggle="tab"><span id="backup-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Backup</a></li>
-						<li><a class="tab-font" href="#restore-tab" role="tab" data-toggle="tab">Restore</a></li>
-						<li><a id="subscription-tab-link" class="tab-font" href="#subscription-tab" <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "style=\"color: #8a6d3b;\"" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "" : "style=\"color: #8a6d3b;\"")) : ""); ?>z role="tab" data-toggle="tab"><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs <?php echo (isset($subs_resp) ? (empty($subs_resp) ? "" : ($subs_resp['expires'] > $subs_resp['timestamp'] + (14*24*60*60) ? "hidden" : "")) : "hidden"); ?>"></span> Subscription</a></li>
-					</ul>
+
+					<div class="nav-tabs-wrapper">
+						<ul class="nav nav-tabs nav-justified" id="top-tabs">
+							<li><a id="users-tab-link" href="#users-tab" role="tab" data-toggle="tab"><small>Users</small></a></li>
+							<li><a id="database-tab-link" href="#database-tab" role="tab" data-toggle="tab"><small><span id="database-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Database</small></a></li>
+							<li><a id="backup-tab-link" href="#backup-tab" role="tab" data-toggle="tab"><small><span id="backup-tab-icon" class="glyphicon glyphicon-warning-sign hidden-xs hidden"></span> Backup</a></small></li>
+							<li><a href="#restore-tab" role="tab" data-toggle="tab"><small>Restore</small></a></li>
+							<li><a id="subscription-tab-link" href="#subscription-tab" role="tab" data-toggle="tab"><small><span id="subscription-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Subscription</small></a></li>
+						</ul>
+					</div>
 				</div>
-			</nav>
 
-			<form action="patchSettings.php" method="post" name="Settings" id="Settings" enctype="multipart/form-data">
+				<!-- Page Title Spacer -->
+				<div style="margin-top: -18px;">
+					<div style="height: 79px;"></div>
+					<div style="padding: 0 20px;">
+						<div id="dashboard-spacer" class="checkbox checkbox-primary hidden">
+							<input class="styled" type="checkbox">
+							<label><strong>Show in Dashboard</strong> <small>Display service status in the NetSUS dashboard.</small></label>
+						</div>
+					</div>
+					<div style="height: 58px;"></div>
+				</div>
 
-				<div id="tab-content" class="tab-content">
-
-<?php if (isset($subs_resp['endpoint']) || $netsus == 0) { ?>
+				<div class="tab-content">
 					<div class="tab-pane fade in" id="users-tab">
-
-						<div style="padding: 16px 20px 8px;">
-							<div style="margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($api_error) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $api_error; ?></div>
-								</div>
-							</div>
-
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($api_success) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $api_success; ?></div>
-								</div>
-							</div>
-
-							<h5><strong>Users</strong> <small>Kinobi user accounts and privileges.</small></h5>
+						<div class="page-content">
+							<div class="text-muted"><small>Kinobi user accounts and privileges.</small></div>
 						</div>
 
-						<table id="users" class="table table-hover" style="border-bottom: 1px solid #ddd;">
+						<table id="users" class="table table-hover" style="min-width: 768px; width: 100%; border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
+									<th>Enable</th>
 									<th>Username</th>
 									<th>Token</th>
-									<th><!-- Warning --></th>
-									<th>Expires</th>
-									<th><?php echo ($netsus > 0 ? "" : "Web Admin"); ?></th>
-									<th><?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "API Read" : "" : ""); ?></th>
-									<th><?php echo (isset($subs_resp['endpoint']) ? "API Write" : ""); ?></th>
+									<th>Expiry</th>
+									<th>Access</th>
 									<th><!-- Delete --></th>
 								</tr>
 							</thead>
 							<tbody>
-<?php foreach ($users as $key => $value) {
-	if ($netsus == 0 || !isset($value['web'])) {?>
-								<tr>
-									<td>
-										<div class="dropdown">
-											<a href="#" id="user_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $key; ?></a>
-											<ul class="dropdown-menu" aria-labelledby="user_<?php echo $key; ?>">
-												<li><a data-toggle="modal" href="#reset_pass-modal" onClick="$('#reset_pass-title').text('<?php echo $key; ?>'); $('#save_pass').val('<?php echo $key; ?>');">Reset Password</a></li>
-											</ul>
-										</div>
-									</td>
-									<td>
-										<div class="dropdown">
-											<a href="#" id="token_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['token']) ? $value['token'] : "&lt;No Token&gt;"); ?></a>
-											<ul class="dropdown-menu" aria-labelledby="token_<?php echo $key; ?>">
-												<li><a href="#" onClick="generateToken('<?php echo $key; ?>');"><?php echo (isset($value['token']) ? "Re-" : ""); ?>Generate</a></li>
-											</ul>
-										</div>
-									</td>
-									<td><span class="<?php echo (isset($value['expires']) ? (time() > $value['expires'] ? "text-warning glyphicon glyphicon-exclamation-sign" : "") : ""); ?>"></span></td>
-									<td>
-										<div class="dropdown">
-											<a href="#" id="expiry_<?php echo $key; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo (isset($value['expires']) ? gmdate("Y-m-d\TH:i:s\Z", $value['expires']) : "&lt;Never&gt;"); ?></a>
-											<ul class="dropdown-menu" aria-labelledby="expiry_<?php echo $key; ?>">
-												<li class="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "disabled" : "") : ""); ?>"><a data-toggle="<?php echo (isset($value['web']) ? ($value['web'] && sizeof($web_users) == 1 ? "" : "modal") : "modal"); ?>" href="#reset_expiry-modal" onClick="$('#reset_expiry-title').text('<?php echo $key; ?>'); $('#reset_expires').val('<?php echo (empty($value['expires']) ? "" : gmdate("Y-m-d\TH:i:s\Z", $value['expires'])); ?>'); $('#reset_expiry').val('<?php echo $key; ?>');"><?php echo (isset($value['expires']) ? "Change" : "Set"); ?></a></li>
-											</ul>
-										</div>
-									</td>
-									<td>
-										<div class="checkbox checkbox-primary checkbox-inline <?php echo ($netsus == 0 ? "" : "hidden"); ?>">
-											<input type="checkbox" class="styled" name="web_ui" id="web_ui" value="<?php echo $key; ?>" onChange="toggleWebAdmin(this);" <?php echo (isset($value['web']) ? ($value['web'] ? "checked" : "") : ""); ?> <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>/>
-											<label/>
-										</div>
-									</td>
-									<td>
-										<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['type']) ? $subs_resp['type'] == "Server" ? "" : "hidden" : "hidden"); ?>">
-											<input type="checkbox" class="styled" name="api_ro" id="api_ro" value="<?php echo $key; ?>" onChange="toggleAPIRead(this);" <?php echo (isset($value['api']) ? "checked" : ""); ?> <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "disabled" : "") : ""); ?>/>
-											<label/>
-										</div>
-									</td>
-									<td>
-										<div class="checkbox checkbox-primary checkbox-inline <?php echo (isset($subs_resp['endpoint']) ? "" : "hidden"); ?>">
-											<input type="checkbox" class="styled" name="api_rw" id="api_rw" value="<?php echo $key; ?>" onChange="toggleAPIWrite(this);" <?php echo (isset($value['api']) ? ($value['api'] == "1" ? "checked" : "") : ""); ?>/>
-											<label/>
-										</div>
-									</td>
-									<td align="right"><button type="button" name="del_user_prompt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_user-modal" onClick="$('#delete_user-title').text('<?php echo $key; ?>'); $('#delete_user').val('<?php echo $key; ?>');" value="<?php echo $key; ?>" <?php echo ($value['web'] && sizeof($web_users) == 1 || $key == $_SESSION['username'] ? "disabled" : ""); ?>>Delete</button></td>
-								</tr>
-<?php }
-} ?>
 							</tobdy>
 						</table>
 
-						<input type="hidden" name="create_token" id="create_token">
+						<form method="post" id="users-form">
+							<!-- User Modal -->
+							<div class="modal fade" id="user-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="user-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="user-label">New User</h3>
+										</div>
+										<div class="modal-body">
+											<input type="hidden" name="create_user" id="create-user" disabled/>
 
-						<!-- Add User Modal -->
-						<div class="modal fade" id="create_user-modal" tabindex="-1" role="dialog">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title">New User</h3>
-									</div>
-									<div class="modal-body">
-										<h5 id="add_user_label"><strong>User Name</strong> <small>Username for the account.</small></h5>
-										<div class="form-group">
-											<input type="text" name="add_user" id="add_user" class="form-control input-sm" onFocus="validUser();" onKeyUp="validUser();" onBlur="validUser();" placeholder="[Required]" value=""/>
-										</div>
-										<h5 id="add_pass_label"><strong>Password</strong> <small>Password for the account.</small></h5>
-										<div class="form-group">
-											<input type="password" name="add_pass" id="add_pass" class="form-control input-sm" onFocus="validUser();" onKeyUp="validUser();" onBlur="validUser();" placeholder="[Required]" value=""/>
-										</div>
-										<h5 id="add_verify_label"><strong>Verify Password</strong></h5>
-										<div class="form-group">
-											<input type="password" name="add_verify" id="add_verify" class="form-control input-sm" onFocus="validUser();" onKeyUp="validUser();" onBlur="validUser();" placeholder="[Required]" value=""/>
-										</div>
-										<h5 id="add_expires_label"><strong>Expires</strong> <small>Date that this user account expires.</small></h5>
-										<div class="form-group">
-											<div class="input-group date" id="add_expires_datepicker">
-												<span class="input-group-addon input-sm" style="color: #555; background-color: #eee; border: 1px solid #ccc; border-right: 0;">
-													<span class="glyphicon glyphicon-calendar"></span>
-												</span>
-												<input type="text" name="add_expires" id="add_expires" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validUser();" onKeyUp="validUser();" onBlur="validUser();" placeholder="[Optional]" value="<?php echo gmdate("Y-m-d\TH:i:s\Z", time()+30*24*60*60); ?>" />
+											<input type="hidden" name="save_user" id="save-user" disabled/>
+
+											<div class="form-group">
+												<label class="control-label" for="user-username">User Name <small>Username for the account.</small></label>
+												<input type="text" class="form-control input-sm" name="user_username" id="user-username" placeholder="[Required]"/>
+												<span id="user-username-help" class="help-block hidden"><small>Duplicate</small></span>
+											</div>
+
+											<!-- Server Only -->
+											<div class="form-group hidden">
+												<label class="control-label" for="user-privileges">Privilege Set <small>Set of privileges to grant the account.</small></label>
+												<select name="user_privileges" id="user-privileges" class="form-control selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body"/>
+													<option value="none">No Access</option>
+													<option value="0">Read Endpoints</option>
+													<option value="1" selected>Full Access</option>
+												</select>
+											</div>
+											<!-- / end Server Only -->
+
+											<div class="form-group">
+												<label class="control-label" for="user-access">Access Status <small>Access status of the account ("enabled" or "disabled").</small></label>
+												<select name="user_access" id="user-access" class="form-control selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body"/>
+													<option value="0">Disabled</option>
+													<option value="1" selected>Enabled</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label class="control-label" for="user-password">Password <small>Password for the account.</small></label>
+												<input type="password" class="form-control input-sm" name="user_password" id="user-password" placeholder="[Required]"/>
+												<span id="user-password-help" class="help-block hidden"><small>Did not match</small></span>
+											</div>
+
+											<div class="form-group">
+												<label class="control-label" for="user-verify">Verify Password</label>
+												<input type="password" class="form-control input-sm" name="user_verify" id="user-verify" placeholder="[Required]"/>
+												<span id="user-verify-help" class="help-block hidden"><small>Did not match</small></span>
+											</div>
+
+											<div class="checkbox checkbox-primary">
+												<input type="checkbox" class="styled" name="user_change" id="user-reset-passwd">
+												<label><strong>Force Password Change</strong> <small class="text-muted">Force user to change password at next login.</small></label>
+											</div>
+
+											<!-- Server Only -->
+											<div class="form-group hidden">
+												<label class="control-label" for="user-expires">Expiry <small>Date that this user account expires.</small></label>
+												<div class="input-group date" id="user-expires-datetimepicker">
+													<span class="input-group-addon input-sm">
+														<span class="glyphicon glyphicon-calendar"></span>
+													</span>
+													<input type="text" class="form-control input-sm" name="user_expires" id="user-expires" placeholder="[Optional]"/>
+												</div>
+											</div>
+											<!-- / end Server Only -->
+
+											<div class="checkbox checkbox-primary">
+												<input type="checkbox" class="styled" name="user_token" id="user-token" value="true">
+												<label><strong>Generate Token</strong> <small class="text-muted">Generate an endpoint authentication token for this user.</small></label>
 											</div>
 										</div>
-										<div class="checkbox checkbox-primary">
-											<input name="add_token" id="add_token" class="styled" type="checkbox" value="true" checked>
-											<label><strong>Generate Token</strong><br><span style="font-size: 75%; color: #777;">Generate an authentication token for this user.</span></label>
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="button" id="save-user-btn" class="btn btn-primary btn-sm pull-right">Save</button>
 										</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
-										<button type="submit" name="create_user" id="create_user" class="btn btn-primary btn-sm" disabled>Save</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
 
-						<!-- Reset Password Modal -->
-						<div class="modal fade" id="reset_pass-modal" tabindex="-1" role="dialog">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title">Reset Password for <span id="reset_pass-title">User</span></h3>
-									</div>
-									<div class="modal-body">
-										<h5 id="reset_pass_label"><strong>New Password</strong> <small>Password for the account.</small></h5>
-										<div class="form-group">
-											<input type="password" name="reset_pass" id="reset_pass" class="form-control input-sm" onFocus="validPass();" onKeyUp="validPass();" onBlur="validPass();" placeholder="[Required]" value=""/>
+							<!-- Delete User Modal -->
+							<div class="modal fade" id="del-user-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="del-user-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="del-user-label">Delete User?</h3>
 										</div>
-										<h5 id="reset_verify_label"><strong>Verify Password</strong></h5>
-										<div class="form-group">
-											<input type="password" name="reset_verify" id="reset_verify" class="form-control input-sm" onFocus="validPass();" onKeyUp="validPass();" onBlur="validPass();" placeholder="[Required]" value=""/>
+										<div class="modal-body">
+											<div class="text-muted" id="del-user-msg">Are you sure you want to delete this user?<br><small>This action is permanent and cannot be undone.</small></div>
 										</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
-										<button type="submit" name="save_pass" id="save_pass" class="btn btn-primary btn-sm" disabled>Save</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
-						<!-- Reset Expiry Modal -->
-						<div class="modal fade" id="reset_expiry-modal" tabindex="-1" role="dialog">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title">Reset Expiry for <span id="reset_expiry-title">User</span></h3>
-									</div>
-									<div class="modal-body">
-										<h5 id="reset_expires_label"><strong>Expires</strong> <small>Date that this user account expires.</small></h5>
-										<div class="form-group">
-											<div class="input-group date" id="reset_expires_datepicker">
-												<span class="input-group-addon input-sm" style="color: #555; background-color: #eee; border: 1px solid #ccc; border-right: 0;">
-													<span class="glyphicon glyphicon-calendar"></span>
-												</span>
-												<input type="text" name="reset_expires" id="reset_expires" class="form-control input-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" onFocus="validExpiry();" onKeyUp="validExpiry();" onBlur="validExpiry();" placeholder="[Optional]" value="" />
-											</div>
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="submit" name="del_user" id="del-user-btn" class="btn btn-danger btn-sm pull-right">Delete</button>
 										</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
-										<button type="submit" name="reset_expiry" id="reset_expiry" class="btn btn-primary btn-sm" value="">Save</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
+						</form><!-- end users-form -->
+					</div><!-- /.tab-pane -->
 
-						<!-- Delete User Modal -->
-						<div class="modal fade" id="delete_user-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Delete <span id="delete_user-title">User</span></h3>
-									</div>
-									<div class="modal-body">
-										<div class="text-muted">This action is permanent and cannot be undone.</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="delete_user" id="delete_user" class="btn btn-danger btn-sm pull-right" value="">Delete</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
-					</div> <!-- /.tab-pane -->
-<?php } ?>
-
-<?php if (!$cloud) { ?>
 					<div class="tab-pane fade in" id="database-tab">
-
-						<div style="padding: 16px 20px 8px;">
-<?php if (empty($pdo_error)) { ?>
-							<div style="margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo "Connected to: ".($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS)); ?></div>
-								</div>
-							</div>
-<?php } else { ?>
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $pdo_error; ?></div>
-								</div>
-							</div>
-<?php } ?>
-
-							<h5><strong>Database Type</strong> <small>Database connection type to use.</small></h5>
-							<div class="form-group" style="max-width: 449px;">
-								<select id="dsn_prefix" name="dsn_prefix" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="validConn(); toggleConnType();">
-									<option value="sqlite" <?php echo ($db['dsn']['prefix'] == "sqlite" ? "selected": ""); ?>>SQLite</option>
-									<option value="mysql" <?php echo ($db['dsn']['prefix'] == "mysql" ? "selected": ""); ?>>MySQL</option>
-								</select>
+						<div class="page-content">
+							<div id="database-success-alert" class="alert alert-success" role="alert">
+								<span class="glyphicon glyphicon-ok-sign"></span><span id="database-success-msg" class="text-muted">SUCCESS</span>
 							</div>
 
-							<div id="sqlite_db" class="<?php echo ($db['dsn']['prefix'] == "sqlite" ? "": "hidden"); ?>">
-								<h5 id="dsn_dbfile_label"><strong>Database</strong> <small>SQLite database file.</small></h5>
-								<div class="form-group" style="max-width: 449px;">
-									<select id="dsn_dbfile" name="dsn_dbfile" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onFocus="validConn();" onChange="validConn();">
-<?php foreach ($sqlite_dbs as $sqlite_db) { ?>
-										<option value="<?php echo $sqlite_db; ?>" <?php echo (basename($db['dsn']['dbpath']) == $sqlite_db ? "selected": ""); ?>><?php echo $sqlite_db; ?></option>
-<?php } ?>
-										<option value="">New...</option>
+							<div id="database-error-alert" class="alert alert-danger hidden" role="alert">
+								<span class="glyphicon glyphicon-exclamation-sign"></span><span id="database-error-msg" class="text-muted">ERROR</span>
+							</div>
+
+							<form method="post" id="dsn-form">
+								<input type="hidden" name="dsn_save" id="dsn-save" disabled/>
+
+								<div class="form-group">
+									<label class="control-label" for="dsn-prefix">Database Type <small>Database connection type to use.</small></label>
+									<select name="dsn_prefix" id="dsn-prefix" class="form-control selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body"/>
+										<option value="sqlite">SQLite</option>
+										<option value="mysql">MySQL</option>
 									</select>
 								</div>
 
-								<div id="new_db_wrapper" class="form-group has-feedback hidden" style="max-width: 449px;">
-									<input type="text" name="new_dbfile" id="new_dbfile" class="form-control input-sm" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" disabled/>
+								<div id="dsn-sqlite" class="hidden">
+									<input type="hidden" name="dsn_dbpath" id="dsn-dbpath"/>
+
+									<label class="control-label" for="dsn-dbfile">Database <small>SQLite database file.</small></label>
+									<div class="form-group">
+										<select id="dsn-dbfile-select" class="form-control selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body"/></select>
+									</div>
+
+									<div class="form-group has-feedback hidden">
+										<input type="text" class="form-control input-sm" id="dsn-dbfile"/>
+									</div>
 								</div>
 
-								<input type="hidden" name="dsn_dbpath" id="dsn_dbpath" value="<?php echo (isset($db['dsn']['dbpath']) ? $db['dsn']['dbpath'] : ""); ?>"/>
+								<div id="dsn-mysql" class="hidden">
+									<label class="control-label" for="dsn-host-port">Hostname &amp; Port <small>Hostname or IP address, and port number for the MySQL server.</small></label>
+									<div id="dsn-host-port" class="text-center">
+										<div class="form-group has-feedback pull-left" style="display: inline-block; width: 75%;">
+											<input type="text" class="form-control input-sm" name="dsn_host" id="dsn-host"/>
+										</div>
+
+										<span class="text-muted text-center" style="display: inline-block; width: 2%; height: 30px; padding-top: 4px;">:</span>
+
+										<div class="form-group has-feedback pull-right" style="display: inline-block; width: 22%;">
+											<input type="text" class="form-control input-sm" name="dsn_port" id="dsn-port"/>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="control-label" for="dsn-dbname">Database <small>MySQL database used for patch definitions.</small></label>
+										<input type="text" class="form-control input-sm" name="dsn_dbname" id="dsn-dbname"/>
+									</div>
+
+									<div class="form-group">
+										<label class="control-label" for="dsn-dbuser">Username <small>Username used to connect to the MySQL server.</small></label>
+										<input type="text" class="form-control input-sm" name="dsn_dbuser" id="dsn-dbuser"/>
+									</div>
+
+									<div class="form-group">
+										<label class="control-label" for="dsn-dbpass">Password <small>Password used to authenticate with the MySQL server.</small></label>
+										<input type="password" class="form-control input-sm" name="dsn_dbpass" id="dsn-dbpass"/>
+									</div>
+								</div>
+
+								<button type="button" id="dsn-save-btn" class="btn btn-primary btn-sm" style="width: 75px; margin-bottom: 8px;">Save</button>
+							</div>
+						</form><!-- end dsn-form -->
+					</div> <!-- /.tab-pane -->
+
+					<div class="tab-pane fade in" id="backup-tab">
+						<div class="page-content">
+							<div id="schedule-warning-alert" class="alert alert-warning hidden" role="alert">
+								<span class="glyphicon glyphicon-warning-sign"></span><span id="schedule-warning-msg" class="text-muted">No backups scheduled.</span>
 							</div>
 
-							<div id="mysql_db" class="<?php echo ($db['dsn']['prefix'] == "mysql" ? "": "hidden"); ?>">
-								<h5 id="dsn_host_label"><strong>Hostname &amp; Port</strong> <small>Hostname or IP address, and port number for the MySQL server.</small></h5>
-								<div class="form-group has-feedback" style="display: inline-block; margin-bottom: 5px;">
-									<input type="text" name="dsn_host" id="dsn_host" class="form-control input-sm" style="width: 334px;" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" value="<?php echo (isset($db['dsn']['host']) ? $db['dsn']['host'] : ""); ?>"/>
-								</div>
-								<div class="form-group text-center" style="display: inline-block; width: 3px; margin-bottom: 5px;">:</div>
-								<div class="form-group has-feedback" style="display: inline-block; margin-bottom: 5px;">
-									<input type="text" name="dsn_port" id="dsn_port" class="form-control input-sm" style="width: 105px;" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" value="<?php echo (isset($db['dsn']['port']) ? $db['dsn']['port'] : ""); ?>"/>
-								</div>
-
-								<h5 id="dsn_dbname_label"><strong>Database</strong> <small>MySQL database used for patch definitions.</small></h5>
-								<div class="form-group has-feedback" style="max-width: 449px;">
-									<input type="text" name="dsn_dbname" id="dsn_dbname" class="form-control input-sm" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" value="<?php echo (isset($db['dsn']['dbname']) ? $db['dsn']['dbname'] : ""); ?>"/>
-								</div>
-
-								<h5 id="dbuser_label"><strong>Username</strong> <small>Username used to connect to the MySQL server.</small></h5>
-								<div class="form-group has-feedback" style="max-width: 449px;">
-									<input type="text" name="dbuser" id="dbuser" class="form-control input-sm" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" value="<?php echo (isset($db['username']) ? $db['username'] : ""); ?>"/>
-								</div>
-								<h5 id="dbpass_label"><strong>Password</strong> <small>Password used to authenticate with the MySQL server.</small></h5>
-								<div class="form-group has-feedback" style="max-width: 449px;">
-									<input type="password" name="dbpass" id="dbpass" class="form-control input-sm" onFocus="validConn();" onKeyUp="validConn();" onBlur="validConn();" value=""/>
-								</div>
-							</div>
-
-							<button type="submit" name="dbconnect" id="dbconnect" class="btn btn-primary btn-sm" style="width: 75px;" disabled>Save</button>
+							<label class="control-label">Backup Schedule <small>Days of the week for an automatic backup to run.<br><strong>Note:</strong> Backups will occur at 12:00 AM (this server's local time) on the specified days.</small></label>
+							<table style="width: 100%;">
+								<tr>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="0"/>
+											<label for="sun"> Sun<span class="hidden-xs">day</span></label>
+										</div>
+									</td>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="1"/>
+											<label for="mon"> Mon<span class="hidden-xs">day</span></label>
+										</div>
+									</td>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="2"/>
+											<label for="tue"> Tue<span class="hidden-xs">sday</span></label>
+										</div>
+									</td>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="3"/>
+											<label for="wed"> Wed<span class="hidden-xs">nesday</span></label>
+										</div>
+									</td>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="4"/>
+											<label for="thu"> Thu<span class="hidden-xs">rsday</span></label>
+										</div>
+									</td>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="5"/>
+											<label for="fri"> Fri<span class="hidden-xs">day</span></label>
+										</div>
+									</td>
+									<td style="width: 14%;">
+										<div class="checkbox checkbox-primary checkbox-inline">
+											<input name="schedule" class="styled" type="checkbox" value="6"/>
+											<label for="sat"> Sat<span class="hidden-xs">urday</span></label>
+										</div>
+									</td>
+								</tr>
+							</table>
 						</div>
 
-						<!-- Database Success Modal -->
-						<div class="modal fade" id="database_change-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Database Changed</h3>
-									</div>
-									<div class="modal-body">
-										<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
-											<div class="panel-body">
-												<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo (empty($pdo_error) ? "Connected to: ".($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS)) : ""); ?>. Log out for changes to take effect.</div>
+						<div class="page-content-alt">
+							<label class="control-label" for="backup-retention">Backup Retention <small>Number of backup archives to be retained on the server.</small></label>
+							<div class="form-group">
+								<input type="text" class="form-control input-sm" id="backup-retention" placeholder="[1 - 30]"/>
+								<span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+							</div>
+						</div>
+
+ 						<div class="page-content">
+							<div id="backup-error-alert" class="alert alert-danger hidden" role="alert">
+								<span class="glyphicon glyphicon-exclamation-sign"></span><span id="backup-error-msg" class="text-muted">ERROR</span>
+							</div>
+
+							<div id="backup-success-alert" class="alert alert-success hidden" role="alert">
+								<span class="glyphicon glyphicon-ok-sign"></span><span id="backup-success-msg" class="text-muted">SUCCESS</span>
+							</div>
+
+							<label class="control-label">Manual Backup <small>Perform a manual backup of the database.</small></label>
+							<div class="text-left">
+								<button type="button" id="manual-backup-btn" class="btn btn-primary btn-sm" style="width: 75px; margin-bottom: 8px;" data-toggle="modal" data-target="#backup-modal">Backup</button>
+							</div>
+						</div>
+
+						<form method="post" id="backup-form">
+							<!-- Manual Backup Modal -->
+							<div class="modal fade" id="backup-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="backup-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="backup-label">Manual Backup</h3>
+										</div>
+										<div class="modal-body">
+											<div class="form-group">
+												<label for="title-current">Backup Format <small>Select the format for the database backup.<br><strong>Note:</strong> The backup may only be restored to the corresponding database type.</small></label>
+												<select name="backup_type" id="backup-type" class="form-control selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body"/>
+													<option value="sqlite">SQLite</option>
+													<option value="mysql">MySQL</option>
+												</select>
 											</div>
 										</div>
-									</div>
-									<div class="modal-footer">
-										<a href="logout.php" role="button" class="btn btn-primary btn-sm pull-right">Logout</a>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
-					</div> <!-- /.tab-pane -->
-<?php } ?>
-
-					<div class="tab-pane active fade in" id="backup-tab">
-
-						<div style="padding: 16px 20px 12px;">
-							<div id="backup-alert-msg" style="margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>No backups scheduled.</div>
-								</div>
-							</div>
-
-							<h5><strong>Backup Schedule</strong> <small>Days of the week for an automatic backup to run.<br><strong>Note:</strong> Backups will occur at 12:00 AM (this server's local time) on the specified days.</small></h5>
-
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[0]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="0" <?php echo (in_array(0, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="sun"> Sun </label>
-							</div>
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[1]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="1" <?php echo (in_array(1, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="mon"> Mon </label>
-							</div>
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[2]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="2" <?php echo (in_array(2, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="tue"> Tue </label>
-							</div>
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[3]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="3" <?php echo (in_array(3, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="wed"> Wed </label>
-							</div>
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[4]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="4" <?php echo (in_array(4, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="thu"> Thu </label>
-							</div>
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[5]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="5" <?php echo (in_array(5, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="fri"> Fri </label>
-							</div>
-							<div class="checkbox checkbox-primary checkbox-inline">
-								<input name="schedule" id="schedule[6]" class="styled" type="checkbox" onChange="updateSchedule(this);" value="6" <?php echo (in_array(6, $scheduled) ? "checked" : ""); ?> <?php echo ($pdo ? "" : "disabled"); ?>>
-								<label for="sat"> Sat </label>
-							</div>
-						</div>
-
-						<hr>
-
-						<div style="padding: 5px 20px 1px; background-color: #f9f9f9;">
-							<h5 id="retention_label"><strong>Backup Retention</strong> <small>Number of backup archives to be retained on the server.</small></h5>
-							<div class="form-group has-feedback" style="width: 105px;">
-								<input type="text" id="retention" class="form-control input-sm" onFocus="validRetention(this, 'retention_label');" onKeyUp="validRetention(this, 'retention_label');" onChange="updateRetention(this);" placeholder="[1 - 30]" value="<?php echo $backup['retention']; ?>" />
-							</div>
-						</div>
-
-						<hr>
-
- 						<div style="padding: 5px 20px 16px;">
-							<div style="margin-top: 7px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($backup_error) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $backup_error; ?></div>
-								</div>
-							</div>
-
-							<div style="margin-top: 7px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($backup_success) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $backup_success; ?></div>
-								</div>
-							</div>
-
-							<h5><strong>Manual Backup</strong> <small>Perform a manual backup of the database.</small></h5>
-							<button type="button" class="btn btn-primary btn-sm" style="width: 75px;" data-toggle="modal" data-target="#backup-modal"  <?php echo ($pdo ? "" : "disabled"); ?>>Backup</button>
-						</div>
-
-						<!-- Manual Backup Modal -->
-						<div class="modal fade" id="backup-modal" tabindex="-1" role="dialog">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title">Manual Backup</h3>
-									</div>
-									<div class="modal-body">
-
-										<h5><strong>Backup Format</strong> <small>Select the format for the database backup.<br><strong>Note:</strong> The backup may only be restored to the corresponding database type.</small></h5>
-										<div class="form-group">
-											<select id="backup_type" name="backup_type" class="selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body">
-												<option value="sqlite" <?php echo ($db['dsn']['prefix'] == "sqlite" ? "selected": ""); ?>>SQLite</option>
-												<option value="mysql" <?php echo ($db['dsn']['prefix'] == "mysql" ? "selected": ""); ?>>MySQL</option>
-											</select>
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="submit" name="backup" class="btn btn-primary btn-sm pull-right">Backup</button>
 										</div>
-
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="backup" id="backup" class="btn btn-primary btn-sm" >Backup</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
+						</form><!-- end backup-form -->
 					</div> <!-- /.tab-pane -->
 
 					<div class="tab-pane fade in" id="restore-tab">
-
-						<div style="padding: 16px 20px 8px;">
-							<div style="margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($upload_error) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $upload_error; ?></div>
-								</div>
+						<div class="page-content">
+							<div id="restore-error-alert" class="alert alert-danger hidden" role="alert">
+								<span class="glyphicon glyphicon-exclamation-sign"></span><span id="restore-error-msg" class="text-muted">ERROR</span>
 							</div>
 
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($upload_success) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $upload_success; ?></div>
-								</div>
+							<div id="restore-success-alert" class="alert alert-success hidden" role="alert">
+								<span class="glyphicon glyphicon-ok-sign"></span><span id="restore-success-msg" class="text-muted">SUCCESS</span>
 							</div>
 
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($delete_error) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $delete_error; ?></div>
-								</div>
-							</div>
-
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($delete_success) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $delete_success; ?></div>
-								</div>
-							</div>
-
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger <?php echo (empty($restore_error) ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $restore_error; ?></div>
-								</div>
-							</div>
-
-							<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success <?php echo (empty($restore_success) || $netsus == 0 ? "hidden" : ""); ?>">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $restore_success; ?> <a href="logout.php">Log Out</a> for changes to take effect.</div>
-								</div>
-							</div>
-
-							<h5><strong>Available Backups</strong> <small>Click the backup filename to <?php echo ($cloud ? "restore" : "download or restore"); ?> a backup archive.<?php if (!$cloud) { ?><br>Backup archives are saved in <a data-toggle="modal" href="#backup_path-modal"><span style="font-family:monospace;"><?php echo $backup['path']; ?></span></a> on this server.<?php } ?></small></h5>
-							
+							<label class="control-label" for="backups">Available Backups</label>
 						</div>
 
-						<table id="backups" class="table table-hover" style="border-bottom: 1px solid #ddd;">
+						<table id="backups" class="table table-hover" style="min-width: 768px; width: 100%; border-bottom: 1px solid #ddd;">
 							<thead>
 								<tr>
 									<th>Filename</th>
@@ -1490,233 +917,181 @@ if (!$cloud) { ?>
 								</tr>
 							</thead>
 							<tbody>
-<?php foreach ($backups as $value) { ?>
-								<tr>
-									<td>
-										<div class="dropdown">
-											<a href="#" id="<?php echo $value['file']; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><?php echo $value['file']; ?></a>
-											<ul class="dropdown-menu" aria-labelledby="<?php echo $value['file']; ?>">
-<?php if (!$cloud) { ?>
-												<li><a href="patchCtl.php?download=<?php echo $value['file']; ?>">Download</a></li>
-<?php } ?>
-												<li class="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "disabled" : ""); ?>"><a data-toggle="<?php echo (!$pdo || strtolower($value['type']) != $db['dsn']['prefix'] ? "" : "modal"); ?>" href="#restore-modal" onClick="$('#restore-title').text('<?php echo $value['file']; ?>'); $('#restore').val('<?php echo $value['file']; ?>');">Restore</a></li>
-											</ul>
-										</div>
-									</td>
-									<td><?php echo $value['type']; ?></td>
-									<td><?php echo gmdate("Y-m-d\TH:i:s\Z", $value['date']); ?></td>
-									<td><?php echo formatSize($value['size'], 0); ?></td>
-									<td align="right"><button type="button" name="deletepromt" class="btn btn-default btn-sm" data-toggle="modal" data-target="#delete_backup-modal" onClick="$('#delete_backup-title').text('<?php echo $value['file']; ?>'); $('#delete_backup').val('<?php echo $value['file']; ?>');">Delete</button></td>
-								</tr>
-<?php } ?>
 							</tobdy>
 						</table>
 
-						<!-- Backup Path Modal -->
-						<div class="modal fade" id="backup_path-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Change Backup Path</h3>
-									</div>
-									<div class="modal-body">
-
-										<h5 id="db_backup_path_label"><strong>Backup Path</strong> <small>Location to save backups.</small></h5>
-										<div class="form-group has-feedback" style="max-width: 449px;">
-											<input type="text" name="backup_path" id="backup_path" class="form-control input-sm" onFocus="validPath(this, 'save_backup_path', 'db_backup_path_label');" onKeyUp="validPath(this, 'save_backup_path', 'db_backup_path_label');" onBlur="validPath(this, 'save_backup_path', 'db_backup_path_label');" value="<?php echo $backup['path']; ?>"/>
+						<form method="post" id="restore-form" enctype="multipart/form-data">
+							<!-- Backup Path Modal -->
+							<div class="modal fade" id="backup-path-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="backup-path-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="backup-path-label">Backup Path</h3>
 										</div>
-
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" style="width: 75px;" >Cancel</button>
-										<button type="submit" name="save_backup_path" id="save_backup_path" class="btn btn-primary btn-sm" style="width: 75px;" disabled>Save</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
-						<!-- Upload Modal -->
-						<div class="modal fade" id="uploadBackup" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Upload Backup</h3>
-									</div>
-									<div class="modal-body">
-
-										<h5><strong>Archive</strong> <small>Select a backup archive file (gzipped SQLite or MySQL dump file) to add to the list of available backups.</small></h5>
-										<input type="file" name="upload_file" id="upload_file" class="form-control input-sm" onChange="document.getElementById('upload').disabled = this.value == '';" >
-
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="upload" id="upload" class="btn btn-primary btn-sm" disabled >Upload</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
-						<!-- Restore Backup Modal -->
-						<div class="modal fade" id="restore-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Restore <span id="restore-title">Backup</span></h3>
-									</div>
-									<div class="modal-body">
-										<div class="text-muted">Are you sure you want to restore this backup?</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="restore" id="restore" class="btn btn-primary btn-sm pull-right" value="">Restore</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
-
-						<!-- Restore Success Modal -->
-						<div class="modal fade" id="restore_complete-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Restore Complete</h3>
-									</div>
-									<div class="modal-body">
-										<div style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success">
-											<div class="panel-body">
-												<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $restore_success; ?></div>
+										<div class="modal-body">
+											<label class="control-label" for="backup-path">Backup Path <small>Location on this server to save backups.<br><strong>Note:</strong> The web server user requires write access for the backup path.</small></label>
+											<div class="form-group">
+												<input type="text" class="form-control input-sm" name="backup_path" id="backup-path" placeholder="[Required]"/>
 											</div>
 										</div>
-									</div>
-									<div class="modal-footer">
-										<a href="logout.php" role="button" class="btn btn-primary btn-sm pull-right">Logout</a>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="submit" name="save_backup_path" id="save-backup-path-btn" class="btn btn-primary btn-sm pull-right">Save</button>
+										</div>
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
 
-						<!-- Delete Backup Modal -->
-						<div class="modal fade" id="delete_backup-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-							<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h3 class="modal-title" id="modalLabel">Delete <span id="delete_backup-title">Backup</span></h3>
-									</div>
-									<div class="modal-body">
-										<div class="text-muted">This action is permanent and cannot be undone.</div>
-									</div>
-									<div class="modal-footer">
-										<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left" >Cancel</button>
-										<button type="submit" name="delete_backup" id="delete_backup" class="btn btn-danger btn-sm pull-right" value="">Delete</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- /.modal -->
+							<!-- Upload Modal -->
+							<div class="modal fade" id="upload-backup-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="upload-backup-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="upload-backup-label">Upload Backup</h3>
+										</div>
+										<div class="modal-body">
+											<label class="control-label" for="backup-file">Archive <small>Select a backup archive file (gzipped SQLite or MySQL dump file) to add to the list of available backups.</small></label>
+											<div class="form-group">
+												<input type="file" class="form-control input-sm" name="backup_file" id="backup-file"/>
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="submit" name="upload_backup" id="upload-backup-btn" class="btn btn-primary btn-sm pull-right">Upload</button>
+										</div>
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
 
+							<!-- Restore Backup Modal -->
+							<div class="modal fade" id="restore-backup-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="restore-backup-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="restore-backup-label">Restore Backup?</h3>
+										</div>
+										<div class="modal-body">
+											<div class="text-muted" id="restore-backup-msg">Are you sure you want to restore this backup?<br><small>This action is permanent and cannot be undone.</small></div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="submit" name="restore_backup" id="restore-backup-btn" class="btn btn-primary btn-sm pull-right">Restore</button>
+										</div>
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
+
+							<!-- Delete Backup Modal -->
+							<div class="modal fade" id="del-backup-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="del-backup-label" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title" id="del-backup-label">Delete Backup?</h3>
+										</div>
+										<div class="modal-body">
+											<div class="text-muted" id="del-backup-msg">Are you sure you want to delete this backup?<br><small>This action is permanent and cannot be undone.</small></div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+											<button type="submit" name="del_backup" id="del-backup-btn" class="btn btn-danger btn-sm pull-right">Delete</button>
+										</div>
+									</div><!-- /.modal-content -->
+								</div><!-- /.modal-dialog -->
+							</div><!-- /.modal -->
+						</form><!-- end restore-form -->
 					</div> <!-- /.tab-pane -->
 
 					<div class="tab-pane fade in" id="subscription-tab">
+						<div class="page-content">
+							<div id="subs-info-alert" class="alert alert-info hidden" role="alert">
+								<span class="glyphicon glyphicon-info-sign"></span><span id="subs-info-msg" class="text-muted">INFO</span>
+							</div>
 
-						<div style="padding: 16px 20px 16px;">
-							<div id="subs-info" style="margin-bottom: 16px;" class="panel panel-primary hidden">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-info glyphicon glyphicon-info-sign" style="padding-right: 12px;"></span>Register for a <a target="_blank" href="https://kinobi.io/kinobi/">Kinobi subscription</a> to provide patch definitions.</div>
+							<div id="subs-success-alert" class="alert alert-success hidden" role="alert">
+								<span class="glyphicon glyphicon-ok-sign"></span><span id="subs-success-msg" class="text-muted">SUCCESS</span>
+							</div>
+
+							<div id="subs-warning-alert" class="alert alert-warning hidden" role="alert">
+								<span class="glyphicon glyphicon-warning-sign"></span><span id="subs-warning-msg" class="text-muted">WARNING</span>
+							</div>
+
+							<div id="subs-error-alert" class="alert alert-danger hidden" role="alert">
+								<span class="glyphicon glyphicon-exclamation-sign"></span><span id="subs-error-msg" class="text-muted">ERROR</span>
+							</div>
+
+							<!-- Disable for cloud -->
+							<form method="post" id="subscription-form">
+								<input type="hidden" name="subscribe" id="subscribe" disabled/>
+
+								<div class="form-group">
+									<label class="control-label" for="subs-url">Server URL <small>URL for the subscription server.</small></label>
+									<input type="text" class="form-control input-sm" name="subs_url" id="subs-url" placeholder="[Required]"/>
 								</div>
-							</div>
 
-							<div id="subs-invalid" style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger hidden">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span>Invalid token. Please ensure the Server URL and Token values are entered exactly as they were provided.</div>
+								<div class="form-group">
+									<label class="control-label" for="subs-token">Token <small>Auth token for the subscription server.</small></label>
+									<input type="text" class="form-control input-sm" name="subs_token" id="subs-token" placeholder="[Required]"/>
 								</div>
-							</div>
 
-							<div id="subs-active" style="margin-top: 0px; margin-bottom: 16px; border-color: #4cae4c;" class="panel panel-success hidden">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expires: <?php echo date('M j, Y', $subs_resp['expires']); ?>.</div>
+								<div class="text-left">
+									<button type="button" id="subscribe-btn" class="btn btn-primary btn-sm" style="width: 75px; margin-bottom: 8px;">Apply</button>
 								</div>
-							</div>
-
-							<div id="subs-expiring" style="margin-top: 0px; margin-bottom: 16px; border-color: #eea236;" class="panel panel-warning hidden">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-warning glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expires: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
-								</div>
-							</div>
-
-							<div id="subs-expired" style="margin-top: 0px; margin-bottom: 16px; border-color: #d43f3a;" class="panel panel-danger hidden">
-								<div class="panel-body">
-									<div class="text-muted"><span class="text-danger glyphicon glyphicon-exclamation-sign" style="padding-right: 12px;"></span><?php echo $subs_resp['type']; ?> subscription expired: <?php echo date('M j, Y', $subs_resp['expires']); ?>. <a target="_blank" href="<?php echo $subs_resp['renew']; ?>">Click here to renew</a>.</div>
-								</div>
-							</div>
-<?php if (!$cloud) { ?>
-							<h5 id="subs_url_label"><strong>Server URL</strong> <small>URL for the subscription server.</small></h5>
-							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" name="subs_url" id="subs_url" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['url']; ?>" <?php echo (empty($pdo_error) ? "" : "disabled") ?>/>
-							</div>
-
-							<h5 id="subs_token_label"><strong>Token</strong> <small>Auth token for the subscription server.</small></h5>
-							<div class="form-group has-feedback" style="max-width: 449px;">
-								<input type="text" name="subs_token" id="subs_token" class="form-control input-sm" onFocus="validSubscribe();" onKeyUp="validSubscribe();" onBlur="validSubscribe();" placeholder="[Required]" value="<?php echo $subs['token']; ?>" <?php echo (empty($pdo_error) ? "" : "disabled") ?>/>
-							</div>
-
-							<div class="text-left">
-								<button type="submit" name="subscribe" id="subscribe" class="btn btn-primary btn-sm" style="width: 75px;" disabled>Apply</button>
-							</div>
-<?php } ?>
+							</form><!-- end subscription-form -->
+							<!-- end Disable for cloud -->
 						</div>
 
-<?php if (isset($subs_resp['endpoint']) && $subs_resp['type'] !== "Server") { ?>
-						<hr>
-
-						<div style="padding: 5px 20px 1px; background-color: #f9f9f9;">
-							<h5><strong>Check-In Frequency</strong> <small>Frequency at which imported titles are refreshed.</small></h5>
-							<div class="form-group" style="max-width: 449px;">
-								<select id="subs_refresh" name="subs_refresh" class="selectpicker" data-style="btn-default btn-sm" data-width="449px" data-container="body" onChange="subsRefresh(this);" <?php echo (empty($subs_resp) ? "disabled" : ""); ?>>
-									<option value="300" <?php echo ($subs['refresh'] == "300" ? "selected" : ""); ?>>Every 5 minutes</option>
-									<option value="900" <?php echo ($subs['refresh'] == "900" ? "selected" : ""); ?>>Every 15 minutes</option>
-									<option value="1800" <?php echo ($subs['refresh'] == "1800" ? "selected" : ""); ?>>Every 30 minutes</option>
-									<option value="3600" <?php echo ($subs['refresh'] == "3600" ? "selected" : ""); ?>>Every 60 minutes</option>
+						<!-- Exclude for server -->
+						<div class="page-content-alt hidden">
+							<label class="control-label" for="subs-refresh">Check-In Frequency <small>Frequency at which imported titles are refreshed.</small></label>
+							<div class="form-group">
+								<select id="subs-refresh" class="form-control selectpicker" data-style="btn-default btn-sm" data-width="100%" data-container="body"/>
+									<!-- <option value="300">Every 5 minutes</option> -->
+									<option value="900">Every 15 minutes</option>
+									<option value="1800">Every 30 minutes</option>
+									<option value="3600">Every 60 minutes</option>
 								</select>
+								<span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
 							</div>
 						</div>
+						<!-- end Exclude for server -->
 
-						<hr>
-<?php }
-if (isset($subs_resp['type']) && $subs_resp['type'] == "Server") { ?>
-						<hr>
-
-						<div style="padding: 5px 20px 1px; <?php echo ($subs_resp['type'] == "Server" ? "background-color: #f9f9f9;" : ""); ?>">
+						<!-- Server only -->
+						<div class="page-content-alt hidden">
 							<div class="checkbox checkbox-primary">
-								<input name="api_auto" id="api_auto" class="styled" type="checkbox" value="true" onChange="toggleAPIAuto();" <?php echo ($api['auto'] ? "checked" : ""); ?>>
-								<label><strong>API Auto-Enable</strong><br><span style="font-size: 75%; color: #777;">Automatically enable items imported via the API.</span></label>
+								<input id="api-req-auth" class="styled" type="checkbox"/>
+								<label><strong>Require Endpoint Authentication</strong><br><small>Require authentication for API endpoints.<br><strong>Note:</strong> Jamf Pro does not currently support authentication for reading from external patch sources.</small></label>
 							</div>
 						</div>
+						<!-- end Server only -->
 
-						<hr>
-
-						<div style="padding: 5px 20px 1px; <?php echo ($subs_resp['type'] == "Server" ? "" : "background-color: #f9f9f9;"); ?>">
+						<!-- Subscription only -->
+						<div class="page-content hidden">
 							<div class="checkbox checkbox-primary">
-								<input name="api_reqauth" id="api_reqauth" class="styled" type="checkbox" value="true" onChange="toggleAPIAccess();" <?php echo ($api['reqauth'] ? "checked" : ""); ?> <?php echo (sizeof($api_users) == 0 ? "disabled" : ""); ?>>
-								<label><strong>Require Endpoint Authentication</strong><br><span style="font-size: 75%; color: #777;">Require authentication for API endpoints.<br><strong>Note:</strong> Jamf Pro does not currently support authentication for reading from external patch sources.</span></label>
+								<input id="api-auto-enable" class="styled" type="checkbox">
+								<label><strong>API Auto-Enable</strong><br><small>Automatically enable items imported via the API.</small></label>
 							</div>
 						</div>
-<?php } ?>
+						<!-- end Subscription only -->
 					</div> <!-- /.tab-pane -->
-
 				</div> <!-- end .tab-content -->
-			</form> <!-- end Database form -->
 
-			<script type="text/javascript">
-				$(document).ready(function() {
-					$('.table-select').selectpicker({
-						style: 'btn-default btn-sm',
-						width: 'fit',
-						container: 'body'
-					});
-				});
-			</script>
+				<!-- License Modal -->
+				<div class="modal fade" id="license-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header text-center"></div>
+							<div class="modal-body">
+								<div id="license-file" class="well well-sm" style="max-height: 254px; overflow-y: scroll"></div>
+
+								<div class="checkbox checkbox-primary hidden">
+									<input id="license-agree" class="styled" type="checkbox"/>
+									<label>I have read and accepted the terms of the license agreement.</label>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" data-dismiss="modal" id="license-close-btn" class="btn btn-default btn-sm pull-right">Close</button>
+							</div>
+						</div><!-- /.modal-content -->
+					</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
 <?php include "inc/footer.php"; ?>

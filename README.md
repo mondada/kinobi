@@ -23,7 +23,7 @@ Supported operating systems:
 * CentOS 6.4 or later
 
 System requirements:
-* 20 GB of disk space available 
+* 20 GB of disk space available
 * 1 GB of RAM
 
 Optional:

@@ -69,7 +69,7 @@ if (isset($api_token)) {
 	} else {
 		$username = $_SERVER['PHP_AUTH_USER'];
 		$password = hash("sha256", $_SERVER['PHP_AUTH_PW']);
-	
+
 		$users = getSettingUsers($pdo);
 
 		$app->authorzied = (array_key_exists($username, $users) && $users[$username]['password'] == $password && (!isset($users[$username]['expires']) || $users[$username]['expires'] > time()) && isset($users[$username]['api']) ? $users[$username]['api'] : $app->authorzied);

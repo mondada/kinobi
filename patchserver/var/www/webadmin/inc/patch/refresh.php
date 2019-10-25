@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.3
  *
  */
 
@@ -22,7 +22,7 @@ if (!empty($subs_resp) && $subs_resp['timestamp'] - (14*24*60*60) >= $subs_resp[
 	}
 }
 
-if (isset($subs_resp['source']) && $last_checkin + $subs['refresh'] < time()) {
+if (isset($subs_resp['functions']) && isset($subs_resp['source']) && $last_checkin + $subs['refresh'] < time()) {
 	require_once $subs_resp['functions'];
 
     // Get Remote /software Endpoint
@@ -36,7 +36,7 @@ if (isset($subs_resp['source']) && $last_checkin + $subs['refresh'] < time()) {
 
     // Imported Titles
     $imported_titles = $pdo->query("SELECT name_id, modified FROM titles WHERE source_id = 1")->fetchAll(PDO::FETCH_ASSOC);
-    
+
     // Refresh Titles
     foreach ($imported_titles as $imported) {
         if ($imported['modified'] < $timestamps[$imported['name_id']]) {

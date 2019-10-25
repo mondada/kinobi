@@ -1,154 +1,88 @@
-
-		</div>
-		<!-- /#page-content-wrapper -->
-
-	</div>
-	<!-- /#wrapper -->
-
-	<script>
-		function showAbout() {
-			$('#about-version').removeClass('hidden');
-			$('#about-license').addClass('hidden');
-			$('#show-license').removeClass('hidden');
-			$('#show-version').addClass('hidden');
-		}
-		function showLicense() {
-			$('#about-version').addClass('hidden');
-			$('#about-license').removeClass('hidden');
-			$('#show-license').addClass('hidden');
-			$('#show-version').removeClass('hidden');
-		}
-
-		function validChangePass() {
-			var current_pass = document.getElementById('current_pass');
-			var change_pass = document.getElementById('change_pass');
-			var change_verify = document.getElementById('change_verify');
-			if (/^.{1,128}$/.test(current_pass.value)) {
-				hideError(current_pass, 'current_pass_label');
-			} else {
-				showError(current_pass, 'current_pass_label');
-			}
-			if (/^.{1,128}$/.test(change_pass.value)) {
-				hideError(change_pass, 'change_pass_label');
-			} else {
-				showError(change_pass, 'change_pass_label');
-			}
-			if (/^.{1,128}$/.test(change_verify.value) && change_verify.value == change_pass.value) {
-				hideError(change_verify, 'change_verify_label');
-			} else {
-				showError(change_verify, 'change_verify_label');
-			}
-			if (/^.{1,128}$/.test(current_pass.value) && /^.{1,128}$/.test(change_verify.value) && change_verify.value == change_pass.value) {
-				$('#save_change').prop('disabled', false);
-			} else {
-				$('#save_change').prop('disabled', true);
-			}
-		}
-	</script>
 <?php
-// Change Password
-if (isset($_POST['save_change'])) {
-	$users = getSettingUsers($pdo);
-	if ($users[$_SESSION['username']]['password'] == hash("sha256", $_POST['current_pass'])) {
-		setSettingUser($pdo, $_SESSION['username'], "password", hash("sha256", $_POST['change_pass'])); ?>
-	<script>
-		$(document).ready(function() {
-			$('#change_success-modal').modal('show');
-		});
-	</script>
-<?php } else { ?>
-	<script>
-		$(document).ready(function() {
-			showError(document.getElementById('current_pass'), 'current_pass_label');
-			$('#change_pass-modal').modal('show');
-			$('#current_pass_err').removeClass('hidden');
-		});
-	</script>
-<?php }
-} ?>
-	<!-- About Modal -->
-	<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-label" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header text-center">
-					<img src="images/kinobi-logo.svg" height="45">
-				</div>
-				<div class="modal-body">
-					<div id="about-version" class="text-center">
-						<p>Version 1.2.1</p>
-						<p class="text-muted" style="font-size: 12px;"><a href="https://kinobi.io" target="_blank">kinobi.io</a><br><a href="https://mondada.github.io" target="_blank">mondada.github.io</a></p>
-						<p class="text-muted" style="font-size: 12px;">Copyright &copy; 2018-2019 Mondada Pty Ltd.<br>All rights reserved.</p>
-					</div>
 
-					<div id="about-license" class="hidden">
-						<div class="well well-sm" style="max-height: 254px; overflow-y: scroll"><?php echo file_get_contents("../../kinobi/LICENSE"); ?></div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" id="show-license" class="btn btn-default btn-sm pull-left" onClick="showLicense();">License</button>
-					<button type="button" id="show-version" class="btn btn-default btn-sm pull-left hidden" onClick="showAbout();">About</button>
-					<button type="button" class="btn btn-default btn-sm pull-right" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- /.modal -->
+/**
+ * Kinobi - external patch source for Jamf Pro
+ *
+ * @author      Duncan McCracken <duncan.mccracken@mondada.coma.au>
+ * @copyright   2018-2019 Mondada Pty Ltd
+ * @link        https://mondada.github.io
+ * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
+ * @version     1.3
+ *
+ */
 
-	<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST" name="UserMenu" id="UserMenu">
-		<!-- Change Password Modal -->
-		<div class="modal fade" id="change_pass-modal" tabindex="-1" role="dialog">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h3 class="modal-title">Change Password</h3>
-					</div>
-					<div class="modal-body">
-						<h5 id="current_pass_label"><strong>Current Password</strong></h5>
-						<div class="form-group">
-							<input type="password" name="current_pass" id="current_pass" class="form-control input-sm" aria-describedby="current_pass_err" onFocus="validChangePass();" onKeyUp="validChangePass();" onBlur="validChangePass();" placeholder="[Required]" value=""/>
-							<span id="current_pass_err" class="help-block hidden">Incorrect Password</span>
-						</div>
-						<h5 id="change_pass_label"><strong>New Password</strong></h5>
-						<div class="form-group">
-							<input type="password" name="change_pass" id="change_pass" class="form-control input-sm" onFocus="validChangePass();" onKeyUp="validChangePass();" onBlur="validChangePass();" placeholder="[Required]" value=""/>
-						</div>
-						<h5 id="change_verify_label"><strong>Verify Password</strong></h5>
-						<div class="form-group">
-							<input type="password" name="change_verify" id="change_verify" class="form-control input-sm" onFocus="validChangePass();" onKeyUp="validChangePass();" onBlur="validChangePass();" placeholder="[Required]" value=""/>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
-						<button type="submit" name="save_change" id="save_change" class="btn btn-primary btn-sm" disabled>Save</button>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- /.modal -->
-	</form>
+?>
 
-	<!-- Password Success Modal -->
-	<div class="modal fade" id="change_success-modal" tabindex="-1" role="dialog">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h3 class="modal-title">Change Password</h3>
-				</div>
-				<div class="modal-body">
-					<div style="margin-bottom: 1px; border-color: #4cae4c;" class="panel panel-success">
-						<div class="panel-body">
-							<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span>Successfully changed password for <?php echo $_SESSION['username']; ?>.</div>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" data-dismiss="modal" class="btn btn-default btn-sm">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- /.modal -->
+				<!-- About Modal -->
+				<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header text-center"></div>
+							<div class="modal-body">
+								<div id="about-version" class="text-center">
+									<p>Version 1.3</p>
+									<p class="text-muted" style="font-size: 12px;"><a href="https://kinobi.io" target="_blank">kinobi.io</a><br><a href="https://mondada.github.io" target="_blank">mondada.github.io</a></p>
+									<p class="text-muted" style="font-size: 12px;">Copyright &copy; 2018-2019 Mondada Pty Ltd.<br>All rights reserved.</p>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" id="show-license" class="btn btn-default btn-sm pull-left" data-dismiss="modal" data-toggle="modal" data-target="#license-modal">License</button>
+								<button type="button" class="btn btn-default btn-sm pull-right" data-dismiss="modal">Close</button>
+							</div>
+						</div><!-- /.modal-content -->
+					</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
 
-</body>
+				<!-- Change Password Modal -->
+				<div class="modal fade" id="change-passwd-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="change-passwd-label" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h3 class="modal-title" id="change-passwd-label">Change Password</h3>
+							</div>
+							<div class="modal-body">
+								<div class="panel panel-success hidden" style="margin-bottom: 1px; border-color: #4cae4c;">
+									<div class="panel-body">
+										<div class="text-muted"><span class="text-success glyphicon glyphicon-ok-sign" style="padding-right: 12px;"></span>Your password has been changed.</div>
+									</div>
+								</div>
 
+								<div class="form-group">
+									<label class="control-label" for="current-passwd">Current Password</label>
+									<input type="password" autocomplete="off" class="form-control input-sm" name="current_passwd" id="current-passwd" aria-describedby="current-passwd-help" placeholder="[Required]"/>
+									<span id="current-passwd-help" class="help-block hidden"><small>Incorrect Password</small></span>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label" for="new-passwd">New Password</label>
+									<input type="password" autocomplete="off" class="form-control input-sm" name="new_passwd" id="new-passwd" aria-describedby="new-passwd-help" placeholder="[Required]"/>
+									<span id="new-passwd-help" class="help-block hidden"><small>Did not match</small></span>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label" for="new-passwd-verify">Verify Password</label>
+									<input type="password" autocomplete="off" class="form-control input-sm" name="new_passwd_verify" id="new-passwd-verify" aria-describedby="new-passwd-verify-help" placeholder="[Required]"/>
+									<span id="new-passwd-verify-help" class="help-block hidden"><small>Did not match</small></span>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" id="change-passwd-close" data-dismiss="modal" class="btn btn-default btn-sm pull-left">Cancel</button>
+								<button type="button" id="change-passwd-save" class="btn btn-primary btn-sm">Save</button>
+							</div>
+						</div><!-- /.modal-content -->
+					</div><!-- /.modal-dialog -->
+				</div><!-- /.modal -->
+
+				<!-- bootstrap-session-timeout -->
+				<script type="text/javascript" src="scripts/bootstrap-session-timeout/bootstrap-session-timeout.min.js"></script>
+
+				<script type="text/javascript">
+					var username = '<?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : "unknown"); ?>';
+					var maxlifetime = 900;
+				</script>
+
+				<script type="text/javascript" src="scripts/kinobi/footer.js"></script>
+			</div><!-- /#page-content-wrapper -->
+		</div><!-- /#wrapper -->
+	</body>
 </html>
