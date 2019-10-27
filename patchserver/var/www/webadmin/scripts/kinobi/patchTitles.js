@@ -60,6 +60,7 @@ $( document ).ready(function() {
 			"extend": "collection",
 			"text": '<span class="glyphicon glyphicon-share-alt"></span> Import</span>',
 			"className": import_btn_class,
+			"autoClose": true,
 			"buttons": [{
 				"text": "From Kinobi",
 				"className": kinobi_btn_class,

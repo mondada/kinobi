@@ -738,6 +738,7 @@ $( document ).ready(function() {
 			"extend": "collection",
 			"text": '<span class="glyphicon glyphicon-share-alt"></span> Import</span>',
 			"className": import_btn_class,
+			"autoClose": true,
 			"buttons": [{
 				"text": "Upload JSON",
 				"className": upload_btn_class,
@@ -757,7 +758,7 @@ $( document ).ready(function() {
 			"data": null,
 			"render": function(data, type, row, meta) {
 				if (row.error.length == 0) {
-					return '<div class="checkbox checkbox-primary checkbox-inline"><input type="checkbox" class="styled" value="' + row.id + '"' + (row.enabled == 1 ? ' checked' : '') + (row.source_id > 0 ? ' disabled' : '') + '/><label/></div>';
+					return '<div class="checkbox checkbox-primary checkbox-inline"><input type="checkbox" class="styled" value="' + row.id + '"' + (row.enabled == 1 ? ' checked' : '') + (title_json.source_id > 0 ? ' disabled' : '') + '/><label/></div>';
 				} else {
 					return '<a href="managePatch.php?id=' + row.id + '"><span class="text-danger glyphicon glyphicon-exclamation-sign checkbox-error"></span></a>';
 				}
@@ -791,7 +792,7 @@ $( document ).ready(function() {
 			"className": "text-right",
 			"data": null,
 			"render": function(data, type, row, meta) {
-				return '<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#del-patch-modal">Delete</button>';
+				return '<button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#del-patch-modal"' + (title_json.source_id > 0 ? ' disabled' : '') + '>Delete</button>';
 			}
 		}],
 		"columns": [{
@@ -849,7 +850,6 @@ $( document ).ready(function() {
 
 	if (title_json.source_id > 0) {
 		$( "#patches" ).DataTable().buttons().disable();
-		$( "#patches tbody input, #patches tbody button" ).prop("disabled", true);
 	}
 
 	if (patches_success_msg.length) {
