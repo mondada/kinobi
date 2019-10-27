@@ -16,7 +16,7 @@ $last_checkin = (isset($subs['lastcheckin']) ? $subs['lastcheckin'] : 0);
 
 // Remove Expired Subscription
 if (!empty($subs_resp) && $subs_resp['timestamp'] - (14*24*60*60) >= $subs_resp['expires'] || empty($subs['url']) && empty($subs['token'])) {
-	$removed = $pdo->exec('DELETE FROM titles WHERE source_id = "1"');
+	$removed = $pdo->exec("DELETE FROM titles WHERE source_id = 1");
 	if (!empty($removed)) {
 		$warning_msg = "Titles imported from Kinobi have been removed.";
 	}
