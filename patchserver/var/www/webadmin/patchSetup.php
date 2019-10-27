@@ -113,7 +113,7 @@ $usernames = array_keys($users);
 
 				<script type="text/javascript">
 					var cloud = <?php echo json_encode($cloud); ?>;
-					var setup_token = '<?php echo $setup_token; ?>';
+					var setup_token = "<?php echo $setup_token; ?>";
 					var usernames = <?php echo json_encode($usernames); ?>;
 				</script>
 

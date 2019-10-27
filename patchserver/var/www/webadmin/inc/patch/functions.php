@@ -191,10 +191,10 @@ function renameUser($pdo, $user, $name)
 	// $kinobi->setSetting("users", $users);
 
 	if ($pdo) {
-		$stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+		$stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
 		$stmt->execute(array($user));
 		$id = $stmt->fetchColumn();
-		$stmt = $pdo->prepare('UPDATE users SET username = ? WHERE id = ?');
+		$stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
 		$stmt->execute(array($name, $id));
 	}
 }
@@ -392,7 +392,7 @@ function getSoftwareTitleSummary($pdo, $ids, $enabled = 1)
 		$stmt->execute(array($enabled, $name_id));
 		while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $sw_title['lastModified']);
-			$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$sw_title['id'].'"')->fetch(PDO::FETCH_COLUMN);
+			$override = $pdo->query("SELECT current FROM overrides WHERE name_id = " . $sw_title['id'])->fetch(PDO::FETCH_COLUMN);
 			if (!empty($override)) {
 				$sw_title['currentVersion'] = $override;
 			}
@@ -423,7 +423,7 @@ function getSoftwareTitle($pdo, $id, $enabled = 1)
 		$title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $title['lastModified']);
 
 		// overrides
-		$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$title['id'].'"')->fetch(PDO::FETCH_COLUMN);
+		$override = $pdo->query("SELECT current FROM overrides WHERE name_id = '" . $title['id'] . "'")->fetch(PDO::FETCH_COLUMN);
 		if (!empty($override)) {
 			$title['currentVersion'] = $override;
 		}

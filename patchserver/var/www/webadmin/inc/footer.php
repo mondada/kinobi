@@ -77,7 +77,7 @@
 				<script type="text/javascript" src="scripts/bootstrap-session-timeout/bootstrap-session-timeout.min.js"></script>
 
 				<script type="text/javascript">
-					var username = '<?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : "unknown"); ?>';
+					var username = "<?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : ""); ?>";
 					var maxlifetime = 900;
 				</script>
 

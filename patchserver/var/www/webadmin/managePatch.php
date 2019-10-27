@@ -58,9 +58,9 @@ if ($pdo) {
 		if (isset($_POST['create_comp'])) {
 			$comp_name = $_POST['comp_name'];
 			$comp_version = $_POST['comp_version'];
-			$stmt = $pdo->prepare('INSERT INTO components (patch_id, name, version) VALUES (?, ?, ?)');
+			$stmt = $pdo->prepare("INSERT INTO components (patch_id, name, version) VALUES (?, ?, ?)");
 			$stmt->execute(array($patch['id'], $comp_name, $comp_version));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -69,9 +69,9 @@ if ($pdo) {
 		// Delete Component
 		if (isset($_POST['del_comp'])) {
 			$comp_id = $_POST['del_comp'];
-			$stmt = $pdo->prepare('DELETE FROM components WHERE id = ?');
+			$stmt = $pdo->prepare("DELETE FROM components WHERE id = ?");
 			$stmt->execute(array($comp_id));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -85,11 +85,11 @@ if ($pdo) {
 			$dep_type = $_POST['dep_type'];
 			$dep_is_and = $_POST['dep_is_and'];
 			$dep_sort_order = $_POST['dep_sort_order'];
-			$stmt = $pdo->prepare('UPDATE dependencies SET sort_order = sort_order + 1 WHERE patch_id = ? AND sort_order >= ?');
+			$stmt = $pdo->prepare("UPDATE dependencies SET sort_order = sort_order + 1 WHERE patch_id = ? AND sort_order >= ?");
 			$stmt->execute(array($patch['id'], $dep_sort_order));
-			$stmt = $pdo->prepare('INSERT INTO dependencies (patch_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
+			$stmt = $pdo->prepare("INSERT INTO dependencies (patch_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			$stmt->execute(array($patch['id'], $dep_name, $dep_operator, $dep_value, $dep_type, $dep_is_and, $dep_sort_order));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -98,14 +98,14 @@ if ($pdo) {
 		// Delete Dependency
 		/* if (isset($_POST['del_dep'])) {
 			$dep_id = $_POST['del_dep'];
-			$stmt = $pdo->prepare('SELECT sort_order FROM dependencies WHERE id = ?');
+			$stmt = $pdo->prepare("SELECT sort_order FROM dependencies WHERE id = ?");
 			$stmt->execute(array($dep_id));
 			$dep_sort_order = $stmt->fetchColumn();
-			$stmt = $pdo->prepare('UPDATE dependencies SET sort_order = sort_order - 1 WHERE patch_id = ? AND sort_order > ?');
+			$stmt = $pdo->prepare("UPDATE dependencies SET sort_order = sort_order - 1 WHERE patch_id = ? AND sort_order > ?");
 			$stmt->execute(array($patch['id'], $dep_sort_order));
-			$stmt = $pdo->prepare('DELETE FROM dependencies WHERE id = ?');
+			$stmt = $pdo->prepare("DELETE FROM dependencies WHERE id = ?");
 			$stmt->execute(array($dep_id));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -119,11 +119,11 @@ if ($pdo) {
 			$cap_type = $_POST['cap_type'];
 			$cap_is_and = $_POST['cap_is_and'];
 			$cap_sort_order = $_POST['cap_sort_order'];
-			$stmt = $pdo->prepare('UPDATE capabilities SET sort_order = sort_order + 1 WHERE patch_id = ? AND sort_order >= ?');
+			$stmt = $pdo->prepare("UPDATE capabilities SET sort_order = sort_order + 1 WHERE patch_id = ? AND sort_order >= ?");
 			$stmt->execute(array($patch['id'], $cap_sort_order));
-			$stmt = $pdo->prepare('INSERT INTO capabilities (patch_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
+			$stmt = $pdo->prepare("INSERT INTO capabilities (patch_id, name, operator, value, type, is_and, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			$stmt->execute(array($patch['id'], $cap_name, $cap_operator, $cap_value, $cap_type, $cap_is_and, $cap_sort_order));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -132,14 +132,14 @@ if ($pdo) {
 		// Delete Capability
 		if (isset($_POST['del_cap'])) {
 			$cap_id = $_POST['del_cap'];
-			$stmt = $pdo->prepare('SELECT sort_order FROM capabilities WHERE id = ?');
+			$stmt = $pdo->prepare("SELECT sort_order FROM capabilities WHERE id = ?");
 			$stmt->execute(array($cap_id));
 			$cap_sort_order = $stmt->fetchColumn();
-			$stmt = $pdo->prepare('UPDATE capabilities SET sort_order = sort_order - 1 WHERE patch_id = ? AND sort_order > ?');
+			$stmt = $pdo->prepare("UPDATE capabilities SET sort_order = sort_order - 1 WHERE patch_id = ? AND sort_order > ?");
 			$stmt->execute(array($patch['id'], $cap_sort_order));
-			$stmt = $pdo->prepare('DELETE FROM capabilities WHERE id = ?');
+			$stmt = $pdo->prepare("DELETE FROM capabilities WHERE id = ?");
 			$stmt->execute(array($cap_id));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -149,9 +149,9 @@ if ($pdo) {
 		if (isset($_POST['create_kill_app'])) {
 			$kill_app_bundle_id = $_POST['kill_app_bundle_id'];
 			$kill_app_name = $_POST['kill_app_name'];
-			$stmt = $pdo->prepare('INSERT INTO kill_apps (patch_id, bundle_id, app_name) VALUES (?, ?, ?)');
+			$stmt = $pdo->prepare("INSERT INTO kill_apps (patch_id, bundle_id, app_name) VALUES (?, ?, ?)");
 			$stmt->execute(array($patch['id'], $kill_app_bundle_id, $kill_app_name));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -160,9 +160,9 @@ if ($pdo) {
 		// Delete Kill Application
 		if (isset($_POST['del_kill_app'])) {
 			$kill_app_id = $_POST['del_kill_app'];
-			$stmt = $pdo->prepare('DELETE FROM kill_apps WHERE id = ?');
+			$stmt = $pdo->prepare("DELETE FROM kill_apps WHERE id = ?");
 			$stmt->execute(array($kill_app_id));
-			if ($stmt->errorCode() != '00000') {
+			if ($stmt->errorCode() != "00000") {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -177,11 +177,11 @@ if ($pdo) {
 		 || isset($_POST['del_cap'])
 		 || isset($_POST['create_kill_app'])
 		 || isset($_POST['del_kill_app'])) {
-			$stmt = $pdo->prepare('SELECT title_id FROM patches WHERE id = ?');
+			$stmt = $pdo->prepare("SELECT title_id FROM patches WHERE id = ?");
 			$stmt->execute(array($patch['id']));
 			$title_id = $stmt->fetchColumn();
 			$title_modified = time();
-			$stmt = $pdo->prepare('UPDATE titles SET modified = ? WHERE id = ?');
+			$stmt = $pdo->prepare("UPDATE titles SET modified = ? WHERE id = ?");
 			$stmt->execute(array($title_modified, $title_id));
 		}
 
@@ -203,16 +203,16 @@ if ($pdo) {
 
 		// Begin Legacy to remove
 		// Previous Patch
-		$prev_id = $pdo->query('SELECT id FROM patches WHERE title_id = ' . $patch['title_id'] . ' AND sort_order = ' . (+$patch['sort_order'] - 1))->fetch(PDO::FETCH_COLUMN);
+		$prev_id = $pdo->query("SELECT id FROM patches WHERE title_id = " . $patch['title_id'] . " AND sort_order = " . (+$patch['sort_order'] - 1))->fetch(PDO::FETCH_COLUMN);
 
 		// Next Patch
-		$next_id = $pdo->query('SELECT id FROM patches WHERE title_id = ' . $patch['title_id'] . ' AND sort_order = ' . (+$patch['sort_order'] + 1))->fetch(PDO::FETCH_COLUMN);
+		$next_id = $pdo->query("SELECT id FROM patches WHERE title_id = " . $patch['title_id'] . " AND sort_order = " . (+$patch['sort_order'] + 1))->fetch(PDO::FETCH_COLUMN);
 		// End Legacy
 
 		// Components
-		$stmt = $pdo->query('SELECT id, name, version FROM components WHERE patch_id = "'.$patch['id'].'"');
+		$stmt = $pdo->query("SELECT id, name, version FROM components WHERE patch_id = " . $patch['id']);
 		while ($component = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$component['criteria'] = $pdo->query('SELECT COUNT(id) FROM criteria WHERE component_id = ' . $component['id'])->fetch(PDO::FETCH_COLUMN);
+			$component['criteria'] = $pdo->query("SELECT COUNT(id) FROM criteria WHERE component_id = " . $component['id'])->fetch(PDO::FETCH_COLUMN);
 			if ($component['criteria'] == 0) {
 				array_push($patch['error'], "criteria");
 			}
@@ -221,17 +221,17 @@ if ($pdo) {
 		if (sizeof($components) == 0) {
 			array_push($patch['error'], "components");
 		}
-		$title_comp_names = $pdo->query('SELECT DISTINCT name FROM patches JOIN components ON patches.id = components.patch_id WHERE patches.title_id = ' . $patch['title_id'])->fetchAll(PDO::FETCH_COLUMN);
+		$title_comp_names = $pdo->query("SELECT DISTINCT name FROM patches JOIN components ON patches.id = components.patch_id WHERE patches.title_id = " . $patch['title_id'])->fetchAll(PDO::FETCH_COLUMN);
 
 		// Dependencies
-		/* $stmt = $pdo->query('SELECT id, name, operator, value, type, is_and, sort_order FROM dependencies WHERE patch_id = ' . $patch['id']);
+		/* $stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM dependencies WHERE patch_id = " . $patch['id']);
 		while ($dependency = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$dependency['is_and'] = ($dependency['is_and'] == "0") ? "0": "1";
 			array_push($dependencies, $dependency);
 		} */
 
 		// Capabilities
-		$stmt = $pdo->query('SELECT id, name, operator, value, type, is_and, sort_order FROM capabilities WHERE patch_id = "'.$patch['id'].'"');
+		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM capabilities WHERE patch_id = " . $patch['id']);
 		while ($capability = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$capability['is_and'] = ($capability['is_and'] == "0") ? "0": "1";
 			array_push($capabilities, $capability);
@@ -241,13 +241,13 @@ if ($pdo) {
 		}
 
 		// Kill Applications
-		$kill_apps = $pdo->query('SELECT id, bundle_id, app_name FROM kill_apps WHERE patch_id = ' . $patch['id'])->fetchAll(PDO::FETCH_ASSOC);
-		$title_kill_apps = $pdo->query('SELECT DISTINCT bundle_id, app_name FROM patches JOIN kill_apps ON patches.id = kill_apps.patch_id WHERE patches.title_id = ' . $patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
+		$kill_apps = $pdo->query("SELECT id, bundle_id, app_name FROM kill_apps WHERE patch_id = " . $patch['id'])->fetchAll(PDO::FETCH_ASSOC);
+		$title_kill_apps = $pdo->query("SELECT DISTINCT bundle_id, app_name FROM patches JOIN kill_apps ON patches.id = kill_apps.patch_id WHERE patches.title_id = " . $patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
 
 		// Disable Incomplete Patch
 		if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
 			$patch['enabled'] = "0";
-			$disable = $pdo->prepare('UPDATE patches SET enabled = 0 WHERE id = ?');
+			$disable = $pdo->prepare("UPDATE patches SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($patch['id']));
 			if ($disable->errorCode() != '00000') {
 				$errorInfo = $disable->errorInfo();
@@ -318,10 +318,10 @@ if ($pdo) {
 				<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 				<script type="text/javascript">
-					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
+					var pdo_error = "<?php echo $pdo_error; ?>";
 					var subs_type = "<?php echo $subs_type; ?>";
 					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
-					var error_msg = '<?php echo $error_msg; ?>';
+					var error_msg = "<?php echo $error_msg; ?>";
 					var patch_json = <?php echo json_encode($patch); ?>;
 					var patches_json = <?php echo json_encode($patches); ?>;
 					var ext_attrs_json = <?php echo json_encode($ext_attrs); ?>;

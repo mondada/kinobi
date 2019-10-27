@@ -160,9 +160,9 @@ if (empty($pdo_error)) {
 
 				<script type="text/javascript">
 					var cloud = <?php echo json_encode($cloud); ?>;
-					var subs_type = '<?php echo $subs_type; ?>';
-					var login_error = '<?php echo $login_error; ?>';
-					var username = '<?php echo $username; ?>';
+					var subs_type = "<?php echo $subs_type; ?>";
+					var login_error = "<?php echo $login_error; ?>";
+					var username = "<?php echo $username; ?>";
 					var modal = "<?php echo $modal; ?>";
 				</script>
 

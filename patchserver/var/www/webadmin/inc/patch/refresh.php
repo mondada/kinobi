@@ -26,7 +26,7 @@ if (isset($subs_resp['functions']) && isset($subs_resp['source']) && $last_check
 	require_once $subs_resp['functions'];
 
     // Get Remote /software Endpoint
-    $software = fetchJsonArray($subs_resp['source']."/software/", $subs_resp['auth']);
+    $software = fetchJsonArray($subs_resp['source'] . "/software/", $subs_resp['auth']);
 
     // lastModified Timestamps
     $timestamps = array();
@@ -40,10 +40,10 @@ if (isset($subs_resp['functions']) && isset($subs_resp['source']) && $last_check
     // Refresh Titles
     foreach ($imported_titles as $imported) {
         if ($imported['modified'] < $timestamps[$imported['name_id']]) {
-            $data = fetchJsonArray($subs_resp['source']."/patch/".$imported['name_id'], $subs_resp['auth']);
+            $data = fetchJsonArray($subs_resp['source'] . "/patch/" . $imported['name_id'], $subs_resp['auth']);
 
             if (isset($data['id'])) {
-                $pdo->exec("DELETE FROM titles WHERE name_id = '".$data['id']."'");
+                $pdo->exec("DELETE FROM titles WHERE name_id = '" . $data['id'] . "'");
 
                 $ref_title_id = createSoftwareTitle($pdo, $data, 1);
             }

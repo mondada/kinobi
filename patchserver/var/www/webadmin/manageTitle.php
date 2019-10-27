@@ -165,7 +165,7 @@ if ($pdo) {
 			$stmt = $pdo->prepare("INSERT INTO patches (title_id, version, released, standalone, min_os, reboot, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)");
 			$stmt->execute(array($title['id'], $patch_version, $patch_released, $patch_standalone, $patch_min_os, $patch_reboot, $patch_sort_order));
 			if ($stmt->errorCode() == "00000") {
-				$patches_success_msg = 'Created Patch Version <a href="managePatch.php?id=' . $pdo->lastInsertId() . '">' . $patch_version . '</a>.';
+				$patches_success_msg = "Created Patch Version <a href='managePatch.php?id=" . $pdo->lastInsertId() . "'>" . $patch_version . "</a>.";
 			} else {
 				$errorInfo = $stmt->errorInfo();
 				$error_msg = $errorInfo[2];
@@ -183,7 +183,7 @@ if ($pdo) {
 			$stmt->execute(array($patch_id));
 			$patch = $stmt->fetch(PDO::FETCH_ASSOC);
 			$stmt = $pdo->prepare("UPDATE patches SET sort_order = sort_order - 1 WHERE title_id = ? AND sort_order > ?");
-			$stmt->execute(array($title['id'], $patch["sort_order"]));
+			$stmt->execute(array($title['id'], $patch['sort_order']));
 			$stmt = $pdo->prepare("DELETE FROM patches WHERE id = ?");
 			$stmt->execute(array($patch_id));
 			if ($stmt->errorCode() == "00000") {
@@ -216,17 +216,17 @@ if ($pdo) {
 		$title['error'] = array();
 
 		// Software Title Name IDs
-		$name_ids = $pdo->query('SELECT name_id FROM titles')->fetchAll(PDO::FETCH_COLUMN);
+		$name_ids = $pdo->query("SELECT name_id FROM titles")->fetchAll(PDO::FETCH_COLUMN);
 
 		// Extension Attributes
-		$ext_attrs = $pdo->query('SELECT id, key_id, script, name FROM ext_attrs WHERE title_id = "'.$title['id'].'"')->fetchAll(PDO::FETCH_ASSOC);
+		$ext_attrs = $pdo->query("SELECT id, key_id, script, name FROM ext_attrs WHERE title_id = " . $title['id'])->fetchAll(PDO::FETCH_ASSOC);
 
 		// Extension Attribute Keys
-		$ext_attr_key_ids = $pdo->query('SELECT key_id FROM ext_attrs')->fetchAll(PDO::FETCH_COLUMN);
+		$ext_attr_key_ids = $pdo->query("SELECT key_id FROM ext_attrs")->fetchAll(PDO::FETCH_COLUMN);
 
 		// Requirements
 		$requirements = array();
-		$stmt = $pdo->query('SELECT id, name, operator, value, type, is_and, sort_order FROM requirements WHERE title_id = "'.$title['id'].'" ORDER BY sort_order');
+		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM requirements WHERE title_id = " . $title['id'] . " ORDER BY sort_order");
 		while ($requirement = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$requirement['is_and'] = ($requirement['is_and'] == "0") ? "0": "1";
 			array_push($requirements, $requirement);
@@ -237,31 +237,31 @@ if ($pdo) {
 
 		// Patches
 		$patches = array();
-		$stmt = $pdo->query('SELECT id, version, released, standalone, min_os, reboot, sort_order, enabled FROM patches WHERE title_id = "'.$title['id'].'" ORDER BY sort_order');
+		$stmt = $pdo->query("SELECT id, version, released, standalone, min_os, reboot, sort_order, enabled FROM patches WHERE title_id = " . $title['id'] . " ORDER BY sort_order");
 		while ($patch = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$patch['standalone'] = ($patch['standalone'] == "0") ? "0": "1";
 			$patch['reboot'] = ($patch['reboot'] == "1") ? "1": "0";
 			$patch['enabled'] = ($patch['enabled'] == "1") ? "1" : "0";
 			$patch['error'] = array();
-			$patch['components'] = $pdo->query('SELECT id FROM components WHERE patch_id = "'.$patch['id'].'"')->fetchAll(PDO::FETCH_COLUMN);
+			$patch['components'] = $pdo->query("SELECT id FROM components WHERE patch_id = " . $patch['id'])->fetchAll(PDO::FETCH_COLUMN);
 			if (sizeof($patch['components']) == 0) {
 				array_push($patch['error'], "components");
 			}
-			foreach ($patch['components'] as $component) {
-				$criteria = $pdo->query('SELECT id FROM criteria WHERE component_id = "'.$component.'"')->fetchAll(PDO::FETCH_COLUMN);
+			foreach ($patch['components'] as $component_id) {
+				$criteria = $pdo->query("SELECT id FROM criteria WHERE component_id = " . $component_id)->fetchAll(PDO::FETCH_COLUMN);
 				if (sizeof($criteria) == 0) {
 					array_push($patch['error'], "criteria");
 				}
 			}
-			$patch['capabilities'] = $pdo->query('SELECT id FROM capabilities WHERE patch_id = "'.$patch['id'].'"')->fetchAll(PDO::FETCH_COLUMN);
+			$patch['capabilities'] = $pdo->query("SELECT id FROM capabilities WHERE patch_id = " . $patch['id'])->fetchAll(PDO::FETCH_COLUMN);
 			if (sizeof($patch['capabilities']) == 0) {
 				array_push($patch['error'], "capabilities");
 			}
 			if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
 				$patch['enabled'] == "0";
-				$disable = $pdo->query('UPDATE patches SET enabled = 0 WHERE id = ?');
+				$disable = $pdo->query("UPDATE patches SET enabled = 0 WHERE id = ?");
 				$disable->execute(array($patch['id']));
-				if ($disable->errorCode() != '00000') {
+				if ($disable->errorCode() != "00000") {
 					$errorInfo = $disable->errorInfo();
 					$error_msg = $errorInfo[2];
 				}
@@ -273,17 +273,17 @@ if ($pdo) {
 		// Current Version
 		if (count($patches) > 0) {
 			if (!in_array($title['current'], $patch_versions, TRUE)) {
-				$stmt = $pdo->prepare('UPDATE titles SET current = ? WHERE id = ?');
+				$stmt = $pdo->prepare("UPDATE titles SET current = ? WHERE id = ?");
 				$stmt->execute(array($patch_versions[0], $title['id']));
 				$title['current'] = $patch_versions[0];
 			}
 		}
-		$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$title['name_id'].'"')->fetch(PDO::FETCH_COLUMN);
+		$override = $pdo->query("SELECT current FROM overrides WHERE name_id = '" . $title['name_id'] . "'")->fetch(PDO::FETCH_COLUMN);
 		if (!empty($override)) {
 			if (in_array($title['current'], $patch_versions, TRUE)) {
 				$title['current'] = $override;
 			} else {
-				$stmt = $pdo->prepare('DELETE FROM overrides WHERE name_id = ?');
+				$stmt = $pdo->prepare("DELETE FROM overrides WHERE name_id = ?");
 				$stmt->execute(array($title['name_id']));
 				$override = false;
 			}
@@ -297,9 +297,9 @@ if ($pdo) {
 		// Disable Incomplete Title
 		if (sizeof($title['error']) > 0 && $title['enabled'] == "1") {
 			$title['enabled'] = "0";
-			$disable = $pdo->prepare('UPDATE titles SET enabled = 0 WHERE id = ?');
+			$disable = $pdo->prepare("UPDATE titles SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($title['id']));
-			if ($disable->errorCode() != '00000') {
+			if ($disable->errorCode() != "00000") {
 				$errorInfo = $disable->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
@@ -380,10 +380,10 @@ if ($pdo) {
 				<script type="text/javascript" src="scripts/ace/ace.js"></script>
 
 				<script type="text/javascript">
-					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
+					var pdo_error = "<?php echo $pdo_error; ?>";
 					var subs_type = "<?php echo $subs_type; ?>";
 					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
-					var error_msg = '<?php echo $error_msg; ?>';
+					var error_msg = "<?php echo $error_msg; ?>";
 					var title_json = <?php echo json_encode($title); ?>;
 					var name_ids = <?php echo json_encode($name_ids); ?>;
 					var override = "<?php echo $override; ?>";
@@ -391,7 +391,7 @@ if ($pdo) {
 					var key_ids = <?php echo json_encode($ext_attr_key_ids); ?>;
 					var requirements_json = <?php echo json_encode($requirements); ?>;
 					var patches_json = <?php echo json_encode($patches); ?>;
-					var patches_success_msg = '<?php echo $patches_success_msg; ?>';
+					var patches_success_msg = "<?php echo $patches_success_msg; ?>";
 				</script>
 
 				<script type="text/javascript" src="scripts/kinobi/manageTitle.js"></script>

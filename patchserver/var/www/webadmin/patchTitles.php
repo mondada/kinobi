@@ -62,7 +62,7 @@ if ($pdo) {
 		$stmt = $pdo->prepare("INSERT INTO titles (name, publisher, app_name, bundle_id, modified, current, name_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
 		$stmt->execute(array($name, $publisher, $app_name, $bundle_id, $modified, $current, $name_id));
 		if ($stmt->errorCode() == "00000") {
-			$success_msg = 'Created Software Title <a href="manageTitle.php?id=' . $pdo->lastInsertId() . '">' . $name . '</a>.';
+			$success_msg = "Created Software Title <a href='manageTitle.php?id=" . $pdo->lastInsertId() . "'>" . $name . "</a>.";
 		} else {
 			$errorInfo = $stmt->errorInfo();
 			$error_msg = $errorInfo[2];
@@ -71,14 +71,14 @@ if ($pdo) {
 
 	// Delete Software Title
 	if (isset($_POST['del_title'])) {
-		$title_id = $_POST['del_title'];
+		$del_title_id = $_POST['del_title'];
 		$stmt = $pdo->prepare("SELECT name, name_id, source_id FROM titles WHERE id = ?");
-		$stmt->execute(array($title_id));
+		$stmt->execute(array($del_title_id));
 		$title = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt = $pdo->prepare("DELETE FROM overrides WHERE name_id = ?");
 		$stmt->execute(array($title['name_id']));
 		$stmt = $pdo->prepare("DELETE FROM titles WHERE id = ?");
-		$stmt->execute(array($title_id));
+		$stmt->execute(array($del_title_id));
 		if ($stmt->errorCode() == "00000") {
 			$success_msg = ($title['source_id'] == 0 ? "Deleted" : "Removed") . " " . $title['name'] . ".";
 		} else {
@@ -104,12 +104,12 @@ if ($pdo) {
 		if (empty($subs_resp['expires'])) {
 			$error_msg = "Invalid token. Please ensure the Server URL and Token values are entered exactly as they were provided.";
 		} elseif ($subs_resp['expires'] < $subs_resp['timestamp']) {
-			$error_msg = $subs_resp['type'] . ' subscription expired: ' . date("M j, Y", $subs_resp['expires']) . ' <a target="_blank" href="' . $subs_resp['renew'] . '">Click here to renew</a>.';
+			$error_msg = $subs_resp['type'] . " subscription expired: " . date("M j, Y", $subs_resp['expires']) . " <a target='_blank' href='" . $subs_resp['renew'] . "'>Click here to renew</a>.";
 			if ($subs_resp['expires'] > $subs_resp['timestamp'] - (14*24*60*60)) {
-				$warning_msg = "Patch Definitions imported from Kinobi will be removed in " . (14 + ($subs_resp['expires'] - $subs_resp['timestamp']) / (24*60*60)) . "days.";
+				$warning_msg = "Patch Definitions imported from Kinobi will be removed in " . (14 + ($subs_resp['expires'] - $subs_resp['timestamp']) / (24*60*60)) . " days.";
 			}
 		} elseif ($subs_resp['expires'] < $subs_resp['timestamp'] + (14*24*60*60)) {
-			$warning_msg = $subs_resp['type'] . ' subscription expires: ' . date("M j, Y", $subs_resp['expires']) . ' <a target="_blank" href="' . $subs_resp['renew'] . '">Click here to renew</a>.';
+			$warning_msg = $subs_resp['type'] . " subscription expires: " . date("M j, Y", $subs_resp['expires']) . " <a target='_blank' href='" . $subs_resp['renew'] . "'>Click here to renew</a>.";
 		}
 	}
 
@@ -129,7 +129,7 @@ if ($pdo) {
 		if (sizeof($sw_title['patches']) == 0) {
 			array_push($sw_title['error'], "patches");
 		}
-		$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "' . $sw_title['name_id'] . '"')->fetch(PDO::FETCH_COLUMN);
+		$override = $pdo->query("SELECT current FROM overrides WHERE name_id = '" . $sw_title['name_id'] . "'")->fetch(PDO::FETCH_COLUMN);
 		if (!empty($override)) {
 			$sw_title['current'] = $override;
 		}
@@ -138,7 +138,7 @@ if ($pdo) {
 			$disable = $pdo->prepare("UPDATE titles SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($sw_title['id']));
 			if ($disable->errorCode() == "00000") {
-				$warning_msg = '<a href="manageTitle.php?id=' . $sw_title['id'] . '">' . $sw_title['name'] . '</a> has been disabled.';
+				$warning_msg = "<a href='manageTitle.php?id=" . $sw_title['id'] . "'>" . $sw_title['name'] . "</a> has been disabled.";
 			} else {
 				$errorInfo = $disable->errorInfo();
 				$error_msg = $errorInfo[2];
@@ -211,12 +211,12 @@ if ($pdo) {
 				<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 				<script type="text/javascript">
-					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
+					var pdo_error = "<?php echo $pdo_error; ?>";
 					var subs_type = "<?php echo $subs_type; ?>";
 					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
-					var error_msg = '<?php echo $error_msg; ?>';
-					var warning_msg = '<?php echo $warning_msg; ?>';
-					var success_msg = '<?php echo $success_msg; ?>';
+					var error_msg = "<?php echo $error_msg; ?>";
+					var warning_msg = "<?php echo $warning_msg; ?>";
+					var success_msg = "<?php echo $success_msg; ?>";
 					var titles_json = <?php echo json_encode($sw_titles); ?>;
 				</script>
 

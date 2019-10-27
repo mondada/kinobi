@@ -110,13 +110,12 @@ if (isset($_POST['dsn_save'])) {
 
 if (!isset($db)) {
 	include "inc/patch/database.php";
-	unset($db['passwd']);
 }
 
 if (empty($pdo_error)) {
 	$pdo_connection_status = "Connected to: " . ($db['dsn']['prefix'] == "sqlite" ? $db['dsn']['dbpath'] : $pdo->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 	if (isset($_POST['dsn_save']) && $netsus == 0) {
-		$pdo_connection_status .= '. <a href="logout.php">Log Out</a> for changes to take effect.';
+		$pdo_connection_status .= ". <a href='logout.php'>Log Out</a> for changes to take effect.";
 	}
 }
 
@@ -146,14 +145,14 @@ if (isset($_POST['backup'])) {
 		$dbname = $db['dsn']['dbname'];
 		if ($_POST['backup_type'] == "mysql") {
 			$dump = new Mysqldump(
-				$db['dsn']['prefix'].":host=".$db['dsn']['host'].";port=".$db['dsn']['port'].";dbname=".$db['dsn']['dbname'],
+				$db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'],
 				$db['username'],
 				openssl_decrypt($db['passwd'], "AES-128-CTR", $key, 0, substr(md5($db['username']), 0, 16)),
 				array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
 			);
 		} else {
 			$dump = new Mysqldump(
-				$db['dsn']['prefix'].":host=".$db['dsn']['host'].";port=".$db['dsn']['port'].";dbname=".$db['dsn']['dbname'],
+				$db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'],
 				$db['username'],
 				openssl_decrypt($db['passwd'], "AES-128-CTR", $key, 0, substr(md5($db['username']), 0, 16)),
 				array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
@@ -167,27 +166,27 @@ if (isset($_POST['backup'])) {
 		}
 		if ($_POST['backup_type'] == "mysql") {
 			$dump = new Mysqldump(
-				$db['dsn']['prefix'].":".$db['dsn']['dbpath'],
+				$db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'],
 				null,
 				null,
 				array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
 			);
 		} else {
 			$dump = new Mysqldump(
-				$db['dsn']['prefix'].":".$db['dsn']['dbpath'],
+				$db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'],
 				null,
 				null,
 				array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
 			);
 		}
 	}
-	$dump->start($backup['path']."/".$dbname."-".$timestamp.".sql.gz");
+	$dump->start($backup['path'] . "/" . $dbname . "-" . $timestamp . ".sql.gz");
 	$backup_success = "Backup Completed Successfully.";
 }
 
 // Delete backup
 if (isset($_POST['del_backup'])) {
-	if (unlink($backup['path']."/".$_POST['del_backup'])) {
+	if (unlink($backup['path'] . "/" . $_POST['del_backup'])) {
 		$restore_success = "Backup deleted successfully.";
 	} else {
 		$restore_error = "Falied to delete backup.";
@@ -197,16 +196,16 @@ if (isset($_POST['del_backup'])) {
 // Upload backup
 if (isset($_POST['upload_backup']) && isset($_FILES['backup_file']['name'])) {
 	if ($_FILES['backup_file']['error'] > 0) {
-		$restore_error = $_FILES['backup_file']['error'].".";
+		$restore_error = $_FILES['backup_file']['error'] . ".";
 	} elseif ($_FILES['backup_file']['type'] != "application/x-gzip") {
-		$restore_error = "Invalid file type '".$_FILES['backup_file']['type']."'.";
+		$restore_error = "Invalid file type '" . $_FILES['backup_file']['type'] . "'.";
 	} else {
 		// To Do: Add string replace to remove spaces in filename
 		$filename = basename($_FILES['backup_file']['name']);
-		if (move_uploaded_file($_FILES['backup_file']['tmp_name'], $backup['path']."/".$filename)) {
+		if (move_uploaded_file($_FILES['backup_file']['tmp_name'], $backup['path'] . "/" . $filename)) {
 			$restore_success = "File uploaded successfully.";
 		} else {
-			$restore_error = "Failed to move file to ".$backup['path'].".";
+			$restore_error = "Failed to move file to " . $backup['path'] . ".";
 		}
 	}
 }
@@ -220,7 +219,7 @@ foreach (glob($backup['path']."/*.sql.gz") as $file) {
 krsort($backup_files, SORT_NUMERIC);
 foreach (array_values($backup_files) as $key => $value) {
 	if ($key >= $backup['retention']) {
-		unlink($backup['path']."/".$value);
+		unlink($backup['path'] . "/" . $value);
 	}
 }
 
@@ -242,7 +241,7 @@ if (isset($_POST['restore_backup'])) {
 			"DROP TABLE IF EXISTS overrides;";
 		$pdo->exec($sql);
 	}
-	$sql = gzfile($backup['path']."/".$_POST['restore_backup']);
+	$sql = gzfile($backup['path'] . "/" . $_POST['restore_backup']);
 	$sql = implode($sql);
 	try {
 		$pdo->exec($sql);
@@ -251,7 +250,7 @@ if (isset($_POST['restore_backup'])) {
 	}
 	if (empty($restore_error)) {
 		$restore_success = "Restored " . $_POST['restore_backup'] . ".";
-		$restore_success .= ($netsus == 0 ? ' <a href="logout.php">Log Out</a> for changes to take effect.' : '');
+		$restore_success .= ($netsus == 0 ? " <a href='logout.php'>Log Out</a> for changes to take effect." : "");
 		include "inc/patch/database.php";
 	}
 }
@@ -383,7 +382,7 @@ foreach (glob($backup['path'] . "/*.sql.gz") as $value) {
 
 // Get Backup Schedule
 exec("crontab -l 2>/dev/null", $crontab);
-$backup_api = $_SERVER['SERVER_NAME']."/v1.php/backup/".$kinobi->getSetting("uuid");
+$backup_api = $_SERVER['SERVER_NAME'] . "/v1.php/backup/" . $kinobi->getSetting("uuid");
 foreach ($crontab as $entry) {
 	if (strpos($entry, $backup_api) !== false) {
 		$entry = explode(" ", $entry);
@@ -530,20 +529,20 @@ if (empty($api_users)) {
 
 					var users_json = <?php echo json_encode(array_values($users)); ?>;
 
-					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
-					var pdo_connection_status = '<?php echo $pdo_connection_status; ?>';;
+					var pdo_error = "<?php echo $pdo_error; ?>";
+					var pdo_connection_status = "<?php echo $pdo_connection_status; ?>";
 					var db_json = <?php echo json_encode($db); ?>;
-					var sqlite_dir = '<?php echo $sqlite_dir; ?>';
+					var sqlite_dir = "<?php echo $sqlite_dir; ?>";
 					var sqlite_dbs_json = <?php echo json_encode($sqlite_dbs); ?>;
 
 					var scheduled_json = <?php echo json_encode($scheduled); ?>;
 					var backup_json = <?php echo json_encode($backup); ?>;
-					var backup_error = '<?php echo htmlentities($backup_error); ?>';
-					var backup_success = '<?php echo $backup_success; ?>';
+					var backup_error = "<?php echo $backup_error; ?>";
+					var backup_success = "<?php echo $backup_success; ?>";
 
 					var backups_json = <?php echo json_encode($backups); ?>;
-					var restore_error = '<?php echo htmlentities($restore_error); ?>';
-					var restore_success = '<?php echo $restore_success; ?>';
+					var restore_error = "<?php echo $restore_error; ?>";
+					var restore_success = "<?php echo $restore_success; ?>";
 
 					var subs_json = <?php echo json_encode($subs); ?>;
 					var subs_resp_json = <?php echo json_encode($subs_resp); ?>;

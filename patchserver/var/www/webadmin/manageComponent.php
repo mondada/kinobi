@@ -96,14 +96,14 @@ if ($pdo) {
 		// ####################################################################
 
 		// Criteria
-		$stmt = $pdo->query('SELECT id, name, operator, value, type, is_and, sort_order FROM criteria WHERE component_id = '.$component['id']);
+		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM criteria WHERE component_id = " . $component['id']);
 		while ($criterion = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$criterion['is_and'] = ($criterion['is_and'] == "0") ? "0": "1";
 			array_push($criteria, $criterion);
 		}
 
 		// Extension Attributes
-		$ext_attrs = $pdo->query("SELECT key_id, ext_attrs.name FROM components JOIN patches ON patches.id = components.patch_id JOIN ext_attrs ON ext_attrs.title_id = patches.title_id WHERE components.id = ".$component['id'])->fetchAll(PDO::FETCH_ASSOC);
+		$ext_attrs = $pdo->query("SELECT key_id, ext_attrs.name FROM components JOIN patches ON patches.id = components.patch_id JOIN ext_attrs ON ext_attrs.title_id = patches.title_id WHERE components.id = " . $component['id'])->fetchAll(PDO::FETCH_ASSOC);
 	}
 }
 ?>
@@ -149,10 +149,10 @@ if ($pdo) {
 				<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>
 
 				<script type="text/javascript">
-					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
+					var pdo_error = "<?php echo $pdo_error; ?>";
 					var subs_type = "<?php echo $subs_type; ?>";
 					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
-					var error_msg = '<?php echo $error_msg; ?>';
+					var error_msg = "<?php echo $error_msg; ?>";
 					var component_json = <?php echo json_encode($component); ?>;
 					var criteria_json = <?php echo json_encode($criteria); ?>;
 					var ext_attrs_json = <?php echo json_encode($ext_attrs); ?>;

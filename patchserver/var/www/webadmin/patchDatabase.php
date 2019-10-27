@@ -157,7 +157,7 @@ foreach (glob($sqlite_dir . "*") as $sqlite_db) {
 
 				<script type="text/javascript">
 					var cloud = <?php echo json_encode($cloud); ?>;
-					var pdo_error = "<?php echo htmlentities($pdo_error); ?>";
+					var pdo_error = "<?php echo $pdo_error; ?>";
 					var dsn_token = "<?php echo $dsn_token; ?>";
 					var dsn_json = <?php echo json_encode($db); ?>;
 					var sqlite_dir = "<?php echo $sqlite_dir; ?>";

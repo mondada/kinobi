@@ -53,7 +53,7 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 
 	// Change Password
 	if ($pdo && isset($_SESSION['username']) && isset($_POST['current_passwd']) && isset($_POST['new_passwd'])) {
-		$current = $pdo->query('SELECT password FROM users WHERE username = "' . $_SESSION['username'] . '"')->fetch(PDO::FETCH_COLUMN);
+		$current = $pdo->query("SELECT password FROM users WHERE username = '" . $_SESSION['username'] . "'")->fetch(PDO::FETCH_COLUMN);
 		if (hash("sha256", $_POST['current_passwd']) == $current) {
 			setSettingUser($pdo, $_SESSION['username'], "password", hash("sha256", $_POST['new_passwd']));
 			echo "true";
@@ -83,7 +83,7 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 	// Backup Schedule
 	if (isset($_POST['schedule'])) {
 		exec("crontab -l", $crontab);
-		$backup_api = $_SERVER['SERVER_NAME']."/v1.php/backup/".$kinobi->getSetting("uuid");
+		$backup_api = $_SERVER['SERVER_NAME'] . "/v1.php/backup/" . $kinobi->getSetting("uuid");
 		foreach ($crontab as $key => $value) {
 			if (strpos($value, $backup_api) !== false) {
 				unset($crontab[$key]);
@@ -91,11 +91,11 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 		}
 		$temp_file = tempnam(sys_get_temp_dir(), "crontab_");
 		if ($_POST['schedule'] !== "") {
-			$crontab[] = "0 0 * * ".$_POST['schedule']." curl -k '".(!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on" ? "http" : "https")."://".$_SERVER['SERVER_NAME']."/v1.php/backup/".$kinobi->getSetting("uuid")."' > /dev/null 2>&1";
+			$crontab[] = "0 0 * * " . $_POST['schedule'] . " curl -k '" . (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on" ? "http" : "https") . "://" . $_SERVER['SERVER_NAME'] . "/v1.php/backup/" . $kinobi->getSetting("uuid") . "' > /dev/null 2>&1";
 		}
 		$crontab[] = "";
 		file_put_contents($temp_file, implode(PHP_EOL, $crontab));
-		exec("crontab ".$temp_file);
+		exec("crontab " . $temp_file);
 		unlink($temp_file);
 	}
 
@@ -155,18 +155,18 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 	// Enable / Disable Software Title
 	if ($pdo && isset($_GET['title_id']) && isset($_POST['title_enabled'])) {
 		$title_enabled = ($_POST['title_enabled'] === "true") ? "1" : "0";
-		$stmt = $pdo->prepare('UPDATE titles SET enabled = ? WHERE id = ?');
+		$stmt = $pdo->prepare("UPDATE titles SET enabled = ? WHERE id = ?");
 		$stmt->execute(array($title_enabled, $_GET['title_id']));
 	}
 
 	// Update Override
 	if ($pdo && isset($_GET['override']) && isset($_POST['current'])) {
-		$stmt = $pdo->prepare('DELETE FROM overrides WHERE name_id = ?');
+		$stmt = $pdo->prepare("DELETE FROM overrides WHERE name_id = ?");
 		$stmt->execute(array($_GET['override']));
 		if ("" !== $_POST['current']) {
-			$stmt = $pdo->prepare('INSERT INTO overrides (name_id, current) VALUES (?, ?)');
+			$stmt = $pdo->prepare("INSERT INTO overrides (name_id, current) VALUES (?, ?)");
 			$stmt->execute(array($_GET['override'], $_POST['current']));
-			if ($stmt->errorCode() == '00000') {
+			if ($stmt->errorCode() == "00000") {
 				echo "true";
 			}
 		}
@@ -175,22 +175,22 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 	// Update Title Modified
 	if ($pdo && isset($_GET['title_id']) && isset($_POST['title_modified'])) {
 		$title_modified = time();
-		$stmt = $pdo->prepare('UPDATE titles SET modified = ? WHERE id = ?');
+		$stmt = $pdo->prepare("UPDATE titles SET modified = ? WHERE id = ?");
 		$stmt->execute(array($title_modified, $_GET['title_id']));
 	}
 
 	// Enable/Disable Patch
 	if ($pdo && isset($_GET['patch_id']) && isset($_POST['patch_enabled'])) {
 		$patch_enabled = ($_POST['patch_enabled'] === "true") ? "1" : "0";
-		$stmt = $pdo->prepare('UPDATE patches SET enabled = ? WHERE id = ?');
+		$stmt = $pdo->prepare("UPDATE patches SET enabled = ? WHERE id = ?");
 		$stmt->execute(array($patch_enabled, $_GET['patch_id']));
 	}
 
 	// Update Field w/Table
 	if ($pdo && isset($_GET['table']) && isset($_GET['field']) && isset($_POST['value']) && isset($_GET['id'])) {
-		$stmt = $pdo->prepare('UPDATE '.$_GET['table'].' SET '.$_GET['field'].' = ? WHERE id = ?');
+		$stmt = $pdo->prepare("UPDATE " . $_GET["table"] . " SET " . $_GET["field"] . " = ? WHERE id = ?");
 		$stmt->execute(array($_POST['value'], $_GET['id']));
-		if ($stmt->errorCode() == '00000') {
+		if ($stmt->errorCode() == "00000") {
 			echo "true";
 		}
 	}
@@ -198,9 +198,9 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 	// Update Patch Released
 	if ($pdo && isset($_GET['patch_id']) && isset($_POST['patch_released'])) {
 		$patch_released = date("U",strtotime($_POST['patch_released']));
-		$stmt = $pdo->prepare('UPDATE patches SET released = ? WHERE id = ?');
+		$stmt = $pdo->prepare("UPDATE patches SET released = ? WHERE id = ?");
 		$stmt->execute(array($patch_released, $_GET['patch_id']));
-		if ($stmt->errorCode() == '00000') {
+		if ($stmt->errorCode() == "00000") {
 			echo "true";
 		}
 	}

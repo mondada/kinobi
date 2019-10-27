@@ -212,7 +212,7 @@ $app->get(
 				if ($db['dsn']['prefix'] == "mysql") {
 					$dbname = $db['dsn']['dbname'];
 					$dump = new Mysqldump(
-						$db['dsn']['prefix'].":host=".$db['dsn']['host'].";port=".$db['dsn']['port'].";dbname=".$db['dsn']['dbname'],
+						$db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'],
 						$db['username'],
 						openssl_decrypt($db['passwd'], "AES-128-CTR", $uuid, 0, substr(md5($db['username']), 0, 16)),
 						array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
@@ -225,14 +225,14 @@ $app->get(
 						$dbname = substr($dbname, 0, $pos);
 					}
 					$dump = new Mysqldump(
-						$db['dsn']['prefix'].":".$db['dsn']['dbpath'],
+						$db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'],
 						null,
 						null,
 						array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
 					);
 				}
 
-				$dump->start($backup['path']."/".$dbname."-".$timestamp.".sql.gz");
+				$dump->start($backup['path'] . "/" . $dbname . "-" . $timestamp . ".sql.gz");
             } else {
 				$app->halt(401, $app->unauthorized);
             }

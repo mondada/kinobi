@@ -13,7 +13,7 @@
 
 // Re-direct to HTTPS if connecting via HTTP
 if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") {
-	header("Location: https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+	header("Location: https://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
 }
 
 ?>
