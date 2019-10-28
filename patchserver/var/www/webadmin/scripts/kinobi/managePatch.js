@@ -158,7 +158,7 @@ $( document ).ready(function() {
 		sort_order = $( this ).val();
 		if (/^\d+$/.test(sort_order)) {
 			if (sort_order !== patch_json.sort_order) {
-				$.post("patchCtl.php?table=patches&field=sort_order&id=" + patch_json.id, { "value": sort_order }).done(function(result) {
+				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "sort_order", "value": sort_order }).done(function(result) {
 					if (result) {
 						$( "#patch-sort-order" ).parent("div").addClass("has-success has-feedback");
 						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -186,7 +186,7 @@ $( document ).ready(function() {
 		version = $( this ).val();
 		if (/^.{1,255}$/.test(version) && patch_versions.indexOf(version) == -1) {
 			if (version !== patch_json.version) {
-				$.post("patchCtl.php?table=patches&field=version&id=" + patch_json.id, { "value": version }).done(function(result) {
+				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "version", "value": version }).done(function(result) {
 					if (result) {
 						$( "#patch-version" ).parent("div").addClass("has-success has-feedback");
 						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -220,7 +220,7 @@ $( document ).ready(function() {
 		released = moment($( this ).val(), "YYYY-MM-DDTHH:mm:ss\Z").unix();
 		if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test($( this ).val())) {
 			if (released != patch_json.released) {
-				$.post("patchCtl.php?table=patches&field=released&id=" + patch_json.id, { "value": released }).done(function(result) {
+				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "released", "value": released }).done(function(result) {
 					if (result) {
 						$( "#patch-released" ).parents("div.form-group").addClass("has-success has-feedback");
 						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -245,7 +245,7 @@ $( document ).ready(function() {
 	$( "#patch-standalone" ).on("change", function() {
 		standalone = $( this ).val();
 		if (standalone !== patch_json.standalone) {
-			$.post("patchCtl.php?table=patches&field=standalone&id=" + patch_json.id, { "value": standalone }).done(function(result) {
+			$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "standalone", "value": standalone }).done(function(result) {
 				if (result) {
 					$( "#patch-standalone" ).parents("div.form-group").addClass("has-success has-feedback");
 					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -266,7 +266,7 @@ $( document ).ready(function() {
 	$( "#patch-reboot" ).on("change", function() {
 		reboot = $( this ).val();
 		if (reboot !== patch_json.reboot) {
-			$.post("patchCtl.php?table=patches&field=reboot&id=" + patch_json.id, { "value": reboot }).done(function(result) {
+			$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "reboot", "value": reboot }).done(function(result) {
 				if (result) {
 					$( "#patch-reboot" ).parents("div.form-group").addClass("has-success has-feedback");
 					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -288,7 +288,7 @@ $( document ).ready(function() {
 		min_os = $( this ).val();
 		if (/^.{1,255}$/.test(min_os)) {
 			if (min_os !== patch_json.min_os) {
-				$.post("patchCtl.php?table=patches&field=min_os&id=" + patch_json.id, { "value": min_os }).done(function(result) {
+				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "min_os", "value": min_os }).done(function(result) {
 					if (result) {
 						$( "#patch-min-os" ).parent("div").addClass("has-success has-feedback");
 						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -512,7 +512,7 @@ $( document ).ready(function() {
 	$( "#dependencies tbody select.is_and" ).on("change", function() {
 		var element = $( this );
 		var data = dependencies.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=dependencies&field=is_and&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -526,7 +526,7 @@ $( document ).ready(function() {
 	$( "#dependencies tbody select.criteria" ).on("change", function() {
 		var element = $( this );
 		var data = dependencies.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=dependencies&field=name&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -541,7 +541,7 @@ $( document ).ready(function() {
 					operator_select.selectpicker("val", operator_opts[0]);
 					operator_select.parents("div.form-group").addClass("has-warning has-feedback").find("span.form-control-feedback").remove();
 					operator_select.parents("div.form-group").append('<span class="glyphicon glyphicon-warning-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?table=dependencies&field=operator&id=" + data.id, { "value": operator_opts[0] });
+					$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "operator", "value": operator_opts[0] });
 					data.operator = operator_opts[0];
 				} else {
 					operator_select.selectpicker("val", data.operator);
@@ -552,7 +552,7 @@ $( document ).ready(function() {
 					type = "recon";
 				}
 				if (data.type != type) {
-					$.post("patchCtl.php?table=dependencies&field=type&id=" + data.id, { "value": type });
+					$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "type", "value": type });
 					data.type = type;
 				}
 				data.name = element.val();
@@ -565,7 +565,7 @@ $( document ).ready(function() {
 	$( "#dependencies tbody select.operator" ).on("change", function() {
 		var element = $( this );
 		var data = dependencies.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=dependencies&field=operator&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -584,8 +584,8 @@ $( document ).ready(function() {
 	$( "#dependencies tbody input" ).on("change", function() {
 		var element = $( this );
 		var data = dependencies.row(element.parents("tr")).data();
-		if (/^.{0,255}$/.test(data.value)) {
-			$.post("patchCtl.php?table=dependencies&field=value&id=" + data.id, { "value": element.val() }).done(function(result) {
+		if (/^.{0,255}$/.test(element.val())) {
+			$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -722,7 +722,7 @@ $( document ).ready(function() {
 	$( "#capabilities tbody select.is_and" ).on("change", function() {
 		var element = $( this );
 		var data = capabilities.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=capabilities&field=is_and&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -736,7 +736,7 @@ $( document ).ready(function() {
 	$( "#capabilities tbody select.criteria" ).on("change", function() {
 		var element = $( this );
 		var data = capabilities.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=capabilities&field=name&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -751,7 +751,7 @@ $( document ).ready(function() {
 					operator_select.selectpicker("val", operator_opts[0]);
 					operator_select.parents("div.form-group").addClass("has-warning has-feedback").find("span.form-control-feedback").remove();
 					operator_select.parents("div.form-group").append('<span class="glyphicon glyphicon-warning-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?table=capabilities&field=operator&id=" + data.id, { "value": operator_opts[0] });
+					$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "operator", "value": operator_opts[0] });
 					data.operator = operator_opts[0];
 				} else {
 					operator_select.selectpicker("val", data.operator);
@@ -762,7 +762,7 @@ $( document ).ready(function() {
 					type = "recon";
 				}
 				if (data.type != type) {
-					$.post("patchCtl.php?table=capabilities&field=type&id=" + data.id, { "value": type });
+					$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "type", "value": type });
 					data.type = type;
 				}
 				data.name = element.val();
@@ -775,7 +775,7 @@ $( document ).ready(function() {
 	$( "#capabilities tbody select.operator" ).on("change", function() {
 		var element = $( this );
 		var data = capabilities.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=capabilities&field=operator&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
@@ -794,8 +794,8 @@ $( document ).ready(function() {
 	$( "#capabilities tbody input" ).on("change", function() {
 		var element = $( this );
 		var data = capabilities.row(element.parents("tr")).data();
-		if (/^.{0,255}$/.test(data.value)) {
-			$.post("patchCtl.php?table=capabilities&field=value&id=" + data.id, { "value": element.val() }).done(function(result) {
+		if (/^.{0,255}$/.test(element.val())) {
+			$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });

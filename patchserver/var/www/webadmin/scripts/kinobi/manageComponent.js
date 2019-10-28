@@ -122,7 +122,7 @@ $( document ).ready(function() {
 		name = $( this ).val();
 		if (/^.{1,255}$/.test(name)) {
 			if (name !== component_json.name) {
-				$.post("patchCtl.php?table=components&field=name&id=" + component_json.id, { "value": name }).done(function(result) {
+				$.post("patchCtl.php?id=" + component_json.id, { "table": "components", "field": "name", "value": name }).done(function(result) {
 					if (result) {
 						$( "#component-name" ).parent("div").addClass("has-success has-feedback");
 						$.post("patchCtl.php?component_id=" + component_json.id, { "component_modified": true });
@@ -149,7 +149,7 @@ $( document ).ready(function() {
 		version = $( this ).val();
 		if (/^.{1,255}$/.test(version)) {
 			if (version !== component_json.version) {
-				$.post("patchCtl.php?table=components&field=version&id=" + component_json.id, { "value": version }).done(function(result) {
+				$.post("patchCtl.php?id=" + component_json.id, { "table": "components", "field": "version", "value": version }).done(function(result) {
 					if (result) {
 						$( "#component-version" ).parent("div").addClass("has-success has-feedback");
 						$.post("patchCtl.php?component_id=" + component_json.id, { "component_modified": true });
@@ -257,7 +257,7 @@ $( document ).ready(function() {
 	$( "#criteria tbody select.is_and" ).on("change", function() {
 		var element = $( this );
 		var data = criteria.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=criteria&field=is_and&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "criteria", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + component_json.title_id, { "title_modified": true });
@@ -271,7 +271,7 @@ $( document ).ready(function() {
 	$( "#criteria tbody select.criteria" ).on("change", function() {
 		var element = $( this );
 		var data = criteria.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=criteria&field=name&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "criteria", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + component_json.title_id, { "title_modified": true });
@@ -286,7 +286,7 @@ $( document ).ready(function() {
 					operator_select.selectpicker("val", operator_opts[0]);
 					operator_select.parents("div.form-group").addClass("has-warning has-feedback").find("span.form-control-feedback").remove();
 					operator_select.parents("div.form-group").append('<span class="glyphicon glyphicon-warning-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?table=criteria&field=operator&id=" + data.id, { "value": operator_opts[0] });
+					$.post("patchCtl.php?id=" + data.id, { "table": "criteria", "field": "operator", "value": operator_opts[0] });
 					data.operator = operator_opts[0];
 				} else {
 					operator_select.selectpicker("val", data.operator);
@@ -297,7 +297,7 @@ $( document ).ready(function() {
 					type = "recon";
 				}
 				if (data.type != type) {
-					$.post("patchCtl.php?table=criteria&field=type&id=" + data.id, { "value": type });
+					$.post("patchCtl.php?id=" + data.id, { "table": "criteria", "field": "type", "value": type });
 					data.type = type;
 				}
 				data.name = element.val();
@@ -310,7 +310,7 @@ $( document ).ready(function() {
 	$( "#criteria tbody select.operator" ).on("change", function() {
 		var element = $( this );
 		var data = criteria.row(element.parents("tr")).data();
-		$.post("patchCtl.php?table=criteria&field=operator&id=" + data.id, { "value": element.val() }).done(function(result) {
+		$.post("patchCtl.php?id=" + data.id, { "table": "criteria", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 				$.post("patchCtl.php?title_id=" + component_json.title_id, { "title_modified": true });
@@ -329,8 +329,8 @@ $( document ).ready(function() {
 	$( "#criteria tbody input" ).on("change", function() {
 		var element = $( this );
 		var data = criteria.row(element.parents("tr")).data();
-		if (/^.{0,255}$/.test(data.value)) {
-			$.post("patchCtl.php?table=criteria&field=value&id=" + data.id, { "value": element.val() }).done(function(result) {
+		if (/^.{0,255}$/.test(element.val())) {
+			$.post("patchCtl.php?id=" + data.id, { "table": "criteria", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
 					$.post("patchCtl.php?title_id=" + component_json.title_id, { "title_modified": true });

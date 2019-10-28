@@ -187,8 +187,8 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 	}
 
 	// Update Field w/Table
-	if ($pdo && isset($_GET['table']) && isset($_GET['field']) && isset($_POST['value']) && isset($_GET['id'])) {
-		$stmt = $pdo->prepare("UPDATE " . $_GET["table"] . " SET " . $_GET["field"] . " = ? WHERE id = ?");
+	if ($pdo && isset($_POST['table']) && isset($_POST['field']) && isset($_POST['value']) && isset($_GET['id'])) {
+		$stmt = $pdo->prepare("UPDATE " . $_POST['table'] . " SET " . $_POST['field'] . " = ? WHERE id = ?");
 		$stmt->execute(array($_POST['value'], $_GET['id']));
 		if ($stmt->errorCode() == "00000") {
 			echo "true";
