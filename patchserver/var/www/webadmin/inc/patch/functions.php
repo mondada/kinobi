@@ -392,7 +392,7 @@ function getSoftwareTitleSummary($pdo, $ids, $enabled = 1)
 		$stmt->execute(array($enabled, $name_id));
 		while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $sw_title['lastModified']);
-			$override = $pdo->query("SELECT current FROM overrides WHERE name_id = " . $sw_title['id'])->fetch(PDO::FETCH_COLUMN);
+			$override = $pdo->query("SELECT current FROM overrides WHERE name_id = '" . $sw_title['id'] . "'")->fetch(PDO::FETCH_COLUMN);
 			if (!empty($override)) {
 				$sw_title['currentVersion'] = $override;
 			}
