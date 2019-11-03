@@ -64,18 +64,18 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 	if (isset($_GET['download'])) {
 		$backup = $kinobi->getSetting("backup");
 		$filename = $_GET['download'];
-		if (file_exists($backup['path'].'/'.$filename)) {
+		if (file_exists($backup['path'] . "/" . $filename)) {
 			if (ob_get_level()) ob_end_clean();
-			header('Content-Description: File Transfer');
-			header('Content-Type: application/octet-stream');
-			header('Content-Disposition: attachment; filename="'.$filename.'"');
-			header('Expires: 0');
-			header('Cache-Control: must-revalidate');
-			header('Pragma: public');
-			header('Content-Length: '.filesize($backup['path'].'/'.$filename));
+			header("Content-Description: File Transfer");
+			header("Content-Type: application/octet-stream");
+			header("Content-Disposition: attachment; filename='" . $filename . "'");
+			header("Expires: 0");
+			header("Cache-Control: must-revalidate");
+			header("Pragma: public");
+			header("Content-Length: " . filesize($backup['path'] . "/" . $filename));
 			ob_clean();
 			flush();
-			readfile($backup['path'].'/'.$filename);
+			readfile($backup['path'] . "/" . $filename);
 			exit;
 		}
 	}

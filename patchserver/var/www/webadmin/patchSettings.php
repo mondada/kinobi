@@ -148,14 +148,14 @@ if (isset($_POST['backup'])) {
 				$db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'],
 				$db['username'],
 				openssl_decrypt($db['passwd'], "AES-128-CTR", $key, 0, substr(md5($db['username']), 0, 16)),
-				array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
+				array("compress" => Mysqldump::GZIP, "add-drop-table" => true, "no-autocommit" => false)
 			);
 		} else {
 			$dump = new Mysqldump(
 				$db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'],
 				$db['username'],
 				openssl_decrypt($db['passwd'], "AES-128-CTR", $key, 0, substr(md5($db['username']), 0, 16)),
-				array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
+				array("compress" => Mysqldump::GZIP, "no-autocommit" => false, "sqlite-dump" => true)
 			);
 		}
 	}
@@ -169,14 +169,14 @@ if (isset($_POST['backup'])) {
 				$db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'],
 				null,
 				null,
-				array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
+				array("compress" => Mysqldump::GZIP, "add-drop-table" => true, "no-autocommit" => false)
 			);
 		} else {
 			$dump = new Mysqldump(
 				$db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'],
 				null,
 				null,
-				array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
+				array("compress" => Mysqldump::GZIP, "no-autocommit" => false, "sqlite-dump" => true)
 			);
 		}
 	}
