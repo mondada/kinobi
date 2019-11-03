@@ -36,10 +36,10 @@ Kinobi may also be installed on [NetSUS 4.1.0 or later](https://github.com/jamf/
 
 ## Migrating from NetSUS
 **Kinobi stores the user accounts in its database, when the database is restored from an earlier version, no user's will exist**
-Kinobi 1.2 has a new backup format and database schema, as such to migrate from NetSUS to a Standalone installation, a few additional steps are required.
+Kinobi 1.2 and later has a new backup format and database schema, as such to migrate from NetSUS to a Standalone installation, a few additional steps are required.
 Migration steps:
 * Perform a backup of the database, and download it (this may be required for rollback)
-* Upgrade the Kinobi installation on NetSUS to version 1.2
+* Upgrade the Kinobi installation on NetSUS to version 1.2 or later
 * Perform a fresh backup (in the new format), download this file (sql.gz)
 * Install Kinobi on a new system
 * Perform an initial setup
