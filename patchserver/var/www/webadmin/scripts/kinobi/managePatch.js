@@ -9,6 +9,7 @@
  *
  */
 
+var active_tab = localStorage.getItem("activePatchTab");
 var patch_versions = $.map(patches_json, function(el) { return el.version; });
 var comps_error_msg = "";
 var caps_error_msg = "";
@@ -129,11 +130,11 @@ $( document ).ready(function() {
 		localStorage.setItem("activePatchTab", $(e.target).attr("href"));
 	});
 
-	var activePatchTab = localStorage.getItem("activePatchTab");
-
-	if(activePatchTab){
-		$( '#top-tabs a[href="' + activePatchTab + '"]' ).tab("show");
+	if (null === active_tab) {
+		active_tab = "#patch-tab";
 	}
+
+	$( "#top-tabs a[href='" + active_tab + "']" ).tab("show");
 
 	$( "#patch-sort-order" ).val(patch_json.sort_order);
 	$( "#patch-version" ).val(patch_json.version);

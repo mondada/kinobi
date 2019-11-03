@@ -367,7 +367,7 @@ if ($pdo) {
 
 					<div class="nav-tabs-wrapper">
 						<ul class="nav nav-tabs nav-justified" id="top-tabs">
-							<li class="active"><a id="patch-tab-link" href="#patch-tab" role="tab" data-toggle="tab"><small>Patch</small></a></li>
+							<li><a id="patch-tab-link" href="#patch-tab" role="tab" data-toggle="tab"><small>Patch</small></a></li>
 							<li><a id="components-tab-link" href="#components-tab" role="tab" data-toggle="tab"><small><span id="components-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Components</small></a></li>
 							<!-- <li><a id="dependencies-tab-link" href="#dependencies-tab" role="tab" data-toggle="tab"><small>Dependencies</small></a></li> -->
 							<li><a id="capabilities-tab-link" href="#capabilities-tab" role="tab" data-toggle="tab"><small><span id="capabilities-tab-icon" class="glyphicon glyphicon-exclamation-sign hidden-xs hidden"></span> Capabilities</small></a></li>

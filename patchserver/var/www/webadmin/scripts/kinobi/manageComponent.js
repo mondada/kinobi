@@ -9,6 +9,7 @@
  *
  */
 
+var active_tab = localStorage.getItem("activeCompTab");
 var license_file = "scripts/kinobi/kinobi-open-source-license.html";
 var logo_name = "kinobi-open-source";
 var logo_height = "36";
@@ -101,11 +102,11 @@ $( document ).ready(function() {
 		localStorage.setItem("activeCompTab", $(e.target).attr("href"));
 	});
 
-	var activeCompTab = localStorage.getItem("activeCompTab");
-
-	if(activeCompTab){
-		$('#top-tabs a[href="' + activeCompTab + '"]').tab("show");
+	if (null === active_tab) {
+		active_tab = "#component-tab";
 	}
+
+	$( "#top-tabs a[href='" + active_tab + "']" ).tab("show");
 
 	$( "#component-name" ).val(component_json.name);
 	$( "#component-version" ).val(component_json.version);

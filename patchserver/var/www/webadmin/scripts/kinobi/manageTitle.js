@@ -9,6 +9,7 @@
  *
  */
 
+var active_tab = localStorage.getItem("activeTitleTab");
 var upload_btn_class = ($( "#upload_patch-modal" ).length ? false : "hidden");
 var import_btn_class = (upload_btn_class ? "hidden" : "btn-primary btn-sm");
 var patch_versions = $.map(patches_json, function(el) { return el.version; });
@@ -117,11 +118,11 @@ $( document ).ready(function() {
 		localStorage.setItem("activeTitleTab", $(e.target).attr("href"));
 	});
 
-	var activeTitleTab = localStorage.getItem("activeTitleTab");
-
-	if(activeTitleTab){
-		$( '#top-tabs a[href="' + activeTitleTab + '"]' ).tab("show");
+	if (null === active_tab) {
+		active_tab = "#title-tab";
 	}
+
+	$( "#top-tabs a[href='" + active_tab + "']" ).tab("show");
 
 	$( "#title-name" ).val(title_json.name);
 	$( "#title-publisher" ).val(title_json.publisher);
