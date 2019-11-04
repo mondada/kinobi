@@ -1,7 +1,6 @@
 /*----------------------------------------------
 Miscellaneous
 ------------------------------------------------*/
-
 body {
     overflow-x: hidden;
     font-family: 'Roboto', sans-serif;
@@ -10,38 +9,62 @@ h2 {
     margin-top: 0;
     color: #263238;
 }
+hr {
+	/* Deprecated */
+    margin: 0;
+}
+.tab-font {
+	/* Deprecated */
+    font-size: 12px;
+}
+
+/*----------------------------------------------
+Fixed Top Navbar
+------------------------------------------------*/
+.navbar-toggle {
+	float: left;
+	margin-left: 10px;
+	margin-right: 0px;
+}
+.navbar-header.pull-right .dropdown > a {
+	padding-top: 15px;
+	padding-bottom: 15px;
+	line-height: 20px;
+	background-color: transparent;
+}
+.navbar-inverse .navbar-header.pull-right .dropdown > a {
+	color: #9d9d9d;
+}
+.navbar-inverse .navbar-header.pull-right .dropdown > a:hover,
+.navbar-inverse .navbar-header.pull-right .dropdown > a:focus {
+	color: #fff;
+}
+.navbar-inverse .navbar-header.pull-right .dropdown > a:focus {
+	background-color: #080808;
+}
+.navbar-header.pull-right .dropdown > ul {
+	margin-top: 0px;
+	border-top-right-radius: 0;
+	border-top-left-radius: 0;
+}
 
 /*----------------------------------------------
 Page Content Wrapper
 ------------------------------------------------*/
-
 #page-content-wrapper {
     position: absolute;
-    padding: 20px 0px;
+    padding: 20px 0px 50px;
     margin-top: 50px;
     width: 100%;
-    padding-bottom: 50px;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
 /*----------------------------------------------
-Page Title Navigation
+Text Styles (Deprecated)
 ------------------------------------------------*/
-#nav-title {
-	top: 51px;
-	height: 83px;
-	border-bottom: 1px solid #eee;
-	background: #fff;
-	-webkit-transition: all 0.5s ease;
-	-moz-transition: all 0.5s ease;
-	-o-transition: all 0.5s ease;
-	transition: all 0.5s ease;
-	z-index: 90;
-}
-
-/*----------------------------------------------
-Text Styles
-------------------------------------------------*/
-
 .description {
     font-size: 12px;
     padding: 1px 0 2px 0;
@@ -49,14 +72,3 @@ Text Styles
     display: block;
     text-decoration: none;
 }
-hr {
-    margin: 0;
-}
-
-/*----------------------------------------------
-Buttons/Input
-------------------------------------------------*/
-.tab-font {
-    font-size: 12px;
-}
-

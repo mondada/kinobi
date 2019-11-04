@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.3
  *
  */
 
@@ -33,47 +33,43 @@ $api = getSettingApi($pdo);
 
 $app->authorzied = ($api['reqauth'] ? false : "0");
 
-if ($api['authtype'] == "token") {
-	if (isset($_SERVER['Authorization'])) {
-		$auth_header = trim($_SERVER['Authorization']);
-	} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-		$auth_header = trim($_SERVER['HTTP_AUTHORIZATION']);
-	} elseif (function_exists("apache_request_headers")) {
-		$request_headers = apache_request_headers();
-		$request_headers = array_combine(array_map("ucwords", array_keys($request_headers)), array_values($request_headers));
+if (isset($_SERVER['Authorization'])) {
+	$auth_header = trim($_SERVER['Authorization']);
+} elseif (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+	$auth_header = trim($_SERVER['HTTP_AUTHORIZATION']);
+} elseif (function_exists("apache_request_headers")) {
+	$request_headers = apache_request_headers();
+	$request_headers = array_combine(array_map("ucwords", array_keys($request_headers)), array_values($request_headers));
 
-		if (isset($request_headers['Authorization'])) {
-			$auth_header = trim($request_headers['Authorization']);
-		}
-	}
-
-	if (isset($auth_header)) {
-		if (preg_match("/Bearer\s(\S+)/", $auth_header, $matches)) {
-			$api_token = $matches[1];
-		}
-	}
-
-	if (isset($api_token)) {
-		$users = getSettingUsers($pdo);
-
-		$api_tokens = array();
-		foreach ($users as $key => $value) {
-			if (isset($value['token']) && isset($value['api']) && (!isset($value['expires']) || $value['expires'] > time())) {
-				$api_tokens[$value['token']] = $value['api'];
-			}
-		}
-
-		$app->authorzied = (array_key_exists($api_token, $api_tokens) ? $api_tokens[$api_token] : $app->authorzied);
+	if (isset($request_headers['Authorization'])) {
+		$auth_header = trim($request_headers['Authorization']);
 	}
 }
 
-if ($api['authtype'] == "basic") {
+if (isset($auth_header)) {
+	if (preg_match("/Bearer\s(\S+)/", $auth_header, $matches)) {
+		$api_token = $matches[1];
+	}
+}
+
+if (isset($api_token)) {
+	$users = getSettingUsers($pdo);
+
+	$api_tokens = array();
+	foreach ($users as $key => $value) {
+		if (isset($value['token']) && isset($value['api']) && (!isset($value['expires']) || $value['expires'] > time())) {
+			$api_tokens[$value['token']] = $value['api'];
+		}
+	}
+
+	$app->authorzied = (array_key_exists($api_token, $api_tokens) ? $api_tokens[$api_token] : $app->authorzied);
+} else {
 	if (!isset($_SERVER['PHP_AUTH_USER'])) {
 		header("WWW-Authenticate: Basic realm=\"v1\"");
 	} else {
 		$username = $_SERVER['PHP_AUTH_USER'];
 		$password = hash("sha256", $_SERVER['PHP_AUTH_PW']);
-	
+
 		$users = getSettingUsers($pdo);
 
 		$app->authorzied = (array_key_exists($username, $users) && $users[$username]['password'] == $password && (!isset($users[$username]['expires']) || $users[$username]['expires'] > time()) && isset($users[$username]['api']) ? $users[$username]['api'] : $app->authorzied);
@@ -216,10 +212,10 @@ $app->get(
 				if ($db['dsn']['prefix'] == "mysql") {
 					$dbname = $db['dsn']['dbname'];
 					$dump = new Mysqldump(
-						$db['dsn']['prefix'].":host=".$db['dsn']['host'].";port=".$db['dsn']['port'].";dbname=".$db['dsn']['dbname'],
+						$db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'],
 						$db['username'],
 						openssl_decrypt($db['passwd'], "AES-128-CTR", $uuid, 0, substr(md5($db['username']), 0, 16)),
-						array('compress' => Mysqldump::GZIP, "add-drop-table" => true, 'no-autocommit' => false)
+						array("compress" => Mysqldump::GZIP, "add-drop-table" => true, "no-autocommit" => false)
 					);
 				}
 
@@ -229,14 +225,14 @@ $app->get(
 						$dbname = substr($dbname, 0, $pos);
 					}
 					$dump = new Mysqldump(
-						$db['dsn']['prefix'].":".$db['dsn']['dbpath'],
+						$db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'],
 						null,
 						null,
-						array('compress' => Mysqldump::GZIP, 'no-autocommit' => false, 'sqlite-dump' => true)
+						array("compress" => Mysqldump::GZIP, "no-autocommit" => false, "sqlite-dump" => true)
 					);
 				}
 
-				$dump->start($backup['path']."/".$dbname."-".$timestamp.".sql.gz");
+				$dump->start($backup['path'] . "/" . $dbname . "-" . $timestamp . ".sql.gz");
             } else {
 				$app->halt(401, $app->unauthorized);
             }

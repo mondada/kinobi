@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.3
  *
  */
 
@@ -129,18 +129,26 @@ if (is_null($kinobi->getSetting("backup"))) {
 /**
  * Get Users
  *
- * @param  object  $pdo  PDO database connection / Kinobi Settings Object
+ * @param  object  $pdo     PDO database connection / Kinobi Settings Object
+ * @param  bool    $simple
  *
  * @return array Returns an array.
  */
-function getSettingUsers($pdo)
+function getSettingUsers($pdo, $simple = false)
 {
-	// $users = $pdo->getSetting("users");
+	// $users = $kinobi->getSetting("users");
 
 	$users = array();
 	if ($pdo) {
-		$stmt = $pdo->query("SELECT id, username, password, token, expires, web, api FROM users");
+		$simple = ($simple ? "" : "password, ");
+		$stmt = $pdo->query("SELECT id, username, " . $simple . "reset, token, expires, disabled, web, api FROM users");
 		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			$row['id'] = (int)$row['id'];
+			$row['expires'] = (null !== $row['expires'] ? (int)$row['expires'] : null);
+			$row['disabled'] = (null !== $row['disabled'] ? (int)$row['disabled'] : null);
+			$row['web'] = (null !== $row['web'] ? (int)$row['web'] : null);
+			$row['api'] = (null !== $row['api'] ? (int)$row['api'] : null);
+			$row['reset'] = (bool)$row['reset'];
 			$users[$row['username']] = $row;
 		}
 	}
@@ -157,14 +165,37 @@ function getSettingUsers($pdo)
  */
 function createUser($pdo, $user, $passwd)
 {
-	// $users = $pdo->getSetting("users");
+	// $users = $kinobi->getSetting("users");
 	// $users[$user] = array();
 	// $users[$user]['password'] = $passwd;
-	// $pdo->setSetting("users", $users);
+	// $kinobi->setSetting("users", $users);
 
 	if ($pdo) {
 		$stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
 		$stmt->execute(array($user, $passwd));
+	}
+}
+
+/**
+ * Rename User
+ *
+ * @param  object   $pdo   PDO database connection / Kinobi Settings Object
+ * @param  string   $user  Username
+ * @param  string   $name  New username
+ */
+function renameUser($pdo, $user, $name)
+{
+	// $users = $kinobi->getSetting("users");
+	// $users[$name] = $users[$user];
+	// unset($users[$user]);
+	// $kinobi->setSetting("users", $users);
+
+	if ($pdo) {
+		$stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+		$stmt->execute(array($user));
+		$id = $stmt->fetchColumn();
+		$stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
+		$stmt->execute(array($name, $id));
 	}
 }
 
@@ -176,9 +207,9 @@ function createUser($pdo, $user, $passwd)
  */
 function deleteUser($pdo, $user)
 {
-	// $users = $pdo->getSetting("users");
+	// $users = $kinobi->getSetting("users");
 	// unset($users[$user]);
-	// $pdo->setSetting("users", $users);
+	// $kinobi->setSetting("users", $users);
 
 	if ($pdo) {
 		$stmt = $pdo->prepare("DELETE FROM users WHERE username = ?");
@@ -196,12 +227,12 @@ function deleteUser($pdo, $user)
  */
 function setSettingUser($pdo, $user, $key, $value)
 {
-	// $users = $pdo->getSetting("users");
+	// $users = $kinobi->getSetting("users");
 	// $users[$user][$key] = $value;
-	// $pdo->setSetting("users", $users);
+	// $kinobi->setSetting("users", $users);
 
 	if ($pdo) {
-		$stmt = $pdo->prepare("UPDATE users SET ".$key." = ? WHERE username = ?");
+		$stmt = $pdo->prepare("UPDATE users SET " . $key . " = ? WHERE username = ?");
 		$stmt->execute(array($value, $user));
 	}
 }
@@ -215,16 +246,22 @@ function setSettingUser($pdo, $user, $key, $value)
  */
 function getSettingSubscription($pdo)
 {
-	$settings = false;
+	// $settings = false;
 
-	// $settings = $pdo->getSetting("subscription");
+	// $settings = $kinobi->getSetting("subscription");
+	// if (!$settings) {
+	//	$settings = array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0);
+	// }
+
+	$settings = array();
 
 	if ($pdo) {
 		$settings = $pdo->query("SELECT url, token, refresh, lastcheckin FROM subscription LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 	}
-	if (!$settings) {
-		$settings = array("url" => null, "token" => null, "refresh" => 3600, "lastcheckin" => 0);
-	}
+	$settings['url'] = (isset($settings['url']) ? $settings['url'] : null);
+	$settings['token'] = (isset($settings['token']) ? $settings['token'] : null);
+	$settings['refresh'] = (isset($settings['refresh']) ? (empty($settings['refresh']) ? 3600 : (int)$settings['refresh']) : 3600);
+	$settings['lastcheckin'] = (isset($settings['lastcheckin']) ? (int)$settings['lastcheckin'] : 0);
 
 	return $settings;
 }
@@ -237,7 +274,7 @@ function getSettingSubscription($pdo)
  */
 function setSettingSubscription($pdo, $settings)
 {
-	// $pdo->setSetting("subscription", $settings);
+	// $kinobi->setSetting("subscription", $settings);
 
 	if ($pdo) {
 		$pdo->exec("DELETE FROM subscription");
@@ -255,16 +292,20 @@ function setSettingSubscription($pdo, $settings)
  */
 function getSettingApi($pdo)
 {
-	$settings = false;
+	// $settings = false;
 
-	// $settings = $pdo->getSetting("api");
+	// $settings = $kinobi->getSetting("api");
+	// if (!$settings) {
+	//	$settings = array("auto" => true, "reqauth" => false);
+	// }
+
+	$settings = array();
 
 	if ($pdo) {
-		$settings = $pdo->query("SELECT authtype, auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+		$settings = $pdo->query("SELECT auto, reqauth FROM api LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 	}
-	if (!$settings) {
-		$settings = array("authtype" => "basic", "auto" => true, "reqauth" => false);
-	}
+	$settings['auto'] = (isset($settings['auto']) ? (bool)$settings['auto'] : false);
+	$settings['reqauth'] = (isset($settings['reqauth']) ? (bool)$settings['reqauth'] : false);
 
 	return $settings;
 }
@@ -277,12 +318,12 @@ function getSettingApi($pdo)
  */
 function setSettingApi($pdo, $settings)
 {
-	// $pdo->setSetting("api", $settings);
+	// $kinobi->setSetting("api", $settings);
 
 	if ($pdo) {
 		$pdo->exec("DELETE FROM api");
-		$stmt = $pdo->prepare("INSERT INTO api (authtype, auto, reqauth) VALUES (?, ?, ?)");
-		$stmt->execute(array($settings['authtype'], (int)$settings['auto'], (int)$settings['reqauth']));
+		$stmt = $pdo->prepare("INSERT INTO api (auto, reqauth) VALUES (?, ?)");
+		$stmt->execute(array((int)$settings['auto'], (int)$settings['reqauth']));
 	}
 }
 
@@ -318,7 +359,7 @@ function fetchJsonArray($url, $token = null)
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     if (null !== $token) {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer ".$token));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("Authorization: Bearer " . $token));
     }
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $title = curl_exec($ch);
@@ -351,7 +392,7 @@ function getSoftwareTitleSummary($pdo, $ids, $enabled = 1)
 		$stmt->execute(array($enabled, $name_id));
 		while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$sw_title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $sw_title['lastModified']);
-			$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$sw_title['id'].'"')->fetch(PDO::FETCH_COLUMN);
+			$override = $pdo->query("SELECT current FROM overrides WHERE name_id = '" . $sw_title['id'] . "'")->fetch(PDO::FETCH_COLUMN);
 			if (!empty($override)) {
 				$sw_title['currentVersion'] = $override;
 			}
@@ -378,38 +419,38 @@ function getSoftwareTitle($pdo, $id, $enabled = 1)
 	$title_id = $stmt->fetch(PDO::FETCH_COLUMN);
 
 	if ($title_id) {
-		$title = $pdo->query("SELECT name, publisher, app_name AS 'appName', bundle_id AS 'bundleId', modified AS 'lastModified', current AS 'currentVersion', name_id AS 'id' FROM titles WHERE id = ".$title_id)->fetch(PDO::FETCH_ASSOC);
+		$title = $pdo->query("SELECT name, publisher, app_name AS 'appName', bundle_id AS 'bundleId', modified AS 'lastModified', current AS 'currentVersion', name_id AS 'id' FROM titles WHERE id = " . $title_id)->fetch(PDO::FETCH_ASSOC);
 		$title['lastModified'] = gmdate("Y-m-d\TH:i:s\Z", $title['lastModified']);
 
 		// overrides
-		$override = $pdo->query('SELECT current FROM overrides WHERE name_id = "'.$title['id'].'"')->fetch(PDO::FETCH_COLUMN);
+		$override = $pdo->query("SELECT current FROM overrides WHERE name_id = '" . $title['id'] . "'")->fetch(PDO::FETCH_COLUMN);
 		if (!empty($override)) {
 			$title['currentVersion'] = $override;
 		}
 
 		// requirements
-		$title['requirements'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM requirements WHERE title_id = ".$title_id." ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
+		$title['requirements'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM requirements WHERE title_id = " . $title_id . " ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
 		foreach($title['requirements'] as $key => $value) {
 			$title['requirements'][$key]['and'] = (is_null($value['and']) ? true : (bool)$value['and']);
 		}
 
 		// patches
 		$title['patches'] = array();
-		$stmt = $pdo->query("SELECT id, version, released AS 'releaseDate', standalone, min_os AS 'minimumOperatingSystem', reboot FROM patches WHERE title_id = ".$title_id." AND enabled >= ".$enabled." ORDER BY sort_order");
+		$stmt = $pdo->query("SELECT id, version, released AS 'releaseDate', standalone, min_os AS 'minimumOperatingSystem', reboot FROM patches WHERE title_id = " . $title_id . " AND enabled >= " . $enabled . " ORDER BY sort_order");
 		while ($patch = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$patch['releaseDate'] = gmdate("Y-m-d\TH:i:s\Z", $patch['releaseDate']);
 			$patch['standalone'] = (bool)$patch['standalone'];
 			$patch['reboot'] = (bool)$patch['reboot'];
 
 			// killApps
-			$patch['killApps'] = $pdo->query("SELECT bundle_id AS 'bundleId', app_name AS 'appName' FROM kill_apps WHERE patch_id = ".$patch['id'])->fetchAll(PDO::FETCH_ASSOC);
+			$patch['killApps'] = $pdo->query("SELECT bundle_id AS 'bundleId', app_name AS 'appName' FROM kill_apps WHERE patch_id = " . $patch['id'])->fetchAll(PDO::FETCH_ASSOC);
 
 			// components
 			$patch['components'] = array();
-			$comp_stmt = $pdo->query("SELECT id, name, version FROM components WHERE patch_id = ".$patch['id']);
+			$comp_stmt = $pdo->query("SELECT id, name, version FROM components WHERE patch_id = " . $patch['id']);
 			while ($component = $comp_stmt->fetch(PDO::FETCH_ASSOC)) {
 				// criteria
-				$component['criteria'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM criteria WHERE component_id = ".$component['id']." ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
+				$component['criteria'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM criteria WHERE component_id = " . $component['id'] . " ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
 				foreach($component['criteria'] as $key => $value) {
 					$component['criteria'][$key]['and'] = (is_null($value['and']) ? true : (bool)$value['and']);
 				}
@@ -419,13 +460,13 @@ function getSoftwareTitle($pdo, $id, $enabled = 1)
 			}
 
 			// capabilities
-			$patch['capabilities'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM capabilities WHERE patch_id = ".$patch['id']." ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
+			$patch['capabilities'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM capabilities WHERE patch_id = " . $patch['id'] . " ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
 			foreach($patch['capabilities'] as $key => $value) {
 				$patch['capabilities'][$key]['and'] = (is_null($value['and']) ? true : (bool)$value['and']);
 			}
 
 			// dependencies
-			$patch['dependencies'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM dependencies WHERE patch_id = ".$patch['id']." ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
+			$patch['dependencies'] = $pdo->query("SELECT name, operator, value, type, is_and AS 'and' FROM dependencies WHERE patch_id = " . $patch['id'] . " ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
 			foreach($patch['dependencies'] as $key => $value) {
 				$patch['dependencies'][$key]['and'] = (is_null($value['and']) ? true : (bool)$value['and']);
 			}
@@ -435,7 +476,7 @@ function getSoftwareTitle($pdo, $id, $enabled = 1)
 		}
 
 		// extensionAttributes
-		$title['extensionAttributes'] = $pdo->query("SELECT key_id AS 'key', script AS 'value', name AS 'displayName' FROM ext_attrs WHERE title_id = ".$title_id)->fetchAll(PDO::FETCH_ASSOC);
+		$title['extensionAttributes'] = $pdo->query("SELECT key_id AS 'key', script AS 'value', name AS 'displayName' FROM ext_attrs WHERE title_id = " . $title_id)->fetchAll(PDO::FETCH_ASSOC);
 		foreach($title['extensionAttributes'] as $key => $value) {
 			$title['extensionAttributes'][$key]['value'] = base64_encode($value['value']);
 		}

@@ -7,25 +7,38 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.2
+ * @version     1.3
  *
  */
 
-$pdo_error = "";
-$pdo_message = "";
+$pdo_error = null;
+$pdo_message = null;
+$alter_users = true;
 
 $db = $kinobi->getSetting("pdo");
 $uuid = $kinobi->getSetting("uuid");
 
 if ($db['dsn']['prefix'] == "sqlite") {
-	$dsn = $db['dsn']['prefix'].":".$db['dsn']['dbpath'];
+	$dsn = $db['dsn']['prefix'] . ":" . $db['dsn']['dbpath'];
 	$username = null;
 	$passwd = null;
 	$auto_inc = "AUTOINCREMENT";
 	$engine = "";
 	$charset = "";
+
+	$dsn_parent_dir = dirname($db['dsn']['dbpath']);
+	if (!is_dir($dsn_parent_dir) && !@mkdir($dsn_parent_dir, 0755, true)) {
+		$e = error_get_last();
+		$pdo_error = str_replace("mkdir()", $dsn_parent_dir, $e['message']);
+	} elseif (!is_writable($dsn_parent_dir)) {
+		$pdo_error = $db['dsn']['dbpath'] . ": Permission denied";
+	} elseif (!is_readable($db['dsn']['dbpath']) || is_dir($db['dsn']['dbpath'])) {
+		$pdo_error = "SQLSTATE[HY000] [14] unable to open database file";
+	} elseif (!is_writable($db['dsn']['dbpath'])) {
+		$pdo_error = "SQLSTATE[HY000]: General error: 8 attempt to write a readonly database";
+	}
 } else {
-	$dsn = $db['dsn']['prefix'].":host=".$db['dsn']['host'].";port=".$db['dsn']['port'].";dbname=".$db['dsn']['dbname'];
+	$dsn = $db['dsn']['prefix'] . ":host=" . $db['dsn']['host'] . ";port=" . $db['dsn']['port'] . ";dbname=" . $db['dsn']['dbname'];
 	$username = $db['username'];
 	$passwd = openssl_decrypt($db['passwd'], "AES-128-CTR", $uuid, 0, substr(md5($username), 0, 16));
 	$auto_inc = "AUTO_INCREMENT";
@@ -33,11 +46,12 @@ if ($db['dsn']['prefix'] == "sqlite") {
 	$charset = " DEFAULT CHARSET=utf8";
 }
 
-try {
-	$pdo = new PDO($dsn, $username, $passwd);
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+if (empty($pdo_error)) {
+	try {
+		$pdo = new PDO($dsn, $username, $passwd);
+		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-	$sql = "CREATE TABLE IF NOT EXISTS titles (
+		$sql = "CREATE TABLE IF NOT EXISTS titles (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   name varchar(255) NOT NULL,
   publisher varchar(255) NOT NULL,
@@ -49,9 +63,9 @@ try {
   enabled tinyint(1) NOT NULL DEFAULT 0,
   source_id int(11) NOT NULL DEFAULT 0
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS requirements (
+		$sql = "CREATE TABLE IF NOT EXISTS requirements (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   title_id int(11) NOT NULL DEFAULT -1,
   name varchar(255) NOT NULL,
@@ -62,9 +76,9 @@ try {
   sort_order int(11) NOT NULL DEFAULT -1,
   FOREIGN KEY (title_id) REFERENCES titles (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS patches (
+		$sql = "CREATE TABLE IF NOT EXISTS patches (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   title_id int(11) NOT NULL DEFAULT -1,
   version varchar(255) NOT NULL,
@@ -76,9 +90,9 @@ try {
   enabled tinyint(1) NOT NULL DEFAULT 0,
   FOREIGN KEY (title_id) REFERENCES titles (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS ext_attrs (
+		$sql = "CREATE TABLE IF NOT EXISTS ext_attrs (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   title_id int(11) NOT NULL DEFAULT -1,
   key_id varchar(255) NOT NULL,
@@ -86,27 +100,27 @@ try {
   name varchar(255) NOT NULL,
   FOREIGN KEY (title_id) REFERENCES titles (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS kill_apps (
+		$sql = "CREATE TABLE IF NOT EXISTS kill_apps (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   patch_id int(11) NOT NULL DEFAULT -1,
   bundle_id varchar(255) NOT NULL,
   app_name varchar(255) NOT NULL,
   FOREIGN KEY (patch_id) REFERENCES patches (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS components (
+		$sql = "CREATE TABLE IF NOT EXISTS components (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   patch_id int(11) NOT NULL DEFAULT -1,
   name varchar(255) NOT NULL,
   version varchar(255) NOT NULL,
   FOREIGN KEY (patch_id) REFERENCES patches (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS capabilities (
+		$sql = "CREATE TABLE IF NOT EXISTS capabilities (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   patch_id int(11) NOT NULL DEFAULT -1,
   name varchar(255) NOT NULL,
@@ -117,9 +131,9 @@ try {
   sort_order int(11) NOT NULL DEFAULT -1,
   FOREIGN KEY (patch_id) REFERENCES patches (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS dependencies (
+		$sql = "CREATE TABLE IF NOT EXISTS dependencies (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   patch_id int(11) NOT NULL DEFAULT -1,
   name varchar(255) NOT NULL,
@@ -130,9 +144,9 @@ try {
   sort_order int(11) NOT NULL DEFAULT -1,
   FOREIGN KEY (patch_id) REFERENCES patches (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS criteria (
+		$sql = "CREATE TABLE IF NOT EXISTS criteria (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   component_id int(11) NOT NULL DEFAULT -1,
   name varchar(255) NOT NULL,
@@ -143,53 +157,55 @@ try {
   sort_order int(11) NOT NULL DEFAULT -1,
   FOREIGN KEY (component_id) REFERENCES components (id) ON DELETE CASCADE
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS overrides (
+		$sql = "CREATE TABLE IF NOT EXISTS overrides (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   name_id varchar(255) NOT NULL,
   current varchar(255) NOT NULL
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS users (
+		$sql = "CREATE TABLE IF NOT EXISTS users (
   id integer PRIMARY KEY " . $auto_inc . " NOT NULL,
   username varchar(255) NOT NULL,
   password varchar(255) NOT NULL,
+  reset tinyint(1),
   token varchar(255),
   expires bigint(32),
+  disabled tinyint(1),
   web tinyint(1),
   api tinyint(1)
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS api (
+		$sql = "CREATE TABLE IF NOT EXISTS api (
   authtype varchar(255) NOT NULL DEFAULT 'basic',
   auto tinyint(1) NOT NULL DEFAULT 1,
   reqauth tinyint(1) NOT NULL DEFAULT 0
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	$sql = "CREATE TABLE IF NOT EXISTS subscription (
+		$sql = "CREATE TABLE IF NOT EXISTS subscription (
   url varchar(255),
   token varchar(255),
   refresh int(11) NOT NULL DEFAULT 3600,
   lastcheckin bigint(32) NOT NULL DEFAULT 0
 )" . $engine . $charset;
-	$pdo->exec($sql);
+		$pdo->exec($sql);
 
-	if ($db['dsn']['prefix'] == "sqlite") {
-		$source_id_type = "";
+		if ($db['dsn']['prefix'] == "sqlite") {
+			$source_id_type = "";
 
-		$pragma = $pdo->query("PRAGMA table_info('titles');");
-		while ($table_info = $pragma->fetch(PDO::FETCH_ASSOC)) {
-			if ($table_info['name'] == "source_id") {
-				$source_id_type = $table_info['type'];
+			$pragma = $pdo->query("PRAGMA table_info('titles');");
+			while ($table_info = $pragma->fetch(PDO::FETCH_ASSOC)) {
+				if ($table_info['name'] == "source_id") {
+					$source_id_type = $table_info['type'];
+				}
 			}
-		}
 
-		if ($source_id_type != "int(11)") {
-			$sql = "PRAGMA writable_schema=ON; 
+			if ($source_id_type != "int(11)") {
+				$sql = "PRAGMA writable_schema=ON;
 UPDATE sqlite_master SET sql='CREATE TABLE titles (
   id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
   name varchar(255) NOT NULL,
@@ -281,17 +297,39 @@ UPDATE sqlite_master SET sql='CREATE TABLE criteria (
   FOREIGN KEY (component_id) REFERENCES components (id) ON DELETE CASCADE
 )' WHERE type='table' AND name='criteria';
 PRAGMA writable_schema=OFF;";
+				$pdo->exec($sql);
+				$pdo_message = "Schema updated successfully.";
+			}
+
+			$sql = 'PRAGMA foreign_keys = ON';
 			$pdo->exec($sql);
-			$pdo_message = "Schema updated successfully.";
+
+			$stmt = $pdo->query("PRAGMA table_info('users');");
+			while ($table_info = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				if ($table_info['name'] == "reset") {
+					$alter_users = false;
+				}
+			}
 		}
 
-		$sql = 'PRAGMA foreign_keys = ON';
-		$pdo->exec($sql);
-	}
+		if ($db['dsn']['prefix'] == "mysql") {
+			$stmt = $pdo->query("SHOW COLUMNS FROM users;");
+			while ($table_info = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				if ($table_info['Field'] == "reset") {
+					$alter_users = false;
+				}
+			}
+		}
 
-} catch(PDOException $e) {
-	$pdo_error = $e->getMessage();
-    $pdo = false;
+		if ($alter_users) {
+			$pdo->exec("ALTER TABLE users ADD reset tinyint(1);");
+			$pdo->exec("ALTER TABLE users ADD disabled tinyint(1);");
+		}
+	} catch (PDOException $e) {
+		$pdo_error = $e->getMessage();
+	}
 }
 
-?>
+if (!empty($pdo_error)) {
+	$pdo = false;
+}

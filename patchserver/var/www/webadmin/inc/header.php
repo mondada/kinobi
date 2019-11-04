@@ -1,15 +1,22 @@
 <?php
+
+/**
+ * Kinobi - external patch source for Jamf Pro
+ *
+ * @author      Duncan McCracken <duncan.mccracken@mondada.coma.au>
+ * @copyright   2018-2019 Mondada Pty Ltd
+ * @link        https://mondada.github.io
+ * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
+ * @version     1.3
+ *
+ */
+
 // Re-direct to HTTPS if connecting via HTTP
 if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != "on") {
-	header("Location: https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+	header("Location: https://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']);
 }
 
-// to find current page
-$currentFile = $_SERVER['PHP_SELF'];
-$parts = explode("/", $currentFile);
-$pageURI = $parts[count($parts) - 1];
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -17,9 +24,8 @@ $pageURI = $parts[count($parts) - 1];
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-		<meta http-equiv="refresh" content="<?php print ini_get("session.gc_maxlifetime"); ?>; url=/webadmin/logout.php">
 
-		<title><?php echo (isset($title) ? $title : "Kinobi"); ?></title>
+		<title>Kinobi</title>
 
 		<!-- Bootstrap -->
 		<link href="theme/bootstrap.css" rel="stylesheet" media="all">
@@ -38,33 +44,41 @@ $pageURI = $parts[count($parts) - 1];
 	</head>
 
 	<body>
+		<!-- Fixed Top Navbar -->
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header pull-left">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".collapse.navbar-collapse" aria-expanded="false" aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" style="padding: 10px 15px;" href="#about-modal" data-toggle="modal"></a>
+				</div><!--/.navbar-header -->
 
-	<!-- Fixed Top Navbar -->
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" style="padding-top: 10px;" href="patchTitles.php"><img src="images/kinobi-logo-rev.svg" height="30"></a>
-				<div class="navbar-text">v1.2</div>
-			</div>
-			<div id="navbar" class="collapse navbar-collapse">
-				<ul class="nav navbar-nav">
-					<li class="<?php echo ($pageURI == "patchTitles.php" ? "active" : ""); ?>"><a href="patchTitles.php">Patch Definitions</a></li>
-					<li class="<?php echo ($pageURI == "patchSettings.php" ? "active" : ""); ?>"><a href="patchSettings.php">Settings</a></li>
-				</ul>
-				<ul class="nav navbar-nav navbar-right">
-					<li><a href="logout.php">Logout <?php echo (isset($_SESSION['username']) ? $_SESSION['username'] : ""); ?></a></li>
-				</ul>
-			</div><!--/.nav-collapse -->
-		</div>
-	</nav>
+				<div class="navbar-header pull-right">
+					<ul class="nav navbar-right">
+						<li class="dropdown pull-right">
+							<a id="user-toggle" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+							<ul class="dropdown-menu">
+								<li><a href="#change-passwd-modal" data-toggle="modal">Change Password</a></li>
+								<li role="separator" class="divider"></li>
+								<li><a href="logout.php">Logout</a></li>
+							</ul>
+						</li>
+					</ul>
+				</div><!--/.navbar-header -->
 
-	<div id="wrapper">
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
+						<li id="patch"><a href="patchTitles.php">Patch Definitions</a></li>
+						<li id="settings"><a href="patchSettings.php">Settings</a></li>
+					</ul>
+				</div><!--/.nav-collapse -->
+			</div><!--/.container-fluid -->
+		</nav><!--/.navbar-fixed-top -->
 
-		<!-- Page Content -->
-		<div class="container-fluid" id="page-content-wrapper">
+		<div id="wrapper">
+			<!-- Page Content -->
+			<div class="container-fluid" id="page-content-wrapper">
