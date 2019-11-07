@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -287,6 +287,9 @@ if ($pdo) {
 							margin-left: 0;
 							margin-right: 0;
 						}
+						.dataTables-footer {
+							left: 220px;
+						}
 <?php if ($netsus == 4) { ?>
 						#page-content-wrapper {
 							padding-left: 220px;
@@ -313,6 +316,9 @@ if ($pdo) {
 				<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
 				<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 				<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
+
+				<!-- Bootstrap Add Clear -->
+				<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
 
 				<!-- bootstrap-select -->
 				<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>

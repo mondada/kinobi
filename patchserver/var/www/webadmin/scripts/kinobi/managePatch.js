@@ -5,7 +5,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -874,18 +874,39 @@ $( document ).ready(function() {
 			"orderable": false
 		}],
 		"data": kill_apps_json,
-		"dom": '<"row dataTables-header"<"col-xs-12"B>>' + '<"row dataTables-table"<"col-xs-12"t>>',
-		"info": false,
+		"dom": '<"row dataTables-header"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row dataTables-table"<"col-xs-12"t>>' + '<"row dataTables-footer"<"col-xs-10"p><"col-xs-2"l>>',
 		"language": {
 			"emptyTable": "No Kill Applications",
+			"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
+			"infoEmpty": "0 - 0 of 0",
+			"lengthMenu": "Show:&nbsp;&nbsp;_MENU_",
 			"loadingRecords": "Please wait - loading...",
+			"search": " ",
+			"searchPlaceholder": "Filter Kill Applications",
+			"paginate": {
+				"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
+				"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
+			}
 		},
-		"lengthChange": false,
-		"ordering": false,
-		"paging": false,
-		"searching": false,
+		"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
+		"order": [ 0, "asc" ],
+		"pageLength": 10,
 		"stateSave": true
 	});
+
+	$( ":input[type=search]" ).css("margin", 0);
+	$( ":input[type=search][aria-controls=kill-apps]" ).addClear({
+		symbolClass: "glyphicon glyphicon-remove",
+		onClear: function() {
+			$( "#kill-apps" ).DataTable().search("").draw();
+		}
+	});
+
+	if ($( ":input[type=search][aria-controls=kill-apps]" ).val() !== "") {
+		$( "#kill-apps" ).DataTable().search("").draw();
+	}
+
+	$( "select[name=kill-apps_length]" ).addClass("table-select");
 
 	if (patch_json.source_id > 0) {
 		$( "#kill-apps" ).DataTable().buttons().disable();
@@ -942,9 +963,22 @@ $( document ).ready(function() {
 
 	$( ".dataTables_wrapper" ).removeClass("form-inline");
 
+	$( ".dataTables_filter" ).addClass("pull-left form-inline");
+
+// 	$( ".dataTables_info" ).addClass("text-center");
+
 	$( ".dt-buttons button" ).css("width", "75px");
 	$( ".dt-buttons" ).addClass("pull-right").removeClass("btn-group dt-buttons")
 	$( ".btn-primary" ).removeClass("btn-default");
+
+	$( ".dataTables_paginate" ).addClass("pull-left");
+
+	$( ".dataTables_length" ).addClass("pull-right");
+	$( ".table-select" ).selectpicker({
+		"style": "btn-default btn-sm",
+		"width": "65px",
+		"container": "body"
+	});
 
 	if (patch_json) {
 		$( ".breadcrumb" ).prepend('<li><a href="manageTitle.php?id=' + patch_json.title_id + '"><small>' + patch_json.name + '</small></a></li>');
