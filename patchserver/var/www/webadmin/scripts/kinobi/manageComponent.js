@@ -5,7 +5,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -75,6 +75,17 @@ $( document ).ready(function() {
 	$( "#heading" ).html(component_json.name + " (" + component_json.version + ")");
 	$( "#patch" ).addClass("active");
 	$( "#settings" ).attr("onclick", "document.location.href='patchSettings.php'");
+
+	i = components_json.findIndex(a => a.version == component_json.version) - 1;
+	if (i >= 0) {
+		$( "#prev-btn" ).removeClass("disabled");
+		$( "#prev-btn" ).attr("href", "manageComponent.php?id=" + components_json[i].id);
+	}
+	i = components_json.findIndex(a => a.version == component_json.version) + 1;
+	if (components_json.length > i) {
+		$( "#next-btn" ).removeClass("disabled");
+		$( "#next-btn" ).attr("href", "manageComponent.php?id=" + components_json[i].id);
+	}
 
 	$( "#license-modal .modal-header" ).append('<img src="images/' + logo_name + '-logo.svg" height="' + logo_height + '">');
 	$( "#license-file" ).load(license_file);
