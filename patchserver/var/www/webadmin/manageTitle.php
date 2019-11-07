@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -237,7 +237,7 @@ if ($pdo) {
 
 		// Patches
 		$patches = array();
-		$stmt = $pdo->query("SELECT id, version, released, standalone, min_os, reboot, sort_order, enabled FROM patches WHERE title_id = " . $title['id'] . " ORDER BY sort_order");
+		$stmt = $pdo->query("SELECT id, version, released, standalone, min_os, reboot, sort_order, enabled FROM patches WHERE title_id = " . $title['id'] . " ORDER BY sort_order ASC, id DESC");
 		while ($patch = $stmt->fetch(PDO::FETCH_ASSOC)) {
 			$patch['standalone'] = ($patch['standalone'] == "0") ? "0": "1";
 			$patch['reboot'] = ($patch['reboot'] == "1") ? "1": "0";

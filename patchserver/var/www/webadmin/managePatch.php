@@ -196,18 +196,10 @@ if ($pdo) {
 		$patch['error'] = array();
 
 		// Patch Versions
-		$patches = $pdo->query("SELECT id, version FROM patches WHERE title_id = " . $patch['title_id'] . " ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
+		$patches = $pdo->query("SELECT id, version FROM patches WHERE title_id = " . $patch['title_id'] . " ORDER BY sort_order ASC, id DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 		// Extension Attributes
 		$ext_attrs = $pdo->query("SELECT key_id, name FROM ext_attrs WHERE title_id = " . $patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
-
-		// Begin Legacy to remove
-		// Previous Patch
-		$prev_id = $pdo->query("SELECT id FROM patches WHERE title_id = " . $patch['title_id'] . " AND sort_order = " . (+$patch['sort_order'] - 1))->fetch(PDO::FETCH_COLUMN);
-
-		// Next Patch
-		$next_id = $pdo->query("SELECT id FROM patches WHERE title_id = " . $patch['title_id'] . " AND sort_order = " . (+$patch['sort_order'] + 1))->fetch(PDO::FETCH_COLUMN);
-		// End Legacy
 
 		// Components
 		$stmt = $pdo->query("SELECT id, name, version FROM components WHERE patch_id = " . $patch['id']);
