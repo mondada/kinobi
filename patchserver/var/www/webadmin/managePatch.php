@@ -190,9 +190,9 @@ if ($pdo) {
 		// ####################################################################
 
 		// Patch
-		$patch['standalone'] = ($patch['standalone'] == "0") ? "0": "1";
-		$patch['reboot'] = ($patch['reboot'] == "1") ? "1": "0";
-		$patch['enabled'] = ($patch['enabled'] == "1") ? "1" : "0";
+		$patch['standalone'] = ($patch['standalone'] == "0") ? 0 : 1;
+		$patch['reboot'] = ($patch['reboot'] == "1") ? 1 : 0;
+		$patch['enabled'] = (bool)$patch['enabled'];
 		$patch['error'] = array();
 
 		// Patch Versions
@@ -218,14 +218,14 @@ if ($pdo) {
 		// Dependencies
 		/* $stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM dependencies WHERE patch_id = " . $patch['id']);
 		while ($dependency = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$dependency['is_and'] = ($dependency['is_and'] == "0") ? "0": "1";
+			$dependency['is_and'] = ($dependency['is_and'] == "0") ? 0 : 1;
 			array_push($dependencies, $dependency);
 		} */
 
 		// Capabilities
 		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM capabilities WHERE patch_id = " . $patch['id']);
 		while ($capability = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$capability['is_and'] = ($capability['is_and'] == "0") ? "0": "1";
+			$capability['is_and'] = ($capability['is_and'] == "0") ? 0 : 1;
 			array_push($capabilities, $capability);
 		}
 		if (sizeof($capabilities) == 0) {
@@ -237,8 +237,8 @@ if ($pdo) {
 		$title_kill_apps = $pdo->query("SELECT DISTINCT bundle_id, app_name FROM patches JOIN kill_apps ON patches.id = kill_apps.patch_id WHERE patches.title_id = " . $patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
 
 		// Disable Incomplete Patch
-		if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
-			$patch['enabled'] = "0";
+		if (sizeof($patch['error']) > 0 && $patch['enabled'] == true) {
+			$patch['enabled'] = false;
 			$disable = $pdo->prepare("UPDATE patches SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($patch['id']));
 			if ($disable->errorCode() != '00000') {

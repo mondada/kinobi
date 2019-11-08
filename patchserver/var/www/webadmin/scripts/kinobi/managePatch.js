@@ -985,7 +985,7 @@ $( document ).ready(function() {
 		$( ".breadcrumb" ).prepend('<li><a href="patchTitles.php"><small>Software Titles</small></a></li>');
 	}
 
-	if (0 == patch_json.enabled) {
+	if (!patch_json.enabled) {
 		patch_warning_msg = "This patch is disabled.";
 		if (!comps_error_msg.length && !caps_error_msg.length) {
 			patch_warning_msg = patch_warning_msg + ' <a href="">Click here to enable it</a>.';

@@ -5,7 +5,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -13,7 +13,7 @@ var active_tab = localStorage.getItem("activeTitleTab");
 var upload_btn_class = ($( "#upload_patch-modal" ).length ? false : "hidden");
 var import_btn_class = (upload_btn_class ? "hidden" : "btn-primary btn-sm");
 var patch_versions = $.map(patches_json, function(el) { return el.version; });
-var patches_enabled = $.map(patches_json, function(el) { if (1 == el.enabled) { return el.version; } });
+var patches_enabled = $.map(patches_json, function(el) { if (el.enabled) { return el.version; } });
 var license_file = "scripts/kinobi/kinobi-open-source-license.html";
 var logo_name = "kinobi-open-source";
 var logo_height = "36";
@@ -158,7 +158,7 @@ $( document ).ready(function() {
 		$( "#title-current-select" ).prop("disabled", false);
 	}
 
-	if (0 == title_json.enabled) {
+	if (!title_json.enabled) {
 		title_warning_msg = "This software title is disabled.";
 		if (requirements_json.length > 0 && patches_enabled.length > 0) {
 			title_warning_msg = title_warning_msg + ' <a href="">Click here to enable it</a>.';
@@ -560,7 +560,7 @@ $( document ).ready(function() {
 		$( "#requirements tbody" ).addClass("hidden");
 	}
 
-	if (0 == title_json.enabled) {
+	if (!title_json.enabled) {
 		if (requirements_json.length > 0 && patches_enabled.length > 0) {
 			title_warning_msg = title_warning_msg + ' <a href="">Click here to enable it</a>.';
 		}
@@ -757,7 +757,7 @@ $( document ).ready(function() {
 			"data": null,
 			"render": function(data, type, row, meta) {
 				if (row.error.length == 0) {
-					return '<div class="checkbox checkbox-primary checkbox-inline"><input type="checkbox" class="styled" value="' + row.id + '"' + (row.enabled == 1 ? ' checked' : '') + (title_json.source_id > 0 ? ' disabled' : '') + '/><label/></div>';
+					return '<div class="checkbox checkbox-primary checkbox-inline"><input type="checkbox" class="styled" value="' + row.id + '"' + (row.enabled ? ' checked' : '') + (title_json.source_id > 0 ? ' disabled' : '') + '/><label/></div>';
 				} else {
 					return '<a href="managePatch.php?id=' + row.id + '"><span class="text-danger glyphicon glyphicon-exclamation-sign checkbox-error"></span></a>';
 				}
@@ -863,10 +863,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?title_id=" + title_json.id, { "title_modified": true });
 		$.each(patches_json, function(index, data) {
 			if (data.id == patch_id.value) {
-				data.enabled = (patch_id.checked ? 1 : 0);
+				data.enabled = (patch_id.checked);
 			}
 		});
-		patches_enabled = $.map(patches_json, function(el) { if (1 == el.enabled) { return el.version; } });
+		patches_enabled = $.map(patches_json, function(el) { if (el.enabled) { return el.version; } });
 		current_select.empty();
 		$.each(patches_enabled, function(index, value) {
 			current_select.append($( "<option>" ).attr("value", value).text(value));
@@ -892,7 +892,7 @@ $( document ).ready(function() {
 			$( "#spacer-msg" ).html(title_warning_msg);
 			$( "#spacer-alert" ).removeClass("hidden");
 			$.post("patchCtl.php?title_id=" + title_json.id, { "title_enabled": false });
-			title_json.enabled = 0;
+			title_json.enabled = false;
 			$( "#title-current" ).removeClass("hidden");
 			$( "#title-current-select" ).addClass("hidden");
 			$( "#title-current-select" ).parent("div").addClass("hidden");

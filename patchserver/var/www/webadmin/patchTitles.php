@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -119,7 +119,7 @@ if ($pdo) {
 	// Software Title Summary
 	$stmt = $pdo->query("SELECT id, name_id, name, publisher, current, modified, enabled, source_id FROM titles ORDER BY publisher, name");
 	while ($sw_title = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		$sw_title['enabled'] = ($sw_title['enabled'] == "1") ? 1 : 0;
+		$sw_title['enabled'] = (bool)$sw_title['enabled'];
 		$sw_title['error'] = array();
 		$sw_title['requirements'] = $pdo->query("SELECT id FROM requirements WHERE title_id = " . $sw_title['id'])->fetchAll(PDO::FETCH_COLUMN);
 		if (sizeof($sw_title['requirements']) == 0) {
@@ -133,8 +133,8 @@ if ($pdo) {
 		if (!empty($override)) {
 			$sw_title['current'] = $override;
 		}
-		if (sizeof($sw_title['error']) > 0 && $sw_title['enabled'] == "1") {
-			$sw_title['enabled'] == "0";
+		if (sizeof($sw_title['error']) > 0 && $sw_title['enabled'] == true) {
+			$sw_title['enabled'] = false;
 			$disable = $pdo->prepare("UPDATE titles SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($sw_title['id']));
 			if ($disable->errorCode() == "00000") {

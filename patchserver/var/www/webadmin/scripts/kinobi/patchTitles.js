@@ -5,7 +5,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -86,7 +86,7 @@ $( document ).ready(function() {
 			"data": null,
 			"render": function(data, type, row, meta) {
 				if (row.error.length == 0) {
-					return '<div class="checkbox checkbox-primary checkbox-inline"><input type="checkbox" class="styled" value="' + row.id + '"' + (row.enabled == 1 ? ' checked' : '') + (row.source_id > 0 ? ' disabled' : '') + '/><label/></div>';
+					return '<div class="checkbox checkbox-primary checkbox-inline"><input type="checkbox" class="styled" value="' + row.id + '"' + (row.enabled ? ' checked' : '') + (row.source_id > 0 ? ' disabled' : '') + '/><label/></div>';
 				} else {
 					return '<a href="manageTitle.php?id=' + row.id + '"><span class="text-danger glyphicon glyphicon-exclamation-sign checkbox-error"></span></a>';
 				}

@@ -101,7 +101,7 @@ if ($pdo) {
 		// Criteria
 		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM criteria WHERE component_id = " . $component['id']);
 		while ($criterion = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$criterion['is_and'] = ($criterion['is_and'] == "0") ? "0": "1";
+			$criterion['is_and'] = ($criterion['is_and'] == "0") ? 0 : 1;
 			array_push($criteria, $criterion);
 		}
 
