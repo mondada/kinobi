@@ -58,7 +58,7 @@ $( document ).ready(function() {
 	var sw_titles = $( "#sw-titles" ).DataTable({
 		"buttons": [{
 			"extend": "collection",
-			"text": '<span class="glyphicon glyphicon-share-alt"></span> Import</span>',
+			"text": '<span class="glyphicon glyphicon-share-alt"></span> Import',
 			"className": import_btn_class,
 			"autoClose": true,
 			"buttons": [{
