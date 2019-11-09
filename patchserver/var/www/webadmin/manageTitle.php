@@ -202,7 +202,6 @@ if ($pdo) {
 		 || isset($_POST['delete_ea'])
 		 || isset($_POST['create_rqmt'])
 		 || isset($_POST['del_rqmt'])
-		 || isset($_POST['create_patch'])
 		 || isset($_POST['del_patch'])
 		 || !empty($patches_success_msg)) {
 			$title_modified = time();

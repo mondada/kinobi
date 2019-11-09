@@ -162,8 +162,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "sort_order", "value": sort_order }).done(function(result) {
 					if (result) {
 						$( "#patch-sort-order" ).parent("div").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.sort_order = sort_order;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-sort-order" ).parent("div").addClass("has-error");
 						$( ".control-label[for='patch-sort-order']").css("color", "#a94442");
@@ -190,8 +192,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "version", "value": version }).done(function(result) {
 					if (result) {
 						$( "#patch-version" ).parent("div").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.version = version;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-version" ).parent("div").addClass("has-error");
 						$( ".control-label[for='patch-version']").css("color", "#a94442");
@@ -224,8 +228,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "released", "value": released }).done(function(result) {
 					if (result) {
 						$( "#patch-released" ).parents("div.form-group").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.released = released;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-released" ).parents("div.form-group").addClass("has-error");
 						$( ".control-label[for='patch-released']").css("color", "#a94442");
@@ -249,8 +255,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "standalone", "value": standalone }).done(function(result) {
 				if (result) {
 					$( "#patch-standalone" ).parents("div.form-group").addClass("has-success has-feedback");
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					patch_json.standalone = standalone;
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					$( "#patch-standalone" ).parents("div.form-group").addClass("has-error");
 					$( ".control-label[for='patch-standalone']").css("color", "#a94442");
@@ -270,8 +278,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "reboot", "value": reboot }).done(function(result) {
 				if (result) {
 					$( "#patch-reboot" ).parents("div.form-group").addClass("has-success has-feedback");
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					patch_json.reboot = reboot;
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					$( "#patch-reboot" ).parents("div.form-group").addClass("has-error");
 					$( ".control-label[for='patch-reboot']").css("color", "#a94442");
@@ -292,8 +302,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "min_os", "value": min_os }).done(function(result) {
 					if (result) {
 						$( "#patch-min-os" ).parent("div").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.min_os = min_os;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-min-os" ).parent("div").addClass("has-error");
 						$( ".control-label[for='patch-min-os']").css("color", "#a94442");
@@ -516,8 +528,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 				data.is_and = element.val();
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
 			}
@@ -530,7 +544,9 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 				var operator_opts = getOperators(element.val());
 				var operator_select = element.parents("tr").find("select.operator");
 				operator_select.empty();
@@ -569,8 +585,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 				data.operator = element.val();
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
 			}
@@ -589,8 +607,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					data.value = element.val();
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					element.parents("div.form-group").addClass("has-error");
 				}
@@ -726,8 +746,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 				data.is_and = element.val();
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
 			}
@@ -740,7 +762,9 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 				var operator_opts = getOperators(element.val());
 				var operator_select = element.parents("tr").find("select.operator");
 				operator_select.empty();
@@ -779,7 +803,9 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 				data.operator = element.val();
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
@@ -799,8 +825,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					data.value = element.val();
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					element.parents("div.form-group").addClass("has-error");
 				}

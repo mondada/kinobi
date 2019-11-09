@@ -53,6 +53,10 @@ if ($pdo) {
 	$patch = $stmt->fetch(PDO::FETCH_ASSOC);
 
 	if (!empty($patch)) {
+		$patch['standalone'] = ($patch['standalone'] == "0") ? 0 : 1;
+		$patch['reboot'] = ($patch['reboot'] == "1") ? 1 : 0;
+		$patch['enabled'] = (bool)$patch['enabled'];
+		$patch['error'] = array();
 
 		// Create Component
 		if (isset($_POST['create_comp'])) {
@@ -169,31 +173,22 @@ if ($pdo) {
 		}
 
 		// Update Title Modified
-		if (isset($_POST['create_comp'])
+		if ($patch['enabled'] && (isset($_POST['create_comp'])
 		 || isset($_POST['del_comp'])
 		 || isset($_POST['create_dep'])
 		 || isset($_POST['del_dep'])
 		 || isset($_POST['create_cap'])
 		 || isset($_POST['del_cap'])
 		 || isset($_POST['create_kill_app'])
-		 || isset($_POST['del_kill_app'])) {
-			$stmt = $pdo->prepare("SELECT title_id FROM patches WHERE id = ?");
-			$stmt->execute(array($patch['id']));
-			$title_id = $stmt->fetchColumn();
+		 || isset($_POST['del_kill_app']))) {
 			$title_modified = time();
 			$stmt = $pdo->prepare("UPDATE titles SET modified = ? WHERE id = ?");
-			$stmt->execute(array($title_modified, $title_id));
+			$stmt->execute(array($title_modified, $patch['title_id']));
 		}
 
 		// ####################################################################
 		// End of GET/POST parsing
 		// ####################################################################
-
-		// Patch
-		$patch['standalone'] = ($patch['standalone'] == "0") ? 0 : 1;
-		$patch['reboot'] = ($patch['reboot'] == "1") ? 1 : 0;
-		$patch['enabled'] = (bool)$patch['enabled'];
-		$patch['error'] = array();
 
 		// Patch Versions
 		$patches = $pdo->query("SELECT id, version FROM patches WHERE title_id = " . $patch['title_id'] . " ORDER BY sort_order ASC, id DESC")->fetchAll(PDO::FETCH_ASSOC);
@@ -241,10 +236,13 @@ if ($pdo) {
 			$patch['enabled'] = false;
 			$disable = $pdo->prepare("UPDATE patches SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($patch['id']));
-			if ($disable->errorCode() != '00000') {
+			if ($disable->errorCode() != "00000") {
 				$errorInfo = $disable->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
+			$title_modified = time();
+			$stmt = $pdo->prepare("UPDATE titles SET modified = ? WHERE id = ?");
+			$stmt->execute(array($title_modified, $patch['title_id']));
 		}
 	}
 }

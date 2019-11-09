@@ -41,7 +41,7 @@ $netsus = (isset($conf) ? (strpos(file_get_contents("inc/header.php"), "NetSUS 4
 
 if ($pdo) {
 	// Component
-	$stmt = $pdo->prepare("SELECT components.id, components.name, components.version, source_id, title_id, titles.name AS 'title_name', app_name, bundle_id, patch_id, patches.version AS 'patch_version' FROM components JOIN patches ON patches.id = components.patch_id JOIN titles ON titles.id = patches.title_id WHERE components.id = ?");
+	$stmt = $pdo->prepare("SELECT components.id, components.name, components.version, source_id, title_id, titles.name AS 'title_name', app_name, bundle_id, patch_id, patches.version AS 'patch_version', patches.enabled AS 'enabled' FROM components JOIN patches ON patches.id = components.patch_id JOIN titles ON titles.id = patches.title_id WHERE components.id = ?");
 	$stmt->execute(array((isset($_GET['id']) ? $_GET['id'] : null)));
 	$component = $stmt->fetch(PDO::FETCH_ASSOC);
 
