@@ -975,9 +975,9 @@ $( document ).ready(function() {
 			}
 		}
 		if (/^(19[7-9][0-9]|[2-9][0-9][0-9][0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])Z$/.test(released)) {
-			$( "#new-patch-released" ).parent("div").removeClass("has-error");
+			$( "#new-patch-released" ).parents("div.form-group").removeClass("has-error");
 		} else {
-			$( "#new-patch-released" ).parent("div").addClass("has-error");
+			$( "#new-patch-released" ).parents("div.form-group").addClass("has-error");
 		}
 		if (/^.{1,255}$/.test(min_os)) {
 			$( "#new-patch-min-os" ).parent("div").removeClass("has-error");
