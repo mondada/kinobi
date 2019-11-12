@@ -107,22 +107,22 @@ Alerts
 .alert-success {
 	color: #398439;
 	border-color: #449d44;
-	background: #fdfffc;
+	background: #fcfefb;
 }
 .alert-info {
 	color: #286090;
 	border-color: #337ab7;
-	background: #fcfeff;
+	background: #fbfdfe;
 }
 .alert-warning {
 	color: #d58512;
 	border-color: #ec971f;
-	background: #fffffc;
+	background: #fffefa;
 }
 .alert-danger {
 	color: #ac2925;
 	border-color: #c9302c;
-	background: #fffcfc;
+	background: #fefbfb;
 }
 .alert-invisible {
 	color: transparent;
@@ -145,6 +145,14 @@ td > .form-group {
 }
 .has-warning .form-control-feedback {
   color: #d58512;
+}
+.has-success .input-group-addon {
+  color: #555;
+  background-color: #fcfefb;
+}
+.has-error .input-group-addon {
+  color: #555;
+  background-color: #fefbfb;
 }
 
 /*----------------------------------------------

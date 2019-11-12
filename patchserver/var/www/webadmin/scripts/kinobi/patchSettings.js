@@ -5,7 +5,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -167,7 +167,7 @@ $( document ).ready(function() {
 	if (null === subs_json.url && null === subs_json.token) {
 		$( "#subs-info-alert" ).removeClass("hidden");
 		$( "#subs-info-msg" ).html('Register for a <a target="_blank" href="https://kinobi.io/payment-portal/?register=' + subs_host + '">Kinobi subscription</a> to provide patch definitions.')
-	} else if (0 === subs_resp_json.expires) {
+	} else if (0 == subs_resp_json.expires) {
 		$( "#subscription-tab-link" ).css("color", "#a94442");
 		$( "#subscription-tab-icon" ).removeClass("hidden");
 		$( "#subs-error-alert" ).removeClass("hidden");

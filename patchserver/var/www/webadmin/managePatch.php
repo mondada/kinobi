@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -53,6 +53,10 @@ if ($pdo) {
 	$patch = $stmt->fetch(PDO::FETCH_ASSOC);
 
 	if (!empty($patch)) {
+		$patch['standalone'] = ($patch['standalone'] == "0") ? 0 : 1;
+		$patch['reboot'] = ($patch['reboot'] == "1") ? 1 : 0;
+		$patch['enabled'] = (bool)$patch['enabled'];
+		$patch['error'] = array();
 
 		// Create Component
 		if (isset($_POST['create_comp'])) {
@@ -169,45 +173,28 @@ if ($pdo) {
 		}
 
 		// Update Title Modified
-		if (isset($_POST['create_comp'])
+		if ($patch['enabled'] && (isset($_POST['create_comp'])
 		 || isset($_POST['del_comp'])
 		 || isset($_POST['create_dep'])
 		 || isset($_POST['del_dep'])
 		 || isset($_POST['create_cap'])
 		 || isset($_POST['del_cap'])
 		 || isset($_POST['create_kill_app'])
-		 || isset($_POST['del_kill_app'])) {
-			$stmt = $pdo->prepare("SELECT title_id FROM patches WHERE id = ?");
-			$stmt->execute(array($patch['id']));
-			$title_id = $stmt->fetchColumn();
+		 || isset($_POST['del_kill_app']))) {
 			$title_modified = time();
 			$stmt = $pdo->prepare("UPDATE titles SET modified = ? WHERE id = ?");
-			$stmt->execute(array($title_modified, $title_id));
+			$stmt->execute(array($title_modified, $patch['title_id']));
 		}
 
 		// ####################################################################
 		// End of GET/POST parsing
 		// ####################################################################
 
-		// Patch
-		$patch['standalone'] = ($patch['standalone'] == "0") ? "0": "1";
-		$patch['reboot'] = ($patch['reboot'] == "1") ? "1": "0";
-		$patch['enabled'] = ($patch['enabled'] == "1") ? "1" : "0";
-		$patch['error'] = array();
-
 		// Patch Versions
-		$patches = $pdo->query("SELECT id, version FROM patches WHERE title_id = " . $patch['title_id'] . " ORDER BY sort_order")->fetchAll(PDO::FETCH_ASSOC);
+		$patches = $pdo->query("SELECT id, version FROM patches WHERE title_id = " . $patch['title_id'] . " ORDER BY sort_order ASC, id DESC")->fetchAll(PDO::FETCH_ASSOC);
 
 		// Extension Attributes
 		$ext_attrs = $pdo->query("SELECT key_id, name FROM ext_attrs WHERE title_id = " . $patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
-
-		// Begin Legacy to remove
-		// Previous Patch
-		$prev_id = $pdo->query("SELECT id FROM patches WHERE title_id = " . $patch['title_id'] . " AND sort_order = " . (+$patch['sort_order'] - 1))->fetch(PDO::FETCH_COLUMN);
-
-		// Next Patch
-		$next_id = $pdo->query("SELECT id FROM patches WHERE title_id = " . $patch['title_id'] . " AND sort_order = " . (+$patch['sort_order'] + 1))->fetch(PDO::FETCH_COLUMN);
-		// End Legacy
 
 		// Components
 		$stmt = $pdo->query("SELECT id, name, version FROM components WHERE patch_id = " . $patch['id']);
@@ -226,14 +213,14 @@ if ($pdo) {
 		// Dependencies
 		/* $stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM dependencies WHERE patch_id = " . $patch['id']);
 		while ($dependency = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$dependency['is_and'] = ($dependency['is_and'] == "0") ? "0": "1";
+			$dependency['is_and'] = ($dependency['is_and'] == "0") ? 0 : 1;
 			array_push($dependencies, $dependency);
 		} */
 
 		// Capabilities
 		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM capabilities WHERE patch_id = " . $patch['id']);
 		while ($capability = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$capability['is_and'] = ($capability['is_and'] == "0") ? "0": "1";
+			$capability['is_and'] = ($capability['is_and'] == "0") ? 0 : 1;
 			array_push($capabilities, $capability);
 		}
 		if (sizeof($capabilities) == 0) {
@@ -245,14 +232,17 @@ if ($pdo) {
 		$title_kill_apps = $pdo->query("SELECT DISTINCT bundle_id, app_name FROM patches JOIN kill_apps ON patches.id = kill_apps.patch_id WHERE patches.title_id = " . $patch['title_id'])->fetchAll(PDO::FETCH_ASSOC);
 
 		// Disable Incomplete Patch
-		if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
-			$patch['enabled'] = "0";
+		if (sizeof($patch['error']) > 0 && $patch['enabled'] == true) {
+			$patch['enabled'] = false;
 			$disable = $pdo->prepare("UPDATE patches SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($patch['id']));
-			if ($disable->errorCode() != '00000') {
+			if ($disable->errorCode() != "00000") {
 				$errorInfo = $disable->errorInfo();
 				$error_msg = $errorInfo[2];
 			}
+			$title_modified = time();
+			$stmt = $pdo->prepare("UPDATE titles SET modified = ? WHERE id = ?");
+			$stmt->execute(array($title_modified, $patch['title_id']));
 		}
 	}
 }
@@ -287,6 +277,9 @@ if ($pdo) {
 							margin-left: 0;
 							margin-right: 0;
 						}
+						.dataTables-footer {
+							left: 220px;
+						}
 <?php if ($netsus == 4) { ?>
 						#page-content-wrapper {
 							padding-left: 220px;
@@ -313,6 +306,9 @@ if ($pdo) {
 				<script type="text/javascript" src="scripts/dataTables/dataTables.bootstrap.min.js"></script>
 				<script type="text/javascript" src="scripts/Buttons/dataTables.buttons.min.js"></script>
 				<script type="text/javascript" src="scripts/Buttons/buttons.bootstrap.min.js"></script>
+
+				<!-- Bootstrap Add Clear -->
+				<script type="text/javascript" src="scripts/bootstrap-add-clear/bootstrap-add-clear.min.js"></script>
 
 				<!-- bootstrap-select -->
 				<script type="text/javascript" src="scripts/bootstrap-select/bootstrap-select.min.js"></script>

@@ -5,7 +5,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -162,8 +162,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "sort_order", "value": sort_order }).done(function(result) {
 					if (result) {
 						$( "#patch-sort-order" ).parent("div").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.sort_order = sort_order;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-sort-order" ).parent("div").addClass("has-error");
 						$( ".control-label[for='patch-sort-order']").css("color", "#a94442");
@@ -190,8 +192,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "version", "value": version }).done(function(result) {
 					if (result) {
 						$( "#patch-version" ).parent("div").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.version = version;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-version" ).parent("div").addClass("has-error");
 						$( ".control-label[for='patch-version']").css("color", "#a94442");
@@ -224,8 +228,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "released", "value": released }).done(function(result) {
 					if (result) {
 						$( "#patch-released" ).parents("div.form-group").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.released = released;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-released" ).parents("div.form-group").addClass("has-error");
 						$( ".control-label[for='patch-released']").css("color", "#a94442");
@@ -249,8 +255,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "standalone", "value": standalone }).done(function(result) {
 				if (result) {
 					$( "#patch-standalone" ).parents("div.form-group").addClass("has-success has-feedback");
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					patch_json.standalone = standalone;
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					$( "#patch-standalone" ).parents("div.form-group").addClass("has-error");
 					$( ".control-label[for='patch-standalone']").css("color", "#a94442");
@@ -270,8 +278,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "reboot", "value": reboot }).done(function(result) {
 				if (result) {
 					$( "#patch-reboot" ).parents("div.form-group").addClass("has-success has-feedback");
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					patch_json.reboot = reboot;
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					$( "#patch-reboot" ).parents("div.form-group").addClass("has-error");
 					$( ".control-label[for='patch-reboot']").css("color", "#a94442");
@@ -292,8 +302,10 @@ $( document ).ready(function() {
 				$.post("patchCtl.php?id=" + patch_json.id, { "table": "patches", "field": "min_os", "value": min_os }).done(function(result) {
 					if (result) {
 						$( "#patch-min-os" ).parent("div").addClass("has-success has-feedback");
-						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 						patch_json.min_os = min_os;
+						if (patch_json.enabled) {
+							$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+						}
 					} else {
 						$( "#patch-min-os" ).parent("div").addClass("has-error");
 						$( ".control-label[for='patch-min-os']").css("color", "#a94442");
@@ -516,8 +528,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 				data.is_and = element.val();
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
 			}
@@ -530,7 +544,9 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 				var operator_opts = getOperators(element.val());
 				var operator_select = element.parents("tr").find("select.operator");
 				operator_select.empty();
@@ -569,8 +585,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 				data.operator = element.val();
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
 			}
@@ -589,8 +607,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + data.id, { "table": "dependencies", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					data.value = element.val();
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					element.parents("div.form-group").addClass("has-error");
 				}
@@ -726,8 +746,10 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "is_and", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 				data.is_and = element.val();
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
 			}
@@ -740,7 +762,9 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "name", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 				var operator_opts = getOperators(element.val());
 				var operator_select = element.parents("tr").find("select.operator");
 				operator_select.empty();
@@ -779,7 +803,9 @@ $( document ).ready(function() {
 		$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "operator", "value": element.val() }).done(function(result) {
 			if (result) {
 				element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-				$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				if (patch_json.enabled) {
+					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+				}
 				data.operator = element.val();
 			} else {
 				element.parents("div.form-group").addClass("has-error has-feedback").append('<span class="glyphicon glyphicon-exclamation-sign form-control-feedback hidden-xs" aria-hidden="true"></span>');
@@ -799,8 +825,10 @@ $( document ).ready(function() {
 			$.post("patchCtl.php?id=" + data.id, { "table": "capabilities", "field": "value", "value": element.val() }).done(function(result) {
 				if (result) {
 					element.parents("div.form-group").addClass("has-success has-feedback").append('<span class="glyphicon glyphicon-ok form-control-feedback hidden-xs" aria-hidden="true"></span>');
-					$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
 					data.value = element.val();
+					if (patch_json.enabled) {
+						$.post("patchCtl.php?title_id=" + patch_json.title_id, { "title_modified": true });
+					}
 				} else {
 					element.parents("div.form-group").addClass("has-error");
 				}
@@ -874,18 +902,39 @@ $( document ).ready(function() {
 			"orderable": false
 		}],
 		"data": kill_apps_json,
-		"dom": '<"row dataTables-header"<"col-xs-12"B>>' + '<"row dataTables-table"<"col-xs-12"t>>',
-		"info": false,
+		"dom": '<"row dataTables-header"<"col-xs-6 col-sm-4"f><"hidden-xs col-sm-4"i><"col-xs-6 col-sm-4"B>>' + '<"row dataTables-table"<"col-xs-12"t>>' + '<"row dataTables-footer"<"col-xs-10"p><"col-xs-2"l>>',
 		"language": {
 			"emptyTable": "No Kill Applications",
+			"info": "_START_ - _END_ of <strong>_TOTAL_</strong>",
+			"infoEmpty": "0 - 0 of 0",
+			"lengthMenu": "Show:&nbsp;&nbsp;_MENU_",
 			"loadingRecords": "Please wait - loading...",
+			"search": " ",
+			"searchPlaceholder": "Filter Kill Applications",
+			"paginate": {
+				"previous": '<span class="glyphicon glyphicon-chevron-left"></span>',
+				"next": '<span class="glyphicon glyphicon-chevron-right"></span>'
+			}
 		},
-		"lengthChange": false,
-		"ordering": false,
-		"paging": false,
-		"searching": false,
+		"lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "All"] ],
+		"order": [ 0, "asc" ],
+		"pageLength": 10,
 		"stateSave": true
 	});
+
+	$( ":input[type=search]" ).css("margin", 0);
+	$( ":input[type=search][aria-controls=kill-apps]" ).addClear({
+		symbolClass: "glyphicon glyphicon-remove",
+		onClear: function() {
+			$( "#kill-apps" ).DataTable().search("").draw();
+		}
+	});
+
+	if ($( ":input[type=search][aria-controls=kill-apps]" ).val() !== "") {
+		$( "#kill-apps" ).DataTable().search("").draw();
+	}
+
+	$( "select[name=kill-apps_length]" ).addClass("table-select");
 
 	if (patch_json.source_id > 0) {
 		$( "#kill-apps" ).DataTable().buttons().disable();
@@ -942,16 +991,29 @@ $( document ).ready(function() {
 
 	$( ".dataTables_wrapper" ).removeClass("form-inline");
 
+	$( ".dataTables_filter" ).addClass("pull-left form-inline");
+
+// 	$( ".dataTables_info" ).addClass("text-center");
+
 	$( ".dt-buttons button" ).css("width", "75px");
 	$( ".dt-buttons" ).addClass("pull-right").removeClass("btn-group dt-buttons")
 	$( ".btn-primary" ).removeClass("btn-default");
+
+	$( ".dataTables_paginate" ).addClass("pull-left");
+
+	$( ".dataTables_length" ).addClass("pull-right");
+	$( ".table-select" ).selectpicker({
+		"style": "btn-default btn-sm",
+		"width": "65px",
+		"container": "body"
+	});
 
 	if (patch_json) {
 		$( ".breadcrumb" ).prepend('<li><a href="manageTitle.php?id=' + patch_json.title_id + '"><small>' + patch_json.name + '</small></a></li>');
 		$( ".breadcrumb" ).prepend('<li><a href="patchTitles.php"><small>Software Titles</small></a></li>');
 	}
 
-	if (0 == patch_json.enabled) {
+	if (!patch_json.enabled) {
 		patch_warning_msg = "This patch is disabled.";
 		if (!comps_error_msg.length && !caps_error_msg.length) {
 			patch_warning_msg = patch_warning_msg + ' <a href="">Click here to enable it</a>.';

@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -41,7 +41,7 @@ $netsus = (isset($conf) ? (strpos(file_get_contents("inc/header.php"), "NetSUS 4
 
 if ($pdo) {
 	// Component
-	$stmt = $pdo->prepare("SELECT components.id, components.name, components.version, source_id, title_id, titles.name AS 'title_name', app_name, bundle_id, patch_id, patches.version AS 'patch_version' FROM components JOIN patches ON patches.id = components.patch_id JOIN titles ON titles.id = patches.title_id WHERE components.id = ?");
+	$stmt = $pdo->prepare("SELECT components.id, components.name, components.version, source_id, title_id, titles.name AS 'title_name', app_name, bundle_id, patch_id, patches.version AS 'patch_version', patches.enabled AS 'enabled' FROM components JOIN patches ON patches.id = components.patch_id JOIN titles ON titles.id = patches.title_id WHERE components.id = ?");
 	$stmt->execute(array((isset($_GET['id']) ? $_GET['id'] : null)));
 	$component = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -95,10 +95,13 @@ if ($pdo) {
 		// End of GET/POST parsing
 		// ####################################################################
 
+		// Components
+		$components = $pdo->query("SELECT components.id, components.version FROM components JOIN patches ON components.patch_id = patches.id WHERE title_id = " . $component['title_id'] . " ORDER BY patches.sort_order ASC, components.id DESC")->fetchAll(PDO::FETCH_ASSOC);
+
 		// Criteria
 		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM criteria WHERE component_id = " . $component['id']);
 		while ($criterion = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$criterion['is_and'] = ($criterion['is_and'] == "0") ? "0": "1";
+			$criterion['is_and'] = ($criterion['is_and'] == "0") ? 0 : 1;
 			array_push($criteria, $criterion);
 		}
 
@@ -154,6 +157,7 @@ if ($pdo) {
 					var eula_accepted = <?php echo json_encode($eula_accepted); ?>;
 					var error_msg = "<?php echo $error_msg; ?>";
 					var component_json = <?php echo json_encode($component); ?>;
+					var components_json = <?php echo json_encode($components); ?>;
 					var criteria_json = <?php echo json_encode($criteria); ?>;
 					var ext_attrs_json = <?php echo json_encode($ext_attrs); ?>;
 				</script>
@@ -166,7 +170,18 @@ if ($pdo) {
 							<li class="active">&nbsp;</li>
 						</ol>
 
-						<h2 id="heading">Component (Version)</h2>
+						<div class="row">
+							<div class="col-xs-9">
+								<h2 id="heading">Component (Version)</h2>
+							</div>
+
+							<div class="col-xs-3 text-right">
+								<div class="btn-group btn-group-sm" role="group">
+									<a id="prev-btn" class="btn btn-default disabled"><span class="glyphicon glyphicon-chevron-left"></span></a>
+									<a id="next-btn" class="btn btn-default disabled"><span class="glyphicon glyphicon-chevron-right"></span></a>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div class="alert-wrapper">

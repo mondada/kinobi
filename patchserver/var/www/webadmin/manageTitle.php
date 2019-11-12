@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -50,6 +50,8 @@ if ($pdo) {
 	$title = $stmt->fetch(PDO::FETCH_ASSOC);
 
 	if (!empty($title)) {
+		$title['enabled'] = (bool)$title['enabled'];
+
 		// Set for legacy compatibility in older version with a subscription
 		$title_id = $title['id'];
 
@@ -200,7 +202,6 @@ if ($pdo) {
 		 || isset($_POST['delete_ea'])
 		 || isset($_POST['create_rqmt'])
 		 || isset($_POST['del_rqmt'])
-		 || isset($_POST['create_patch'])
 		 || isset($_POST['del_patch'])
 		 || !empty($patches_success_msg)) {
 			$title_modified = time();
@@ -228,7 +229,7 @@ if ($pdo) {
 		$requirements = array();
 		$stmt = $pdo->query("SELECT id, name, operator, value, type, is_and, sort_order FROM requirements WHERE title_id = " . $title['id'] . " ORDER BY sort_order");
 		while ($requirement = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$requirement['is_and'] = ($requirement['is_and'] == "0") ? "0": "1";
+			$requirement['is_and'] = ($requirement['is_and'] == "0") ? 0 : 1;
 			array_push($requirements, $requirement);
 		}
 		if (sizeof($requirements) == 0) {
@@ -237,11 +238,11 @@ if ($pdo) {
 
 		// Patches
 		$patches = array();
-		$stmt = $pdo->query("SELECT id, version, released, standalone, min_os, reboot, sort_order, enabled FROM patches WHERE title_id = " . $title['id'] . " ORDER BY sort_order");
+		$stmt = $pdo->query("SELECT id, version, released, standalone, min_os, reboot, sort_order, enabled FROM patches WHERE title_id = " . $title['id'] . " ORDER BY sort_order ASC, id DESC");
 		while ($patch = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			$patch['standalone'] = ($patch['standalone'] == "0") ? "0": "1";
-			$patch['reboot'] = ($patch['reboot'] == "1") ? "1": "0";
-			$patch['enabled'] = ($patch['enabled'] == "1") ? "1" : "0";
+			$patch['standalone'] = ($patch['standalone'] == "0") ? 0 : 1;
+			$patch['reboot'] = ($patch['reboot'] == "1") ? 1 : 0;
+			$patch['enabled'] = (bool)$patch['enabled'];
 			$patch['error'] = array();
 			$patch['components'] = $pdo->query("SELECT id FROM components WHERE patch_id = " . $patch['id'])->fetchAll(PDO::FETCH_COLUMN);
 			if (sizeof($patch['components']) == 0) {
@@ -257,8 +258,8 @@ if ($pdo) {
 			if (sizeof($patch['capabilities']) == 0) {
 				array_push($patch['error'], "capabilities");
 			}
-			if (sizeof($patch['error']) > 0 && $patch['enabled'] == "1") {
-				$patch['enabled'] == "0";
+			if (sizeof($patch['error']) > 0 && $patch['enabled'] == true) {
+				$patch['enabled'] = false;
 				$disable = $pdo->query("UPDATE patches SET enabled = 0 WHERE id = ?");
 				$disable->execute(array($patch['id']));
 				if ($disable->errorCode() != "00000") {
@@ -295,8 +296,8 @@ if ($pdo) {
 		}
 
 		// Disable Incomplete Title
-		if (sizeof($title['error']) > 0 && $title['enabled'] == "1") {
-			$title['enabled'] = "0";
+		if (sizeof($title['error']) > 0 && $title['enabled'] == true) {
+			$title['enabled'] = false;
 			$disable = $pdo->prepare("UPDATE titles SET enabled = 0 WHERE id = ?");
 			$disable->execute(array($title['id']));
 			if ($disable->errorCode() != "00000") {

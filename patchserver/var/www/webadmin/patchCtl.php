@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.1
  *
  */
 
@@ -68,7 +68,7 @@ if (!($_SESSION['isAuthUser']) || isset($_POST['setup_token'])) {
 			if (ob_get_level()) ob_end_clean();
 			header("Content-Description: File Transfer");
 			header("Content-Type: application/octet-stream");
-			header("Content-Disposition: attachment; filename='" . $filename . "'");
+			header("Content-Disposition: attachment; filename=" . $filename);
 			header("Expires: 0");
 			header("Cache-Control: must-revalidate");
 			header("Pragma: public");
