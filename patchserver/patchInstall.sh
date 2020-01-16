@@ -46,6 +46,7 @@ elif [[ $(which yum 2>&-) != "" ]]; then
 	yum_install mod_ssl
 	yum_install php
 	yum_install php-json
+	yum_install php-mysqlnd
 	yum_install php-pdo
 	yum_install php-sqlite
 	chkconfig httpd on >> $logFile 2>&1
