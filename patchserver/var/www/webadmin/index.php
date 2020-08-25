@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3
+ * @version     1.3.2
  *
  */
 
@@ -91,7 +91,7 @@ if (empty($pdo_error)) {
 		}
 
 		if ($is_auth) {
-			if (isset($users[$username]['reset']) ? $users[$username]['reset'] == "1" : false) {
+			if (isset($users[$username]['reset']) && (bool)$users[$username]['reset']) {
 				$modal = "change-passwd";
 			} else {
 				$_SESSION['isAuthUser'] = 1;

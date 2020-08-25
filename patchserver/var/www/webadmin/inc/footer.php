@@ -7,7 +7,7 @@
  * @copyright   2018-2019 Mondada Pty Ltd
  * @link        https://mondada.github.io
  * @license     https://github.com/mondada/kinobi/blob/master/LICENSE
- * @version     1.3.1
+ * @version     1.3.2
  *
  */
 
@@ -20,7 +20,7 @@
 							<div class="modal-header text-center"></div>
 							<div class="modal-body">
 								<div id="about-version" class="text-center">
-									<p>Version 1.3.1</p>
+									<p>Version 1.3.2</p>
 									<p class="text-muted" style="font-size: 12px;"><a href="https://kinobi.io" target="_blank">kinobi.io</a><br><a href="https://mondada.github.io" target="_blank">mondada.github.io</a></p>
 									<p class="text-muted" style="font-size: 12px;">Copyright &copy; 2018-2019 Mondada Pty Ltd.<br>All rights reserved.</p>
 								</div>
