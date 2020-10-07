@@ -64,11 +64,9 @@ if (empty($pdo_error)) {
 			$username = $_POST['username'];
 			$_SESSION['username'] = $username;
 
-			$password = hash("sha256", $_POST['password']);
-
-			if (($username != "") && ($password != "")) {
+			if (($username != "") && ($_POST['password'] != "")) {
 				$users = getSettingUsers($pdo);
-				$is_auth = (array_key_exists($username, $users) ? $users[$username]['password'] == $password : false);
+				$is_auth = (array_key_exists($username, $users) ? hash("sha256", $_POST['password']) == $users[$username]['password'] || password_verify($_POST['password'], $users[$username]['password']) : false);
 				if ($is_auth) {
 					$is_auth = (isset($users[$username]['web']) ? $users[$username]['web'] : false);
 					if ($is_auth) {
