@@ -1,5 +1,11 @@
 ![Kinobi logo](https://github.com/mondada/kinobi/blob/master/docs/images/kinobi.png)
 
+# Title Editor
+
+Kinobi has been superseded by **[Title Editor](https://docs.jamf.com/title-editor/documentation/About_Title_Editor.html)**. The open source code will no longer be updated.
+
+To assist with migration from Kinobi to Title Editor, visit the [Kinobi Title Editor](https://github.com/jamf/kinobi-title-editor) GitHub page to assist with downloading the definitions from Kinobi to import them into Title Editor.
+
 # Kinobi
 
 Kinobi is an external patch server (or *patch source*) for Jamf Pro. It provides a simple interface for creating and editing patch definitions, as well as the appropriate endpoints for Jamf Pro to connect to.
